@@ -1,0 +1,15 @@
+PackageIdentifier: Sociobot.HotkeyRunbook
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: Sociobot
+PackageName: Hotkey Runbook
+License: MIT
+ShortDescription: Keyboard-first local launcher for reviewed YAML runbooks
+PackageUrl: https://hotkey-runbook.sociobot.in
+InstallerType: wix
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_windows-x86_64.msi
+    InstallerSha256: RELEASE_SHA256_PLACEHOLDER
+ManifestType: singleton
+ManifestVersion: 1.6.0

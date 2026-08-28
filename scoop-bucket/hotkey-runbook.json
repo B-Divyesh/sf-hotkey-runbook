@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "description": "Keyboard-first local launcher for reviewed YAML runbooks",
+  "homepage": "https://hotkey-runbook.sociobot.in",
+  "license": "MIT",
+  "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_windows-x86_64.msi",
+  "hash": "RELEASE_SHA256_PLACEHOLDER",
+  "installer": { "script": "Start-Process msiexec.exe -ArgumentList @('/i', \"$dir\\$fname\", '/passive') -Wait" },
+  "uninstaller": { "script": "Write-Host 'Uninstall Hotkey Runbook from Windows Settings > Apps.'" },
+  "checkver": { "github": "https://github.com/B-Divyesh/sf-hotkey-runbook" }
+}

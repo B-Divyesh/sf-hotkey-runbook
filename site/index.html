@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Review and run trusted local YAML runbooks without shell interpolation or cloud accounts." />
+    <meta name="theme-color" content="#f3f0e4" />
+    <title>Hotkey Runbook — safe local operations at a keystroke</title>
+    <link rel="preload" as="image" href="/assets/hero-field-guide-960.webp" type="image/webp" fetchpriority="high" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="Hotkey Runbook home"><span aria-hidden="true">⌁</span><strong>Hotkey Runbook</strong></a>
+      <nav aria-label="Primary navigation"><a href="#method">Method</a><a href="#safety">Safety</a><a href="#license">License</a><a class="nav-download" href="#download">Download</a></nav>
+    </header>
+    <main id="main">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Local operator’s field kit · v0.1</p>
+          <h1>Turn careful procedures into one safe keystroke.</h1>
+          <p class="intro">Collect YAML runbooks locally, fill typed parameters, inspect the exact process arguments, then run—with secrets redacted and rollback notes at hand.</p>
+          <div class="hero-actions"><a id="primary-download" class="button primary" href="https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest">Download for your computer <span aria-hidden="true">↓</span></a><a class="button quiet" href="#method">See the method</a></div>
+          <p id="download-status" class="download-status" aria-live="polite">Detecting your platform…</p>
+        </div>
+        <figure class="hero-art">
+          <picture><source media="(max-width: 700px)" srcset="/assets/hero-field-guide-960.webp"><img src="/assets/hero-field-guide-1536.webp" srcset="/assets/hero-field-guide-960.webp 960w, /assets/hero-field-guide-1536.webp 1536w" sizes="(max-width: 900px) 100vw, 56vw" width="1536" height="1024" alt="A pressed fern arranged like a branching command tree on an open botanical field guide" decoding="async" fetchpriority="high"></picture>
+          <figcaption>Every runbook is a specimen: named, sourced, inspected, and handled with care.</figcaption>
+        </figure>
+      </section>
+      <section class="trust-strip" aria-label="Product commitments"><p><strong>No account</strong><span>Works offline after install</span></p><p><strong>No shell strings</strong><span>Direct program + argv only</span></p><p><strong>No telemetry</strong><span>Your runbooks stay local</span></p></section>
+      <section id="method" class="method section">
+        <div class="section-heading"><p class="eyebrow">The handling method</p><h2>Three deliberate steps. Zero copy/paste.</h2><p>Safety is part of the interaction, not a settings checkbox.</p></div>
+        <ol class="method-list"><li><span class="number">01</span><div><h3>Collect a trusted folder</h3><p>Choose an owned directory of reviewed YAML files. Hotkey Runbook signs its exact digest with a device-local key. A change breaks trust until you review it again.</p></div></li><li><span class="number">02</span><div><h3>Prepare typed parameters</h3><p>Choices, integers, paths, booleans, and secrets are validated before use. Programs are fixed by the runbook; values become direct arguments, never shell interpolation.</p></div></li><li><span class="number">03</span><div><h3>Review, name, and run</h3><p>See every exact argument and the rollback note. Type the runbook name for consent. Output and local history redact declared secrets and patterns.</p></div></li></ol>
+      </section>
+      <section class="specimen section" aria-labelledby="specimen-title">
+        <div class="specimen-copy"><p class="eyebrow">A legible local format</p><h2 id="specimen-title">The procedure remains reviewable.</h2><p>A runbook is plain YAML in your repository or operations folder. It specifies programs and argument arrays—not an opaque shell script assembled at runtime.</p><a href="https://github.com/B-Divyesh/sf-hotkey-runbook/tree/main/examples">Browse working examples →</a></div>
+        <div class="code-sheet"><div class="code-label"><span>specimen / restart-worker.yaml</span><span>v1</span></div><pre><code><span>id:</span> restart-worker
+<span>name:</span> Restart worker
+<span>risk:</span> medium
+<span>parameters:</span>
+  - <span>name:</span> service
+    <span>type:</span> choice
+    <span>choices:</span> [indexer, mailer]
+<span>steps:</span>
+  - <span>program:</span> systemctl
+    <span>args:</span> [restart, "{{service}}"]
+<span>rollback:</span> Start the previous unit.</code></pre></div>
+      </section>
+      <section id="safety" class="safety section">
+        <div class="section-heading"><p class="eyebrow">Built-in field discipline</p><h2>Small enough to audit. Strict where it matters.</h2></div>
+        <div class="safety-grid"><article><span aria-hidden="true">⌘</span><h3>No hidden shell</h3><p>Commands launch as a fixed executable and argument vector. Parameter values cannot turn into pipes, redirects, or second commands.</p></article><article><span aria-hidden="true">✣</span><h3>Trust expires on change</h3><p>A local HMAC signature binds the reviewed directory path and content digest to this device. Changed YAML is blocked.</p></article><article><span aria-hidden="true">◌</span><h3>Redaction at capture</h3><p>Secret parameters and declared patterns are replaced before results enter the local history file.</p></article><article><span aria-hidden="true">↶</span><h3>Rollback stays visible</h3><p>The author’s recovery note appears at review time, after completion, and beside historical output.</p></article></div>
+      </section>
+      <section id="license" class="license section">
+        <div><p class="eyebrow">One-time field license</p><h2>Own the utility. Keep the data.</h2><p>The free field kit handles 3 runbooks and a 10-entry history. A <strong>$29 one-time license</strong> unlocks unlimited local runbooks and the full 100-entry logbook. Safety, redaction, accessibility, and export are never paywalled.</p><p class="fine">No subscription or account. Sociobot/Dodo is the merchant of record; refunds are handled there and revoke the license.</p></div>
+        <div class="purchase"><span class="price"><strong>$29</strong> once</span><a class="button primary" href="https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout">Buy the field license</a><button id="restore-license" class="text-button">Have a license? Restore it</button><form id="license-form" hidden><label for="license-token">Paste license token</label><input id="license-token" type="password" autocomplete="off" required><button class="button quiet">Verify license</button><p id="license-message" aria-live="polite"></p></form></div>
+      </section>
+      <section id="download" class="download section">
+        <p class="eyebrow">Take it into the field</p><h2>Install in one obvious step.</h2><p>Unsigned preview builds are produced in public GitHub Actions. On macOS, right-click the app and choose Open on first launch. Windows may show a SmartScreen notice.</p>
+        <div class="download-grid"><article><h3>macOS</h3><a class="platform-link" data-platform="macos-arm64" href="https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest">Download .dmg</a><code>curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh</code></article><article><h3>Windows</h3><a class="platform-link" data-platform="windows-x86_64" href="https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest">Download .msi</a><code>irm https://hotkey-runbook.sociobot.in/install.ps1 | iex</code></article><article><h3>Linux</h3><a class="platform-link" data-platform="linux-x86_64" href="https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest">Download .AppImage</a><code>curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh</code></article></div>
+        <p><a href="https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest/download/SHA256SUMS">Verify SHA-256 checksums</a> · <a href="https://github.com/B-Divyesh/sf-hotkey-runbook">Read the source</a></p>
+      </section>
+    </main>
+    <footer><div class="wordmark"><span aria-hidden="true">⌁</span><strong>Hotkey Runbook</strong></div><p>Local procedures, handled deliberately. No telemetry.</p><nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-hotkey-runbook">GitHub</a></nav><small>Original AI-assisted botanical artwork; provenance is documented in the repository. © 2026 Param Factory.</small></footer>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
