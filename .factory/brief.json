@@ -1,0 +1,12 @@
+{
+  "slug": "hotkey-runbook",
+  "title": "Hotkey Runbook",
+  "territory": "devtools-data",
+  "user": "Operators and developers who repeatedly execute internal maintenance steps and need a fast keyboard-first launcher with local, reviewable runbooks.",
+  "smallest_useful_product": "Tray/menubar launcher reading signed local YAML runbooks, prompting for typed parameters, showing dry-run text, executing locally, and retaining redacted command history.",
+  "success_measure": "Pilot users execute a saved runbook at least five times per week and report a 30% reduction in copy/paste command errors.",
+  "artifact_class": "desktop-app",
+  "monetization": "one-time",
+  "constraints": "Explicit execution consent; no hidden shell interpolation; redact outputs; sandbox where platform support permits; signed/owned runbook directories only.",
+  "non_goals": ["remote orchestration", "secret vault", "low-code automation cloud"]
+}
