@@ -1,0 +1,20 @@
+version: 1
+id: inspect-endpoint
+name: Inspect endpoint
+description: Request headers from an approved endpoint with a redacted bearer token.
+risk: low
+tags: [http, diagnostics]
+parameters:
+  - name: environment
+    label: Environment URL
+    type: choice
+    required: true
+    choices: ["https://staging.example.internal/health", "https://api.example.internal/health"]
+  - name: token
+    label: Bearer token
+    type: secret
+    required: true
+steps:
+  - program: curl
+    args: ["--fail", "--show-error", "--head", "--header", "Authorization: Bearer {{token}}", "{{environment}}"]
+rollback: This read-only check makes no changes.

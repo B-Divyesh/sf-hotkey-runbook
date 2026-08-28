@@ -1,0 +1,32 @@
+{
+  "name": "hotkey-runbook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:site": "vite --config vite.site.config.ts",
+    "tauri": "tauri",
+    "build": "npm run build:app && npm run build:site",
+    "build:app": "tsc --noEmit && vite build",
+    "build:site": "vite build --config vite.site.config.ts",
+    "test": "npm run test:unit && npm run test:rust",
+    "test:unit": "vitest run",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "check": "npm test && npm run build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.8.0",
+    "@tauri-apps/plugin-dialog": "2.4.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.8.4",
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3",
+    "vite": "6.4.3",
+    "vitest": "3.2.7"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

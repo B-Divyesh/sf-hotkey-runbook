@@ -1,0 +1,21 @@
+version: 1
+id: restart-worker
+name: Restart worker
+description: Restart one approved local service and record its status.
+risk: medium
+tags: [service, maintenance]
+parameters:
+  - name: service
+    label: Service
+    type: choice
+    required: true
+    description: Only services listed by the runbook author are accepted.
+    choices: [indexer, mailer]
+steps:
+  - program: systemctl
+    args: [restart, "{{service}}"]
+  - program: systemctl
+    args: [status, "{{service}}", "--no-pager"]
+redactPatterns:
+  - "(?i)token=[^\\s]+"
+rollback: Start the previous unit version, then inspect its journal.
