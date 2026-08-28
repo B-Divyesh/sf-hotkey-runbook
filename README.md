@@ -78,7 +78,7 @@ curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh
 irm https://hotkey-runbook.sociobot.in/install.ps1 | iex
 ```
 
-Preview packages are unsigned. On macOS, right-click the app and choose **Open** on first launch. Windows may display SmartScreen. The Scoop and winget templates are kept in `scoop-bucket/` and `winget/`; their checksum placeholders are replaced from the published `SHA256SUMS` before submission. A Homebrew tap can point its cask to the release `.dmg` after the first release exists.
+Preview packages are unsigned. On macOS, right-click the app and choose **Open** on first launch. Windows may display SmartScreen. Install with Homebrew using `brew install --cask B-Divyesh/hotkey-runbook/hotkey-runbook`. Checksum-pinned Scoop and winget manifests are kept in `scoop-bucket/` and `winget/`; the winget manifest is ready for owner submission.
 
 ## License and privacy
 

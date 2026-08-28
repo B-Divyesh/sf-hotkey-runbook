@@ -96,5 +96,5 @@ jobs:
           tag_name: ${{ env.RELEASE_VERSION }}
           name: Hotkey Runbook ${{ env.RELEASE_VERSION }}
           generate_release_notes: true
-          prerelease: true
+          prerelease: false
           files: release-assets/*

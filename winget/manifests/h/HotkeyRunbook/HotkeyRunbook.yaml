@@ -10,6 +10,6 @@ InstallerType: wix
 Installers:
   - Architecture: x64
     InstallerUrl: https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_windows-x86_64.msi
-    InstallerSha256: RELEASE_SHA256_PLACEHOLDER
+    InstallerSha256: 00b0b17428d4cd1c0d405888a9307f4266fb013a1f3ac6a2a7d243b4585e118a
 ManifestType: singleton
 ManifestVersion: 1.6.0

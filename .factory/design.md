@@ -68,7 +68,7 @@ One wide editorial hero illustration shows a pressed fern whose fronds subtly re
 - **Palette words:** bone paper, deep forest ink, fern green, lichen, one tiny clay-red registration mark
 - **Negative list:** no text, no legible writing, no letters, no numbers, no logos, no watermark, no people, no hands, no branded devices, no glossy 3D, no neon, no gradients, no fantasy glow
 
-Generated using the factory Azure image model (`factory-image`) on 2026-08-28 through `/opt/fleet/lib/gen-image.sh`. The selected output is original generated imagery for this product. Source PNG and prompt sidecar live in `assets/src/`; optimized WebP/AVIF derivatives ship with the site. The footer discloses AI-assisted artwork.
+Generated using the factory Azure image model (`factory-image`) on 2026-08-28 through `/opt/fleet/lib/gen-image.sh`. The selected output is original generated imagery for this product. Source PNG and prompt sidecar live in `assets/src/`; optimized responsive WebP derivatives and a JPEG fallback ship with the site. The footer discloses AI-assisted artwork.
 
 ## Why it fits
 

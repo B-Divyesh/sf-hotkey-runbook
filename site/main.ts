@@ -2,7 +2,9 @@ import "./style.css";
 import { consumeLicenseFromUrl, saveAndVerifyLicense, verifyLicense } from "../src/license";
 
 const REPO = "B-Divyesh/sf-hotkey-runbook";
-const MANIFEST = `https://github.com/${REPO}/releases/latest/download/latest.json`;
+const RELEASE_MANIFEST = `https://github.com/${REPO}/releases/latest/download/latest.json`;
+const RELEASE_PAGE = `https://github.com/${REPO}/releases/latest`;
+const MANIFEST = "/latest.json";
 interface Asset { url: string; sha256: string; file: string }
 interface ReleaseManifest { version: string; platforms: Record<string, Asset> }
 
@@ -21,11 +23,7 @@ async function downloads(): Promise<void> {
   const primary = document.querySelector<HTMLAnchorElement>("#primary-download")!;
   const status = document.querySelector<HTMLElement>("#download-status")!;
   const detected = platform();
-  if (["localhost", "127.0.0.1"].includes(location.hostname)) {
-    primary.textContent = `See downloads for ${label(detected)}`;
-    status.textContent = "Local preview · release links resolve after publication.";
-    return;
-  }
+  primary.dataset.releaseManifest = RELEASE_MANIFEST;
   try {
     const response = await fetch(MANIFEST, { headers: { Accept: "application/json" } });
     if (!response.ok) throw new Error("release manifest unavailable");
@@ -36,7 +34,8 @@ async function downloads(): Promise<void> {
     status.textContent = `${manifest.version} · ${asset ? asset.file : "Choose a platform below"} · SHA-256 published`;
   } catch {
     primary.textContent = `See downloads for ${label(detected)}`;
-    status.textContent = navigator.onLine ? "The release manifest is not published yet. Open GitHub Releases for current builds." : "You appear offline. Downloads will resume when you reconnect.";
+    primary.href = RELEASE_PAGE;
+    status.textContent = navigator.onLine ? "The release manifest could not be read. Open GitHub Releases for current builds." : "You appear offline. Downloads will resume when you reconnect.";
   }
 }
 

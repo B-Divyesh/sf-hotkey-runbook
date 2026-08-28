@@ -22,5 +22,6 @@ test("legal pages and mobile download path render", async ({ page }) => {
   await expect(page.locator("h1")).toHaveText("Terms");
   await page.goto("/");
   await expect(page.locator("#primary-download")).toBeVisible();
+  await expect(page.locator("#primary-download")).toHaveAttribute("href", /Hotkey-Runbook_0\.1\.0_(windows-x86_64|linux-x86_64|macos-(arm64|x86_64))/);
   await expect(page.locator("img[alt]")).toBeVisible();
 });
