@@ -69,14 +69,14 @@ function renderRunbooks(): void {
       <label class="search"><span class="sr-only">Filter runbooks</span><span aria-hidden="true">⌕</span><input id="runbook-search" type="search" value="${esc(query)}" placeholder="Filter by name or tag" autocomplete="off"><kbd>⌘ K</kbd></label>
       ${state.errors.length ? `<div class="notice danger" role="alert"><strong>Some folders need attention</strong>${state.errors.map((error) => `<p>${esc(error)}</p>`).join("")}</div>` : ""}
       ${!license.unlocked && state.runbooks.length > 3 ? `<div class="notice"><strong>${state.runbooks.length - 3} more runbook${state.runbooks.length - 3 === 1 ? " is" : "s are"} collected</strong><p>The free field kit opens the first 3. Activate a one-time license in Settings for the rest.</p></div>` : ""}
-      <div class="runbook-list" role="listbox" aria-label="Available runbooks">${filtered.length ? filtered.map((item, index) => `
+      <div class="runbook-list" ${filtered.length ? 'role="listbox" aria-label="Available runbooks"' : ""}>${filtered.length ? filtered.map((item, index) => `
         <button class="runbook-row ${item.id === selected?.id ? "selected" : ""}" role="option" aria-selected="${item.id === selected?.id}" data-id="${esc(item.id)}">
           <span class="specimen-no">${String(index + 1).padStart(2, "0")}</span><span><strong>${esc(item.name)}</strong><small>${esc(item.description)}</small><span class="tags">${item.tags.map((tag) => `<span>${esc(tag)}</span>`).join("")}</span></span><span class="arrow" aria-hidden="true">→</span>
         </button>`).join("") : emptyRunbooks(query)}
       </div>
       <p class="key-hint"><kbd>↑</kbd><kbd>↓</kbd> choose <kbd>Enter</kbd> open <kbd>⌘ K</kbd> filter</p>
     </section>
-    <section class="detail-sheet" aria-label="Selected runbook">${selected ? detailTemplate(selected) : `<div class="quiet-sheet"><span class="botanical-mark" aria-hidden="true">⌁</span><p>Select or add a runbook to inspect its steps.</p></div>`}</section>`;
+    <section class="detail-sheet ${selected ? "" : "empty-detail"}" aria-label="Selected runbook">${selected ? detailTemplate(selected) : `<div class="quiet-sheet"><span class="botanical-mark" aria-hidden="true">⌁</span><p>Select or add a runbook to inspect its steps.</p></div>`}</section>`;
   bindRunbooks(filtered, selected);
 }
 

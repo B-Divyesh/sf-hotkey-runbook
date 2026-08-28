@@ -21,6 +21,11 @@ async function downloads(): Promise<void> {
   const primary = document.querySelector<HTMLAnchorElement>("#primary-download")!;
   const status = document.querySelector<HTMLElement>("#download-status")!;
   const detected = platform();
+  if (["localhost", "127.0.0.1"].includes(location.hostname)) {
+    primary.textContent = `See downloads for ${label(detected)}`;
+    status.textContent = "Local preview · release links resolve after publication.";
+    return;
+  }
   try {
     const response = await fetch(MANIFEST, { headers: { Accept: "application/json" } });
     if (!response.ok) throw new Error("release manifest unavailable");

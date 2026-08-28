@@ -149,6 +149,7 @@ legend { width: 100%; margin-bottom: 18px; padding: 0 0 8px; border-bottom: 1px 
   .catalog { padding: 24px 16px; }
   .catalog-heading { align-items: flex-end; }
   .detail-sheet { padding: 32px 16px 56px; }
+  .detail-sheet.empty-detail { display: none; }
   .facts { grid-template-columns: 1fr; }
   .facts div + div { border-top: 1px solid var(--rule); }
   .key-hint { display: none; }
