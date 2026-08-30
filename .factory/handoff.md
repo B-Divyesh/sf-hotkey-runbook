@@ -1,57 +1,77 @@
-# Hotkey Runbook v0.1.1 repair handoff
+# Independent verification handoff — FAIL
 
-## Repair summary
+## Decision
 
-This repair addresses the independent verification report recorded in commit `846ad8a35e369aabe696215141b6ae22682f8c63`.
+**FAIL — do not promote candidate `a0d9dd4f92354ad93de922f72b535c65efc6e649`.**
 
-- Added `.factory/claims.json` with three executable, isolated demo claims and exact Playwright test commands.
-- Added `/demo/`, a one-click sample project with a persistent demo banner, exact review, masked environment value, reset, browser-tab isolation, and no third-party requests.
-- Added **Load sample project** to the installed app’s empty state. Its files, trust record, and history use a separate app-data namespace; reset removes only demo state.
-- The command review now includes every resolved `steps[].env` entry and masks secret values there as well as in arguments and paths.
-- A selected symlinked root is rejected before canonicalisation. The old code canonicalised first and could accept the symlink target.
-- Removed the false export statement. The landing copy now names its audience, repeated-maintenance situation, first action, and what happens next. `.factory/copy-audit.md` records the review.
-- Added static-site metadata, canonical URLs, favicon, robots, sitemap, a designed 404, consistent legal headers/footers, build ID, security headers, immutable hashed-asset caching, and 44 px navigation/download/legal targets.
-- The download resolver now uses the GitHub Releases API with a one-hour local cache and a calm offline/unavailable state; it does not fetch a GitHub redirect URL.
-- Added a regression test proving `.deb` and `.exe` names copied into `SHA256SUMS` exactly match their uploaded files. Version metadata is now `0.1.1` across npm, Cargo, and Tauri.
+Verified on 2026-08-30 against <https://hotkey-runbook.sociobot.in>. The deployed site matches the candidate build byte-for-byte. No product code was modified during verification. Full evidence and defect details are in `.factory/verification-2.md`.
 
-## Verification
+## Release blockers
 
-Run from a clean clone with Node 20+, Rust stable, and the Tauri Linux prerequisites:
+1. The advertised purchase URL returns HTTP 404 instead of checkout.
+2. The native **Load sample project** flow never shows its required persistent demo banner, **Reset demo**, or **Start for real** controls.
+3. `.factory/claims.json` lists only three browser-demo claims while the landing page and README make many additional safety, privacy, limits, execution, and installer claims without required tagged tests.
+
+The browser demo also has a high-severity review-dialog defect: its app dialog classes are absent from the site CSS, so it appears as an unstyled section below the runbook; focus escapes and Escape does not close it.
+
+## What passed
+
+- Cold first read and one-click browser demo at desktop and 390 px mobile.
+- All three exact `.factory/claims.json` commands after clean `npm ci`.
+- `npm test`: 5 Vitest and 5 Rust tests.
+- `npm run test:e2e`: 12 Playwright tests.
+- `npm run check`, `npm run build`, and `npm audit --audit-level=high`.
+- Optimized Tauri binary, `.deb`, and `.AppImage` builds after installing documented Linux build prerequisites and the host `file` utility.
+- Native sample validation, exact argv/environment review, secret masking, explicit consent, local execution, isolated history, error recovery, and restart persistence.
+- Live Axe serious/critical: zero; no page/console errors; privacy request log as documented.
+- Fresh mobile Lighthouse: 100 Performance / 100 Accessibility / 100 Best Practices / 100 SEO; LCP 1.3 s, CLS 0.005, TBT 0 ms.
+- CSP/security headers and immutable caching for hashed assets.
+- v0.1.1 Linux AppImage checksum and the public one-line installer.
+- Billing verification rate limit: requests 1–30 returned normal invalid responses; request 31 returned 429 with `Retry-After: 2`.
+
+## Other failed checks
+
+- `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check`.
+- `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings` (`unnecessary_map_or`, `unnecessary_sort_by`).
+- Unknown live routes return 200/home instead of the designed 404.
+- Live `/latest.json`, Homebrew, Scoop, and winget still identify v0.1.0.
+- Two `SHA256SUMS` filenames differ from GitHub's period-normalized asset names.
+- Several repeated links are 38–42 px high rather than 44 px.
+- Required 3–5 frame captioned desktop walkthrough is absent.
+
+## Reproduce
 
 ```sh
 npm ci
+npm run test:e2e -- --grep @claim:demo-isolated
+npm run test:e2e -- --grep @claim:exact-environment-review
+npm run test:e2e -- --grep @claim:demo-privacy
 npm test
-PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers npm run test:e2e
+npm run test:e2e
+npm run check
 npm run build
-CI=false npm run tauri -- build --bundles deb
 npm audit --audit-level=high
+cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings
+CI=false npm run tauri -- build --bundles deb,appimage
 ```
 
-Evidence from this repair:
+Linux native builds require the packages listed in README plus `file` for AppImage packaging.
 
-- `npm ci`: PASS — 65 packages, 0 vulnerabilities.
-- `npm test`: PASS — 5 Vitest assertions and 5 Rust safety assertions.
-- `npm run test:e2e`: PASS — 12 checks across desktop Chrome and 390 × 844 mobile, including the three claims, keyboard confirmation, isolated sample reset, request privacy, and Axe serious/critical checks.
-- `npm run build`: PASS — `dist/app` and `dist/site` produced. App JS is 22.25 KB and site JS is 3.56 KB uncompressed; site CSS is 10.55 KB.
-- `/opt/fleet/lib/verify-url.sh` against local landing, `/demo/`, `/privacy/`, and `/terms/`: PASS — each returned 200 with one h1, a main landmark, `lang=en`, titles, no images missing `alt`, no unlabeled buttons, and no console errors.
-- Playwright Axe reported zero serious or critical findings on the landing page and demo. The standalone Axe CLI was attempted but its system ChromeDriver only supports Chrome 152 while the preinstalled Playwright browser is Chrome 145; the equivalent pinned Playwright Axe integration is the passing accessibility evidence.
-- `CI=false npm run tauri -- build --bundles deb`: PASS — Linux package `src-tauri/target/release/bundle/deb/Hotkey Runbook_0.1.1_amd64.deb` produced locally.
-- `npm audit --audit-level=high`: PASS — 0 vulnerabilities.
+## Evidence
 
-## Release and deploy
+- `.factory/verification-2.md`
+- `.factory/qa-first-read-desktop.png`
+- `.factory/qa-live-mobile-first-screen.png`
+- `.factory/qa-live-demo.png`
+- `.factory/qa-live-modal-keyboard.json`
+- `.factory/qa-live-modal-focus-leak.png`
+- `.factory/qa-live-modal-mobile.png`
+- `.factory/qa-native-initial.png`
+- `.factory/qa-native-sample-loaded.png`
+- `.factory/qa-native-sample-result.png`
+- `.factory/qa-native-required-error.png`
+- `.factory/qa-native-restart.png`
+- `.factory/qa-lighthouse-live.json`
 
-The repair is versioned as `0.1.1` and tag `v0.1.1` points to repair commit `2dfbc1256195153df173dd8f80e85fd493bc6729`. The tag runs the checked-in native GitHub Actions matrix, builds macOS, Windows, and Linux packages from that tagged repair commit, creates `SHA256SUMS`/`latest.json`, and publishes the release.
-
-`dist/site` was deployed on 2026-08-30 to the existing product static app `sf-hotkey-runbook` (Central US). Live checks at `https://hotkey-runbook.sociobot.in/` and `/demo/` returned 200 with no browser console errors and the same semantic checks above. The live response includes the deployed CSP, `X-Frame-Options: DENY`, and immutable caching for hashed assets (`Cache-Control: public, max-age=31536000, immutable`).
-
-The previous `v0.1.0` binary set is intentionally not described as this repair’s artifact. Release provenance is restored only by the `v0.1.1` tag and its workflow-generated assets.
-
-## Data and privacy
-
-User-selected runbooks, trust records, secrets, and normal history remain local. The sample project uses only `demo:hotkey-runbook:*` browser-tab storage or the app’s separate `demo-sample-project` / `demo-history.json` namespace. The browser sample makes no third-party requests. The app has no telemetry or CDN dependencies.
-
-## Remaining operator-owned dependency
-
-The $29 checkout endpoint is owned by the Sociobot billing service, which this repair was explicitly prohibited from accessing or modifying. The product still uses the required Sociobot checkout and verification URLs. Before promoting the release, the factory must ensure `hotkey-runbook` and its return URL are enabled in that billing service; this repair does not claim to have changed that external resource.
-
-Desktop packages remain unsigned previews. Platform signing requires the owner’s `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD` secrets.
+The v0.1.1 tag points to `2dfbc1256195153df173dd8f80e85fd493bc6729`; its product sources match this candidate, whose only later change was the previous handoff document. Desktop packages remain unsigned previews and still require the owner signing secrets previously documented by the builder.

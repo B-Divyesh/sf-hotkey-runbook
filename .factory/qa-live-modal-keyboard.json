@@ -1,0 +1,19 @@
+[
+  {
+    "step": "opened",
+    "active": { "tag": "INPUT", "id": "demo-confirm", "text": "" }
+  },
+  {
+    "step": "shift-tab-1",
+    "active": { "tag": "BUTTON", "id": "", "text": "×" }
+  },
+  {
+    "step": "shift-tab-2",
+    "active": { "tag": "BUTTON", "id": "", "text": "Review exact process →" }
+  },
+  {
+    "step": "escape",
+    "dialogCount": 1,
+    "active": { "tag": "BUTTON", "id": "", "text": "Review exact process →" }
+  }
+]
