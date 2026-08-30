@@ -1169,6 +1169,7 @@ steps:
     }
 
     #[test]
+    // @claim:native-safety-contract
     fn claim_native_safety_contract() {
         let directory = tempfile::tempdir().unwrap();
         let file = directory.path().join("safe.yaml");
