@@ -32,4 +32,12 @@ describe("static site contract", () => {
     expect(readFileSync("site/main.ts", "utf8")).not.toContain('import "./style.css"');
     expect(readFileSync("site/demo/main.ts", "utf8")).not.toContain('import "../style.css"');
   });
+
+  it("keeps compact native and site controls at least 44 pixels high", () => {
+    const nativeCss = readFileSync("src/style.css", "utf8");
+    const siteCss = readFileSync("site/style.css", "utf8");
+    expect(nativeCss).toContain(".button.small { min-height: 44px");
+    expect(siteCss).toContain(".wordmark { min-height:44px");
+    expect(siteCss).toContain(".text-button { min-height:44px");
+  });
 });
