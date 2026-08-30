@@ -1,0 +1,1127 @@
+{
+  "desktop": {
+    "label": "desktop",
+    "navigationStatus": 200,
+    "navigationHeaders": {
+      "cache-control": "public, must-revalidate, max-age=30",
+      "content-encoding": "br",
+      "content-type": "text/html",
+      "date": "Sun, 30 Aug 2026 05:40:41 GMT",
+      "etag": "\"49218940\"",
+      "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-dns-prefetch-control": "off",
+      "x-xss-protection": "1; mode=block"
+    },
+    "dom": {
+      "title": "Hotkey Runbook — safe local operations at a keystroke",
+      "lang": "en",
+      "metas": {
+        "viewport": "width=device-width, initial-scale=1",
+        "description": "Review and run trusted local YAML runbooks without shell interpolation or cloud accounts.",
+        "theme-color": "#f3f0e4"
+      },
+      "canonical": null,
+      "favicon": null,
+      "h1s": [
+        "Turn careful procedures into one safe keystroke."
+      ],
+      "mainCount": 1,
+      "landmarkCounts": {
+        "header": 1,
+        "nav": 2,
+        "main": 1,
+        "footer": 1
+      },
+      "imagesMissingAlt": [],
+      "brokenImages": [],
+      "horizontalOverflow": 0,
+      "smallTargets": [
+        {
+          "tag": "a",
+          "text": "⌁Hotkey Runbook",
+          "width": 144,
+          "height": 38
+        },
+        {
+          "tag": "a",
+          "text": "Method",
+          "width": 59,
+          "height": 21
+        },
+        {
+          "tag": "a",
+          "text": "Safety",
+          "width": 50,
+          "height": 21
+        },
+        {
+          "tag": "a",
+          "text": "License",
+          "width": 58,
+          "height": 21
+        },
+        {
+          "tag": "a",
+          "text": "Download",
+          "width": 107,
+          "height": 42
+        },
+        {
+          "tag": "a",
+          "text": "Browse working examples →",
+          "width": 228,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Download .dmg",
+          "width": 140,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+          "width": 325,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Download .msi",
+          "width": 133,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "irm https://hotkey-runbook.sociobot.in/install.ps1 | iex",
+          "width": 325,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Download .AppImage",
+          "width": 192,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+          "width": 325,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Verify SHA-256 checksums",
+          "width": 214,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Read the source",
+          "width": 130,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Privacy",
+          "width": 58,
+          "height": 25
+        },
+        {
+          "tag": "a",
+          "text": "Terms",
+          "width": 47,
+          "height": 25
+        },
+        {
+          "tag": "a",
+          "text": "GitHub",
+          "width": 55,
+          "height": 25
+        }
+      ],
+      "serviceWorkers": true,
+      "activeAnimations": [],
+      "localStorageKeys": []
+    },
+    "focusSequence": [
+      {
+        "tag": "a",
+        "text": "⌁Hotkey Runbook",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Method",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Safety",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "License",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download for Linux ↓",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "See the method",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Browse working examples →",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Buy the field license",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "button",
+        "text": "Have a license? Restore it",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "input",
+        "text": "",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "button",
+        "text": "Verify license",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download .dmg",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "code",
+        "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      }
+    ],
+    "axe": [],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+        "type": "image"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+        "type": "stylesheet"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/latest.json",
+        "type": "fetch"
+      },
+      {
+        "method": "GET",
+        "url": "https://api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=invalid-verifier-token",
+        "type": "fetch"
+      }
+    ],
+    "responses": [
+      {
+        "url": "https://hotkey-runbook.sociobot.in/",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/html",
+          "date": "Sun, 30 Aug 2026 05:40:41 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/javascript",
+          "date": "Sun, 30 Aug 2026 05:40:41 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/css",
+          "date": "Sun, 30 Aug 2026 05:40:41 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-length": "64170",
+          "content-type": "image/webp",
+          "date": "Sun, 30 Aug 2026 05:40:41 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/latest.json",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "application/json",
+          "date": "Sun, 30 Aug 2026 05:40:41 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=invalid-verifier-token",
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "https://hotkey-runbook.sociobot.in",
+          "cache-control": "no-store",
+          "content-length": "52",
+          "content-type": "application/json",
+          "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+          "set-cookie": "ARRAffinity=27a68b7e77a8b7692bcb4c16e2a8a32d44ecdf1f351d0e078d158af264a88edc;Path=/;HttpOnly;Secure;Domain=api.sociobot.in\nARRAffinitySameSite=27a68b7e77a8b7692bcb4c16e2a8a32d44ecdf1f351d0e078d158af264a88edc;Path=/;HttpOnly;SameSite=None;Secure;Domain=api.sociobot.in",
+          "vary": "origin, access-control-request-method, access-control-request-headers"
+        }
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "license": {
+      "focusedAfterOpen": "license-token",
+      "message": "That license is not active for Hotkey Runbook.",
+      "storage": {
+        "sb_license:hotkey-runbook:verdict": "{\"unlocked\":false,\"token\":\"invalid-verifier-token\",\"reason\":\"invalid\",\"checkedAt\":1788068445494}",
+        "sb_license:hotkey-runbook": "invalid-verifier-token"
+      }
+    }
+  },
+  "mobile": {
+    "label": "mobile",
+    "navigationStatus": 200,
+    "navigationHeaders": {
+      "cache-control": "public, must-revalidate, max-age=30",
+      "content-encoding": "br",
+      "content-type": "text/html",
+      "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+      "etag": "\"49218940\"",
+      "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-dns-prefetch-control": "off",
+      "x-xss-protection": "1; mode=block"
+    },
+    "dom": {
+      "title": "Hotkey Runbook — safe local operations at a keystroke",
+      "lang": "en",
+      "metas": {
+        "viewport": "width=device-width, initial-scale=1",
+        "description": "Review and run trusted local YAML runbooks without shell interpolation or cloud accounts.",
+        "theme-color": "#f3f0e4"
+      },
+      "canonical": null,
+      "favicon": null,
+      "h1s": [
+        "Turn careful procedures into one safe keystroke."
+      ],
+      "mainCount": 1,
+      "landmarkCounts": {
+        "header": 1,
+        "nav": 2,
+        "main": 1,
+        "footer": 1
+      },
+      "imagesMissingAlt": [],
+      "brokenImages": [],
+      "horizontalOverflow": 0,
+      "smallTargets": [
+        {
+          "tag": "a",
+          "text": "⌁Hotkey Runbook",
+          "width": 144,
+          "height": 38
+        },
+        {
+          "tag": "a",
+          "text": "Download",
+          "width": 107,
+          "height": 42
+        },
+        {
+          "tag": "a",
+          "text": "Browse working examples →",
+          "width": 228,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Download .dmg",
+          "width": 140,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+          "width": 300,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Download .msi",
+          "width": 133,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "irm https://hotkey-runbook.sociobot.in/install.ps1 | iex",
+          "width": 300,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Download .AppImage",
+          "width": 192,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+          "width": 300,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Verify SHA-256 checksums",
+          "width": 214,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Read the source",
+          "width": 177,
+          "height": 44
+        },
+        {
+          "tag": "a",
+          "text": "Privacy",
+          "width": 58,
+          "height": 25
+        },
+        {
+          "tag": "a",
+          "text": "Terms",
+          "width": 47,
+          "height": 25
+        },
+        {
+          "tag": "a",
+          "text": "GitHub",
+          "width": 55,
+          "height": 25
+        }
+      ],
+      "serviceWorkers": true,
+      "activeAnimations": [],
+      "localStorageKeys": []
+    },
+    "focusSequence": [
+      {
+        "tag": "a",
+        "text": "⌁Hotkey Runbook",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download for Linux ↓",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "See the method",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Browse working examples →",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Buy the field license",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "button",
+        "text": "Have a license? Restore it",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "input",
+        "text": "",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "button",
+        "text": "Verify license",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download .dmg",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "code",
+        "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download .msi",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "code",
+        "text": "irm https://hotkey-runbook.sociobot.in/install.ps1 | iex",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download .AppImage",
+        "outline": "3px solid rgb(163, 59, 43)",
+        "visible": true
+      }
+    ],
+    "axe": [],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+        "type": "image"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+        "type": "stylesheet"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/latest.json",
+        "type": "fetch"
+      }
+    ],
+    "responses": [
+      {
+        "url": "https://hotkey-runbook.sociobot.in/",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/html",
+          "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-length": "64170",
+          "content-type": "image/webp",
+          "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/css",
+          "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/javascript",
+          "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/latest.json",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "application/json",
+          "date": "Sun, 30 Aug 2026 05:40:45 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "license": null
+  },
+  "dark": {
+    "label": "dark",
+    "navigationStatus": 200,
+    "navigationHeaders": {
+      "cache-control": "public, must-revalidate, max-age=30",
+      "content-encoding": "br",
+      "content-type": "text/html",
+      "date": "Sun, 30 Aug 2026 05:40:47 GMT",
+      "etag": "\"49218940\"",
+      "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-dns-prefetch-control": "off",
+      "x-xss-protection": "1; mode=block"
+    },
+    "dom": {
+      "title": "Hotkey Runbook — safe local operations at a keystroke",
+      "lang": "en",
+      "metas": {
+        "viewport": "width=device-width, initial-scale=1",
+        "description": "Review and run trusted local YAML runbooks without shell interpolation or cloud accounts.",
+        "theme-color": "#f3f0e4"
+      },
+      "canonical": null,
+      "favicon": null,
+      "h1s": [
+        "Turn careful procedures into one safe keystroke."
+      ],
+      "mainCount": 1,
+      "landmarkCounts": {
+        "header": 1,
+        "nav": 2,
+        "main": 1,
+        "footer": 1
+      },
+      "imagesMissingAlt": [],
+      "brokenImages": [],
+      "horizontalOverflow": 0,
+      "smallTargets": [
+        {
+          "tag": "a",
+          "text": "⌁Hotkey Runbook",
+          "width": 144,
+          "height": 38
+        },
+        {
+          "tag": "a",
+          "text": "Method",
+          "width": 59,
+          "height": 21
+        },
+        {
+          "tag": "a",
+          "text": "Safety",
+          "width": 50,
+          "height": 21
+        },
+        {
+          "tag": "a",
+          "text": "License",
+          "width": 58,
+          "height": 21
+        },
+        {
+          "tag": "a",
+          "text": "Download",
+          "width": 107,
+          "height": 42
+        },
+        {
+          "tag": "a",
+          "text": "Browse working examples →",
+          "width": 228,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Download .dmg",
+          "width": 140,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+          "width": 325,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Download .msi",
+          "width": 133,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "irm https://hotkey-runbook.sociobot.in/install.ps1 | iex",
+          "width": 325,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Download .AppImage",
+          "width": 192,
+          "height": 25
+        },
+        {
+          "tag": "code",
+          "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+          "width": 325,
+          "height": 37
+        },
+        {
+          "tag": "a",
+          "text": "Verify SHA-256 checksums",
+          "width": 214,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Read the source",
+          "width": 130,
+          "height": 19
+        },
+        {
+          "tag": "a",
+          "text": "Privacy",
+          "width": 58,
+          "height": 25
+        },
+        {
+          "tag": "a",
+          "text": "Terms",
+          "width": 47,
+          "height": 25
+        },
+        {
+          "tag": "a",
+          "text": "GitHub",
+          "width": 55,
+          "height": 25
+        }
+      ],
+      "serviceWorkers": true,
+      "activeAnimations": [],
+      "localStorageKeys": []
+    },
+    "focusSequence": [
+      {
+        "tag": "a",
+        "text": "⌁Hotkey Runbook",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Method",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Safety",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "License",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download for Linux ↓",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "See the method",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Browse working examples →",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Buy the field license",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "button",
+        "text": "Have a license? Restore it",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "input",
+        "text": "",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "button",
+        "text": "Verify license",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "a",
+        "text": "Download .dmg",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      },
+      {
+        "tag": "code",
+        "text": "curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh",
+        "outline": "3px solid rgb(255, 155, 134)",
+        "visible": true
+      }
+    ],
+    "axe": [],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+        "type": "image"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+        "type": "stylesheet"
+      },
+      {
+        "method": "GET",
+        "url": "https://hotkey-runbook.sociobot.in/latest.json",
+        "type": "fetch"
+      }
+    ],
+    "responses": [
+      {
+        "url": "https://hotkey-runbook.sociobot.in/",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/html",
+          "date": "Sun, 30 Aug 2026 05:40:47 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/javascript",
+          "date": "Sun, 30 Aug 2026 05:40:48 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-length": "64170",
+          "content-type": "image/webp",
+          "date": "Sun, 30 Aug 2026 05:40:47 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "text/css",
+          "date": "Sun, 30 Aug 2026 05:40:47 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      },
+      {
+        "url": "https://hotkey-runbook.sociobot.in/latest.json",
+        "status": 200,
+        "headers": {
+          "cache-control": "public, must-revalidate, max-age=30",
+          "content-encoding": "br",
+          "content-type": "application/json",
+          "date": "Sun, 30 Aug 2026 05:40:47 GMT",
+          "etag": "\"49218940\"",
+          "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-xss-protection": "1; mode=block"
+        }
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "license": null
+  },
+  "routes": {
+    "/privacy/": {
+      "status": 200,
+      "title": "Privacy — Hotkey Runbook",
+      "h1": [
+        "Privacy"
+      ],
+      "contentType": "text/html"
+    },
+    "/terms/": {
+      "status": 200,
+      "title": "Terms — Hotkey Runbook",
+      "h1": [
+        "Terms"
+      ],
+      "contentType": "text/html"
+    },
+    "/demo": {
+      "status": 200,
+      "title": "Hotkey Runbook — safe local operations at a keystroke",
+      "h1": [
+        "Turn careful procedures into one safe keystroke."
+      ],
+      "contentType": "text/html"
+    },
+    "/definitely-missing-verifier-route": {
+      "status": 200,
+      "title": "Hotkey Runbook — safe local operations at a keystroke",
+      "h1": [
+        "Turn careful procedures into one safe keystroke."
+      ],
+      "contentType": "text/html"
+    },
+    "/robots.txt": {
+      "status": 404,
+      "title": "Azure Static Web Apps - 404: Not found",
+      "h1": [],
+      "contentType": "text/html"
+    },
+    "/sitemap.xml": {
+      "status": 404,
+      "title": "Azure Static Web Apps - 404: Not found",
+      "h1": [],
+      "contentType": "text/html"
+    }
+  }
+}

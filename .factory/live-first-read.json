@@ -1,0 +1,192 @@
+{
+  "title": "Hotkey Runbook — safe local operations at a keystroke",
+  "lang": "en",
+  "h1": [
+    "Turn careful procedures into one safe keystroke."
+  ],
+  "mainCount": 1,
+  "visible": [
+    {
+      "tag": "a",
+      "text": "⌁Hotkey Runbook",
+      "top": 19
+    },
+    {
+      "tag": "a",
+      "text": "Method",
+      "top": 27
+    },
+    {
+      "tag": "a",
+      "text": "Safety",
+      "top": 27
+    },
+    {
+      "tag": "a",
+      "text": "License",
+      "top": 27
+    },
+    {
+      "tag": "a",
+      "text": "Download",
+      "top": 17
+    },
+    {
+      "tag": "p",
+      "text": "Local operator’s field kit · v0.1",
+      "top": 135
+    },
+    {
+      "tag": "h1",
+      "text": "Turn careful procedures into one safe keystroke.",
+      "top": 166
+    },
+    {
+      "tag": "p",
+      "text": "Collect YAML runbooks locally, fill typed parameters, inspect the exact process arguments, then run—with secrets redacted and rollback notes at hand.",
+      "top": 563
+    },
+    {
+      "tag": "a",
+      "text": "Download for Linux ↓",
+      "top": 710
+    },
+    {
+      "tag": "a",
+      "text": "See the method",
+      "top": 710
+    },
+    {
+      "tag": "p",
+      "text": "v0.1.0 · Hotkey-Runbook_0.1.0_linux-x86_64.AppImage · SHA-256 published",
+      "top": 770
+    }
+  ],
+  "allActions": [
+    {
+      "text": "Skip to main content",
+      "href": "https://hotkey-runbook.sociobot.in/#main"
+    },
+    {
+      "text": "⌁Hotkey Runbook",
+      "href": "https://hotkey-runbook.sociobot.in/"
+    },
+    {
+      "text": "Method",
+      "href": "https://hotkey-runbook.sociobot.in/#method"
+    },
+    {
+      "text": "Safety",
+      "href": "https://hotkey-runbook.sociobot.in/#safety"
+    },
+    {
+      "text": "License",
+      "href": "https://hotkey-runbook.sociobot.in/#license"
+    },
+    {
+      "text": "Download",
+      "href": "https://hotkey-runbook.sociobot.in/#download"
+    },
+    {
+      "text": "Download for Linux ↓",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_linux-x86_64.AppImage"
+    },
+    {
+      "text": "See the method",
+      "href": "https://hotkey-runbook.sociobot.in/#method"
+    },
+    {
+      "text": "Browse working examples →",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook/tree/main/examples"
+    },
+    {
+      "text": "Buy the field license",
+      "href": "https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout"
+    },
+    {
+      "text": "Have a license? Restore it",
+      "href": null
+    },
+    {
+      "text": "Verify license",
+      "href": null
+    },
+    {
+      "text": "Download .dmg",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_macos-arm64.dmg"
+    },
+    {
+      "text": "Download .msi",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_windows-x86_64.msi"
+    },
+    {
+      "text": "Download .AppImage",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.0/Hotkey-Runbook_0.1.0_linux-x86_64.AppImage"
+    },
+    {
+      "text": "Verify SHA-256 checksums",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest/download/SHA256SUMS"
+    },
+    {
+      "text": "Read the source",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook"
+    },
+    {
+      "text": "Privacy",
+      "href": "https://hotkey-runbook.sociobot.in/privacy/"
+    },
+    {
+      "text": "Terms",
+      "href": "https://hotkey-runbook.sociobot.in/terms/"
+    },
+    {
+      "text": "GitHub",
+      "href": "https://github.com/B-Divyesh/sf-hotkey-runbook"
+    }
+  ],
+  "demoMatches": [],
+  "status": 200,
+  "headers": {
+    "cache-control": "public, must-revalidate, max-age=30",
+    "content-encoding": "br",
+    "content-type": "text/html",
+    "date": "Sun, 30 Aug 2026 05:38:48 GMT",
+    "etag": "\"49218940\"",
+    "last-modified": "Fri, 28 Aug 2026 09:27:31 GMT",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-xss-protection": "1; mode=block"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://hotkey-runbook.sociobot.in/",
+      "resourceType": "document"
+    },
+    {
+      "method": "GET",
+      "url": "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+      "resourceType": "image"
+    },
+    {
+      "method": "GET",
+      "url": "https://hotkey-runbook.sociobot.in/assets/index-C9SR82lu.js",
+      "resourceType": "script"
+    },
+    {
+      "method": "GET",
+      "url": "https://hotkey-runbook.sociobot.in/assets/index-SuYS_H12.css",
+      "resourceType": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "url": "https://hotkey-runbook.sociobot.in/latest.json",
+      "resourceType": "fetch"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

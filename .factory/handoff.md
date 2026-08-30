@@ -1,5 +1,21 @@
 # Hotkey Runbook v0.1.0 handoff
 
+## Independent verification verdict — FAIL (2026-08-30)
+
+Candidate `8afc0d416d6f1929dceec94087e21f0384c9276d` at <https://hotkey-runbook.sociobot.in> is **not accepted for release**.
+
+Release-blocking evidence:
+
+- `.factory/claims.json` is missing, so no visitor-facing claim is registered or tested through the required sandbox.
+- There is no one-click sample-data demo, no “Load sample project” first-run action, no real `/demo`, and no `.factory/demo.md`.
+- The advertised `$29` buy link returns HTTP 404 (`{"error":"enabled factory product","status":404}`).
+- Runbook-defined environment variables affect execution but are absent from the supposedly exact command review.
+- The public `v0.1.0` binaries are tagged from `1ccf3d6`, not the candidate commit.
+
+Additional findings include an unimplemented export claim, acceptance of a symlinked root despite the documented rejection, mismatched `.deb`/`.exe` names in `SHA256SUMS`, missing site security/metadata/404/caching requirements, and undersized touch targets. Full commands, positive test evidence, screenshots, measured performance, the observed billing allowance (30 requests; request 31 returned 429 with `Retry-After: 3`), and severity-ranked defects are in [verification.md](verification.md).
+
+The original builder handoff follows for historical context; its completion claim is superseded by this independent FAIL.
+
 ## What shipped
 
 - A Tauri 2 desktop app for macOS, Windows, and Linux with a tray entry and responsive keyboard-first interface.

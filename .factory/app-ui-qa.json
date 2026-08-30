@@ -1,0 +1,80 @@
+{
+  "desktop": {
+    "label": "desktop",
+    "axeInitial": [],
+    "axeSettings": [],
+    "ctrlKFocus": "runbook-search",
+    "addRecovery": "Install the desktop app to read local runbooks.",
+    "historyText": "REDACTED LOGBOOK\n\nExecution history\n↺\nNo runs recorded\n\nCompleted and failed runs appear here with secrets redacted. History never leaves this device.",
+    "settingsText": "DEVICE FIELD NOTES\n\nSettings\nTrusted folders\n\nNo folders are trusted on this device.\n\nAdd folder\nField license\n\nThe free field kit includes up to 3 runbooks and 10 history entries. A one-time license unlocks unlimited local runbooks and extended history.\n\nLICENSE TOKEN\nVerify license\nBuy once\n\nPrivacy and safety\n\nNo account, telemetry, remote orchestration, or secret vault. Commands run as direct local processes only after review. History is stored in the app data directory.",
+    "theme": "dark",
+    "layout": {
+      "h1s": [
+        "Settings"
+      ],
+      "main": 1,
+      "overflow": 0,
+      "loadSample": 0,
+      "smallTargets": [
+        {
+          "text": "Skip to runbooks",
+          "width": 166,
+          "height": 43
+        }
+      ]
+    },
+    "requests": [
+      "http://127.0.0.1:1420/",
+      "http://127.0.0.1:1420/@vite/client",
+      "http://127.0.0.1:1420/src/main.ts",
+      "http://127.0.0.1:1420/node_modules/vite/dist/client/env.mjs",
+      "http://127.0.0.1:1420/src/style.css",
+      "http://127.0.0.1:1420/node_modules/.vite/deps/@tauri-apps_plugin-dialog.js?v=de0d8552",
+      "http://127.0.0.1:1420/src/bridge.ts",
+      "http://127.0.0.1:1420/src/validation.ts",
+      "http://127.0.0.1:1420/src/license.ts",
+      "http://127.0.0.1:1420/node_modules/.vite/deps/chunk-G7S6KQDI.js?v=381d8a51",
+      "http://127.0.0.1:1420/node_modules/.vite/deps/@tauri-apps_api_core.js?v=b59b2fc9"
+    ],
+    "errors": []
+  },
+  "mobile": {
+    "label": "mobile",
+    "axeInitial": [],
+    "axeSettings": [],
+    "ctrlKFocus": "runbook-search",
+    "addRecovery": "Install the desktop app to read local runbooks.",
+    "historyText": "REDACTED LOGBOOK\n\nExecution history\n↺\nNo runs recorded\n\nCompleted and failed runs appear here with secrets redacted. History never leaves this device.",
+    "settingsText": "DEVICE FIELD NOTES\n\nSettings\nTrusted folders\n\nNo folders are trusted on this device.\n\nAdd folder\nField license\n\nThe free field kit includes up to 3 runbooks and 10 history entries. A one-time license unlocks unlimited local runbooks and extended history.\n\nLICENSE TOKEN\nVerify license\nBuy once\n\nPrivacy and safety\n\nNo account, telemetry, remote orchestration, or secret vault. Commands run as direct local processes only after review. History is stored in the app data directory.",
+    "theme": "dark",
+    "layout": {
+      "h1s": [
+        "Settings"
+      ],
+      "main": 1,
+      "overflow": 0,
+      "loadSample": 0,
+      "smallTargets": [
+        {
+          "text": "Skip to runbooks",
+          "width": 166,
+          "height": 43
+        }
+      ]
+    },
+    "requests": [
+      "http://127.0.0.1:1420/",
+      "http://127.0.0.1:1420/@vite/client",
+      "http://127.0.0.1:1420/src/main.ts",
+      "http://127.0.0.1:1420/node_modules/vite/dist/client/env.mjs",
+      "http://127.0.0.1:1420/src/style.css",
+      "http://127.0.0.1:1420/node_modules/.vite/deps/@tauri-apps_plugin-dialog.js?v=de0d8552",
+      "http://127.0.0.1:1420/src/bridge.ts",
+      "http://127.0.0.1:1420/src/validation.ts",
+      "http://127.0.0.1:1420/src/license.ts",
+      "http://127.0.0.1:1420/node_modules/.vite/deps/chunk-G7S6KQDI.js?v=381d8a51",
+      "http://127.0.0.1:1420/node_modules/.vite/deps/@tauri-apps_api_core.js?v=b59b2fc9"
+    ],
+    "errors": []
+  }
+}

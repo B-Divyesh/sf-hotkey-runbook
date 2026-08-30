@@ -1,0 +1,24 @@
+[
+  {
+    "id": "d8f40f21-6a8e-4041-b1ad-4197f8d0163b",
+    "runbookId": "e045683978a035d1e6b8e8ac",
+    "name": "Inspect endpoint",
+    "startedAt": "2026-08-30T06:10:05.909760111Z",
+    "durationMs": 109,
+    "status": "failed",
+    "exitCode": 6,
+    "output": "$ curl --fail --show-error --head --header \"Authorization: Bearer [REDACTED]\" https://staging.example.internal/health\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: staging.example.internal\n",
+    "rollback": "This read-only check makes no changes."
+  },
+  {
+    "id": "ace7e9d8-fb60-4867-aa09-e1a3e9c34c1a",
+    "runbookId": "b451bf6b2f31fe0b8c9dd5de",
+    "name": "QA echo",
+    "startedAt": "2026-08-30T06:08:23.259187965Z",
+    "durationMs": 2,
+    "status": "success",
+    "exitCode": 0,
+    "output": "$ /usr/bin/printf \"env=%s count=%s ticket=%s token=%s\\\\n\" stage 12 [REDACTED] [REDACTED]\nenv=stage count=12 ticket=[REDACTED] token=[REDACTED]\n",
+    "rollback": "No rollback is needed because this only prints text."
+  }
+]
