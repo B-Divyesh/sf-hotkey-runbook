@@ -1,0 +1,14 @@
+{
+  "url": "https://hotkey-runbook.sociobot.in",
+  "loadMs": 1985,
+  "errors": [],
+  "a11y": {
+    "title": "Hotkey Runbook — run local YAML safely",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 3753
+  }
+}

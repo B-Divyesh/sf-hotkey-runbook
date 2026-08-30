@@ -61,10 +61,11 @@ test("@claim:demo-privacy keeps the demo request flow same-origin", async ({ pag
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
   await page.goto("/demo/");
+  const demoOrigin = new URL(page.url()).origin;
   await page.getByRole("button", { name: "Review exact process" }).click();
   await page.locator("#demo-confirm").fill("Inspect sample deployment");
   await page.getByRole("button", { name: "Run sample check" }).click();
-  expect(requests.every((url) => new URL(url).origin === "http://127.0.0.1:5173")).toBe(true);
+  expect(requests.every((url) => new URL(url).origin === demoOrigin)).toBe(true);
 });
 
 test("sample demo is keyboard-ready and has no serious accessibility violations", async ({ page }) => {
@@ -109,4 +110,14 @@ test("checkout is gated and existing-license recovery stays available", async ({
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
   await page.getByRole("button", { name: "Have a license? Restore it" }).click();
   await expect(page.getByLabel("Paste license token")).toBeVisible();
+});
+
+test("unusable release metadata keeps a calm direct-download recovery path", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-hotkey-runbook/releases/latest", (route) => route.fulfill({ json: {} }));
+  await page.goto("/");
+  await expect(page.locator("#download-status")).toContainText("could not be read");
+  await expect(page.locator("#primary-download")).toHaveAttribute("href", "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest");
+  expect(errors).toEqual([]);
 });
