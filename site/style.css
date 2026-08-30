@@ -70,6 +70,7 @@ pre span { color:var(--fern); font-weight:800; }
 .price { color:#cdd9ce; }.price strong { color:#fff; font:3.2rem Georgia,serif; }
 .purchase .primary { background:#f3f0e4; color:#143c29; }
 .text-button { min-height:44px; border:0; background:transparent; color:#e0e8df; text-decoration:underline; text-underline-offset:4px; cursor:pointer; }
+.legal-page a { min-height:44px; display:inline-flex; align-items:center; }
 .purchase form { display:grid; gap:8px; }.purchase input { min-height:46px; padding:0 10px; border:1px solid #9bb09f; background:#173a29; color:#fff; }
 .download { text-align:center; }.download h2 { max-width:none; }.download > p { color:var(--muted); }.download-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:48px 0 24px; text-align:left; }
 .download-grid article { min-width:0; padding:24px; border:1px solid var(--rule); background:var(--sheet); }.download-grid a { min-height:44px; display:inline-flex; align-items:center; margin:8px 0; font-weight:800; }.download-grid code { min-height:44px; display:flex; align-items:center; padding:10px; overflow:auto; background:var(--paper); color:var(--muted); font-size:.68rem; white-space:nowrap; }

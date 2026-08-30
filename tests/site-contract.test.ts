@@ -37,7 +37,9 @@ describe("static site contract", () => {
     const nativeCss = readFileSync("src/style.css", "utf8");
     const siteCss = readFileSync("site/style.css", "utf8");
     expect(nativeCss).toContain(".button.small { min-height: 44px");
+    expect(nativeCss).toContain(".empty > a { min-height: 44px");
     expect(siteCss).toContain(".wordmark { min-height:44px");
     expect(siteCss).toContain(".text-button { min-height:44px");
+    expect(siteCss).toContain(".legal-page a { min-height:44px");
   });
 });

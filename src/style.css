@@ -91,6 +91,7 @@ legend { width: 100%; margin-bottom: 18px; padding: 0 0 8px; border-bottom: 1px 
 .button.small { min-height: 44px; padding-inline: 12px; font-size: .82rem; }
 .button.ghost { border-color: var(--rule); }
 .text-button { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--fern-deep); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.empty > a { min-height: 44px; display: inline-flex; align-items: center; }
 .consent-note { color: var(--muted); font-size: .76rem; text-align: center; }
 .empty, .quiet-sheet { display: grid; place-items: center; padding: 56px 20px; color: var(--muted); text-align: center; }
 .empty > span { font-size: 2rem; color: var(--fern); }
