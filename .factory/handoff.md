@@ -40,7 +40,9 @@ Evidence from this repair:
 
 ## Release and deploy
 
-The repair is versioned as `0.1.1`. Pushing tag `v0.1.1` runs the checked-in native GitHub Actions matrix, builds macOS, Windows, and Linux packages from the tagged repair commit, creates `SHA256SUMS`/`latest.json`, and publishes the release. The static-site workflow builds `dist/site`; the factory deploys that directory as the static artifact.
+The repair is versioned as `0.1.1` and tag `v0.1.1` points to repair commit `2dfbc1256195153df173dd8f80e85fd493bc6729`. The tag runs the checked-in native GitHub Actions matrix, builds macOS, Windows, and Linux packages from that tagged repair commit, creates `SHA256SUMS`/`latest.json`, and publishes the release.
+
+`dist/site` was deployed on 2026-08-30 to the existing product static app `sf-hotkey-runbook` (Central US). Live checks at `https://hotkey-runbook.sociobot.in/` and `/demo/` returned 200 with no browser console errors and the same semantic checks above. The live response includes the deployed CSP, `X-Frame-Options: DENY`, and immutable caching for hashed assets (`Cache-Control: public, max-age=31536000, immutable`).
 
 The previous `v0.1.0` binary set is intentionally not described as this repair’s artifact. Release provenance is restored only by the `v0.1.1` tag and its workflow-generated assets.
 
