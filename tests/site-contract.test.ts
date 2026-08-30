@@ -21,4 +21,15 @@ describe("static site contract", () => {
     expect(home.match(/assets\/walkthrough\//g)).toHaveLength(4);
     expect(home.match(/<figcaption>/g)).toHaveLength(5);
   });
+
+  it("loads critical styles from HTML before application scripts", () => {
+    const pages = ["site/index.html", "site/demo/index.html", "site/privacy/index.html", "site/terms/index.html", "site/404.html"];
+    for (const page of pages) {
+      const html = readFileSync(page, "utf8");
+      expect(html).toContain('rel="stylesheet" href="/style.css"');
+      expect(html.indexOf('rel="stylesheet"')).toBeLessThan(html.indexOf('<script type="module"'));
+    }
+    expect(readFileSync("site/main.ts", "utf8")).not.toContain('import "./style.css"');
+    expect(readFileSync("site/demo/main.ts", "utf8")).not.toContain('import "../style.css"');
+  });
 });

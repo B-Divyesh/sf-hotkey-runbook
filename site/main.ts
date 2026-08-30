@@ -1,4 +1,3 @@
-import "./style.css";
 import { consumeLicenseFromUrl, saveAndVerifyLicense, verifyLicense } from "../src/license";
 
 const REPO = "B-Divyesh/sf-hotkey-runbook";

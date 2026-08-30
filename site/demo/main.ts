@@ -1,5 +1,3 @@
-import "../style.css";
-
 const dialog = document.querySelector<HTMLDivElement>("#demo-dialog")!;
 const result = document.querySelector<HTMLElement>("#demo-result")!;
 const form = document.querySelector<HTMLFormElement>("#sample-form")!;
