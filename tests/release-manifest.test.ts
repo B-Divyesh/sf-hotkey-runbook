@@ -8,6 +8,25 @@ const temporary: string[] = [];
 afterEach(() => temporary.splice(0).forEach((path) => rmSync(path, { recursive: true, force: true })));
 
 describe("release manifest", () => {
+  it("keeps package manifests pinned to the published site manifest", () => {
+    const latest = JSON.parse(readFileSync("public/latest.json", "utf8"));
+    const version = latest.version.replace(/^v/, "");
+    const macArm = latest.platforms["macos-arm64"];
+    const macIntel = latest.platforms["macos-x86_64"];
+    const windows = latest.platforms["windows-x86_64"];
+    const cask = readFileSync("homebrew/Casks/hotkey-runbook.rb", "utf8");
+    const scoop = JSON.parse(readFileSync("scoop-bucket/hotkey-runbook.json", "utf8"));
+    const winget = readFileSync("winget/manifests/h/HotkeyRunbook/HotkeyRunbook.yaml", "utf8");
+
+    expect(cask).toContain(`version "${version}"`);
+    expect(cask).toContain(macArm.sha256);
+    expect(cask).toContain(macIntel.sha256);
+    expect(scoop).toMatchObject({ version, url: windows.url, hash: windows.sha256 });
+    expect(winget).toContain(`PackageVersion: ${version}`);
+    expect(winget).toContain(`InstallerUrl: ${windows.url}`);
+    expect(winget).toContain(`InstallerSha256: ${windows.sha256.toUpperCase()}`);
+  });
+
   it("keeps uploaded deb and exe filenames identical in SHA256SUMS", () => {
     const root = mkdtempSync(join(tmpdir(), "hkr-release-"));
     temporary.push(root);
