@@ -19,5 +19,8 @@ describe("product claims", () => {
     expect(sources).not.toMatch(/segment\.com|googletagmanager|openai\.azure\.com/i);
     const native = readFileSync("src-tauri/src/lib.rs", "utf8");
     expect(native).toMatch(/join\(if demo \{\s*"demo-history\.json"\s*\} else \{\s*"history\.json"/);
+    expect(native).toContain('join("device-signing-key")');
+    expect(native).toContain("fill_bytes(&mut key)");
+    expect(native).toContain('join("trusted-directories.json")');
   });
 });

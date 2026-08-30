@@ -1219,6 +1219,21 @@ steps:
             "A trusted folder may contain at most 100 YAML files."
         );
 
+        let nested = tempfile::tempdir().unwrap();
+        let supported_depth = nested.path().join("team/service");
+        fs::create_dir_all(&supported_depth).unwrap();
+        fs::write(supported_depth.join("nested.yaml"), sample()).unwrap();
+        assert_eq!(yaml_files(nested.path()).unwrap().len(), 1);
+
+        let too_deep = tempfile::tempdir().unwrap();
+        let unsupported_depth = too_deep.path().join("team/service/task");
+        fs::create_dir_all(&unsupported_depth).unwrap();
+        fs::write(unsupported_depth.join("hidden.yaml"), sample()).unwrap();
+        assert_eq!(
+            yaml_files(too_deep.path()).unwrap_err().to_string(),
+            "No .yaml or .yml runbooks were found within three folder levels."
+        );
+
         let mut parameterized_program = books[0].runbook.clone();
         parameterized_program.steps[0].program = "{{cache}}".into();
         assert!(validate_runbook(&parameterized_program, &file).is_err());
@@ -1229,6 +1244,48 @@ steps:
             .unwrap_err()
             .to_string()
             .contains("needs 1–20 steps"));
+
+        let mut typed = books[0].runbook.parameters[0].clone();
+        let one_value = |value| HashMap::from([("cache".into(), value)]);
+        typed.kind = ParameterType::Text;
+        assert_eq!(
+            value_string(&typed, &one_value(Value::String("text".into()))).unwrap(),
+            "text"
+        );
+        typed.kind = ParameterType::Integer;
+        assert_eq!(
+            value_string(&typed, &one_value(Value::from(42))).unwrap(),
+            "42"
+        );
+        assert!(value_string(&typed, &one_value(Value::String("4.2".into()))).is_err());
+        typed.kind = ParameterType::Choice;
+        assert_eq!(
+            value_string(&typed, &one_value(Value::String("pages".into()))).unwrap(),
+            "pages"
+        );
+        assert!(value_string(&typed, &one_value(Value::String("other".into()))).is_err());
+        typed.kind = ParameterType::Boolean;
+        assert_eq!(
+            value_string(&typed, &one_value(Value::Bool(true))).unwrap(),
+            "true"
+        );
+        typed.kind = ParameterType::Path;
+        assert_eq!(
+            value_string(&typed, &one_value(Value::String("./cache".into()))).unwrap(),
+            "./cache"
+        );
+        typed.kind = ParameterType::Secret;
+        assert_eq!(
+            value_string(&typed, &one_value(Value::String("token".into()))).unwrap(),
+            "token"
+        );
+        typed.kind = ParameterType::Text;
+        typed.pattern = Some(r"^OPS-[0-9]+$".into());
+        assert_eq!(
+            value_string(&typed, &one_value(Value::String("OPS-42".into()))).unwrap(),
+            "OPS-42"
+        );
+        assert!(value_string(&typed, &one_value(Value::String("BAD".into()))).is_err());
 
         books[0].runbook.parameters[0].kind = ParameterType::Secret;
         books[0].runbook.steps[0]

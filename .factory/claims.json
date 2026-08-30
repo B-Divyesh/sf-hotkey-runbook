@@ -29,10 +29,10 @@
   },
   {
     "id": "native-safety-contract",
-    "claim": "Reviewed folders reject symlinks and world-writable roots, enforce 64 KB, 100-file, and 20-step limits, and use content digests. Programs stay fixed; typed values use direct arguments and environment entries; secrets are masked and redacted; rollback notes remain attached.",
+    "claim": "Reviewed folders reject symlinks and world-writable roots, enforce three-level, 64 KB, 100-file, and 20-step limits, and use content digests. Programs stay fixed; text, integer, choice, boolean, path, and secret values use direct arguments and environment entries; patterns validate; secrets are masked and redacted; rollback notes remain attached.",
     "where": "landing safety and method sections, desktop app, README safety model",
     "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_native_safety_contract",
-    "sandbox": "temporary owned runbook directories; reject symlink and world-writable roots; enforce file, folder, and step limits; reject a parameterized program; prepare direct argv and environment; mask and redact a secret; retain rollback; edit YAML and assert the digest changes"
+    "sandbox": "temporary owned runbook directories; reject symlink and world-writable roots; enforce depth, file, folder, and step limits; validate every parameter type and an author pattern; reject a parameterized program; prepare direct argv and environment; mask and redact a secret; retain rollback; edit YAML and assert the digest changes"
   },
   {
     "id": "local-privacy",
