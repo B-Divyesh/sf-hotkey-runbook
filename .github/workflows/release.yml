@@ -8,7 +8,7 @@ on:
       version:
         description: Release tag (for example v0.1.1)
         required: true
-        default: v0.1.1
+        default: v0.1.2
 
 permissions:
   contents: write
@@ -22,9 +22,12 @@ jobs:
         with: { node-version: 20, cache: npm }
       - uses: dtolnay/rust-toolchain@stable
       - name: Linux webview dependencies
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        run: sudo apt-get update && sudo apt-get install -y file libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm test
+      - run: npm run lint
+      - run: npm run test:e2e
       - run: npm run build
 
   build:
@@ -58,7 +61,7 @@ jobs:
         with: { targets: "${{ matrix.target }}" }
       - name: Linux webview dependencies
         if: matrix.platform == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+        run: sudo apt-get update && sudo apt-get install -y file libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: npm ci
       - uses: tauri-apps/tauri-action@v0
         env:

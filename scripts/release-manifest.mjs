@@ -4,7 +4,7 @@ import { basename, join, relative } from "node:path";
 
 const input = process.argv[2] || "artifacts";
 const output = process.argv[3] || "release-assets";
-const version = process.env.RELEASE_VERSION || "v0.1.1";
+const version = process.env.RELEASE_VERSION || "v0.1.2";
 const repository = process.env.GITHUB_REPOSITORY || "B-Divyesh/sf-hotkey-runbook";
 
 async function walk(directory) {
@@ -36,7 +36,11 @@ for (const [platform, source] of Object.entries(selected)) {
   platforms[platform] = { file: filename, sha256, url: `https://github.com/${repository}/releases/download/${version}/${encodeURIComponent(filename)}` };
 }
 for (const file of all.filter((item) => /\.(deb|exe)$/i.test(item))) {
-  const filename = basename(file); const destination = join(output, filename); await cp(file, destination);
+  // GitHub exposes spaces in uploaded Tauri filenames as periods. Use the
+  // published name in both the asset and checksum list.
+  const filename = basename(file).replaceAll(" ", ".");
+  const destination = join(output, filename);
+  await cp(file, destination);
   sums.push(`${createHash("sha256").update(await readFile(destination)).digest("hex")}  ${filename}`);
 }
 await writeFile(join(output, "SHA256SUMS"), `${sums.join("\n")}\n`);

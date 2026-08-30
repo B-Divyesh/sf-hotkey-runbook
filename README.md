@@ -47,7 +47,7 @@ YAML files may be nested up to three levels within a trusted folder. Each file i
 Requirements: Node.js 20+, Rust stable, and the [Tauri 2 system prerequisites](https://v2.tauri.app/start/prerequisites/). On Ubuntu/Debian:
 
 ```sh
-sudo apt-get install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+sudo apt-get install file libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 npm ci
 npm run tauri dev
 ```
@@ -56,6 +56,7 @@ Useful commands:
 
 ```sh
 npm test            # Vitest + Rust tests
+npm run lint        # TypeScript, rustfmt, and strict Clippy
 npm run test:e2e    # Chromium desktop/mobile + axe checks
 npm run build       # app webview -> dist/app; static site -> dist/site
 npm run build:site  # exact static deploy command -> dist/site
@@ -86,10 +87,10 @@ curl -fsSL https://hotkey-runbook.sociobot.in/install.sh | sh
 irm https://hotkey-runbook.sociobot.in/install.ps1 | iex
 ```
 
-Preview packages are unsigned. On macOS, right-click the app and choose **Open** on first launch. Windows may display SmartScreen. Install with Homebrew using `brew install --cask B-Divyesh/hotkey-runbook/hotkey-runbook`. Checksum-pinned Scoop and winget manifests are kept in `scoop-bucket/` and `winget/`; the winget manifest is ready for owner submission.
+Preview packages are unsigned. On macOS, right-click the app and choose **Open** on first launch. Windows may display SmartScreen. A checksum-pinned Homebrew cask, Scoop manifest, and winget manifest are kept in `homebrew/`, `scoop-bucket/`, and `winget/`; operators can publish them after signing is configured.
 
 ## License and privacy
 
-The free field kit supports three runbooks and ten visible history entries. A $29 one-time license unlocks unlimited runbooks and the 100-entry logbook. Checkout and verification use only the Sociobot billing API. Core safety, accessibility, and data control are not gated.
+The free field kit supports three runbooks and ten visible history entries. A $29 one-time license adds unlimited runbooks and the 100-entry logbook. New checkout links appear only when the product’s billing registration is enabled. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
 
 See the deployed [privacy policy](https://hotkey-runbook.sociobot.in/privacy/) and [terms](https://hotkey-runbook.sociobot.in/terms/). The source is MIT licensed; see [LICENSE](LICENSE).

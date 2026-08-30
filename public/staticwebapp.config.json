@@ -1,5 +1,4 @@
 {
-  "navigationFallback": { "rewrite": "/index.html", "exclude": ["/assets/*", "/demo/*", "/privacy/*", "/terms/*", "/404.html", "/robots.txt", "/sitemap.xml", "/favicon.svg", "/latest.json"] },
   "globalHeaders": {
     "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://api.github.com https://api.sociobot.in; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://api.sociobot.in; upgrade-insecure-requests",
     "X-Content-Type-Options": "nosniff",

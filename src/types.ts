@@ -51,6 +51,7 @@ export interface NativeBridge {
   trustDirectory(path: string, digest: string, acknowledged: boolean): Promise<AppState>;
   removeDirectory(path: string): Promise<AppState>;
   loadSampleProject(): Promise<AppState>;
+  resetDemoProject(): Promise<AppState>;
   resetSampleProject(): Promise<AppState>;
   prepareRun(runbookId: string, parameters: Record<string, unknown>): Promise<PreparedRun>;
   executeRun(runbookId: string, parameters: Record<string, unknown>, confirmation: string): Promise<RunResult>;

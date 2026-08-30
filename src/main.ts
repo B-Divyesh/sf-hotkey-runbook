@@ -4,6 +4,8 @@ import { bridge } from "./bridge";
 import { matchesRunbook, validateParameter } from "./validation";
 import { clearLicense, saveAndVerifyLicense, verifyLicense, type LicenseState } from "./license";
 import type { AppState, DirectoryInspection, PreparedRun, RunResult, RunbookSummary } from "./types";
+import { demoBannerTemplate } from "./demo-ui";
+import { FREE_HISTORY_LIMIT, FREE_RUNBOOK_LIMIT, visibleFreeItems } from "./limits";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let state: AppState = { runbooks: [], directories: [], errors: [], demoMode: false };
@@ -13,6 +15,8 @@ let historyItems: RunResult[] = [];
 let view: "runbooks" | "history" | "settings" = "runbooks";
 let inspection: DirectoryInspection | null = null;
 let license: LicenseState = { unlocked: false };
+const checkoutEnabled = import.meta.env.VITE_CHECKOUT_ENABLED === "true";
+let dialogOpener: HTMLElement | null = null;
 
 const esc = (value: unknown) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]!);
 const riskLabel = (risk: string) => ({ low: "Low risk", medium: "Review carefully", high: "High risk" }[risk] || risk);
@@ -23,7 +27,7 @@ function shell(): void {
       <button class="brand" data-action="home" aria-label="Show runbooks"><span class="brand-mark" aria-hidden="true">⌁</span><span><strong>Hotkey Runbook</strong><small>Local specimen index</small></span></button>
       <div class="header-actions"><span class="local-badge">● Local only</span><button class="icon-button" data-action="theme" aria-label="Toggle color theme">◐</button></div>
     </header>
-    ${state.demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><span><strong>Demo</strong> — sample data, nothing is saved to your real runbooks.</span><span><button class="text-button" data-action="reset-demo">Reset demo</button><button class="text-button" data-action="start-real">Start for real</button></span></aside>` : ""}
+    <div id="demo-mode-root"></div>
     <main id="main" class="app-shell">
       <nav class="rail" aria-label="Primary">
         <button class="rail-button" data-view="runbooks" aria-current="page"><span aria-hidden="true">⌘</span> Runbooks</button>
@@ -49,20 +53,41 @@ function bindShell(): void {
     const next = root.dataset.theme === "dark" ? "light" : "dark";
     root.dataset.theme = next; localStorage.setItem("hkr-theme", next);
   });
-  app.querySelector('[data-action="reset-demo"]')?.addEventListener("click", async () => { state = await bridge.resetSampleProject(); historyItems = await bridge.history(); render(); toast("Sample project reset."); });
-  app.querySelector('[data-action="start-real"]')?.addEventListener("click", async () => { state = await bridge.resetSampleProject(); historyItems = await bridge.history(); render(); toast("Sample project removed. Add a folder you reviewed."); });
 }
 
 function render(): void {
+  renderDemoBanner();
   app.querySelectorAll("[data-view]").forEach((node) => node.setAttribute("aria-current", String((node as HTMLElement).dataset.view === view ? "page" : "false")));
   if (view === "history") renderHistory();
   else if (view === "settings") renderSettings();
   else renderRunbooks();
 }
 
+function renderDemoBanner(): void {
+  const root = app.querySelector<HTMLElement>("#demo-mode-root");
+  if (!root) return;
+  root.innerHTML = demoBannerTemplate(state.demoMode);
+  root.querySelector('[data-action="reset-demo"]')?.addEventListener("click", async () => {
+    state = await bridge.resetDemoProject();
+    historyItems = await bridge.history();
+    query = "";
+    selectedId = "";
+    render();
+    toast("Demo reset to its original sample.");
+  });
+  root.querySelector('[data-action="start-real"]')?.addEventListener("click", async () => {
+    state = await bridge.resetSampleProject();
+    historyItems = await bridge.history();
+    query = "";
+    selectedId = "";
+    render();
+    toast("Sample project removed. Add a folder you reviewed.");
+  });
+}
+
 function renderRunbooks(): void {
   const workspace = app.querySelector<HTMLElement>("#workspace")!;
-  const available = license.unlocked ? state.runbooks : state.runbooks.slice(0, 3);
+  const available = visibleFreeItems(state.runbooks, FREE_RUNBOOK_LIMIT, license.unlocked);
   const filtered = available.filter((runbook) => matchesRunbook(query, runbook));
   const selected = filtered.find((item) => item.id === selectedId) || filtered[0];
   if (selected) selectedId = selected.id;
@@ -143,6 +168,7 @@ async function addDirectory(): Promise<void> {
 
 function showTrustDialog(): void {
   if (!inspection) return;
+  dialogOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const dialog = app.querySelector<HTMLDivElement>("#dialog-root")!;
   dialog.innerHTML = `<div class="scrim"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="trust-title"><button class="dialog-close" data-close aria-label="Close">×</button><p class="eyebrow">Local signature</p><h2 id="trust-title">Trust this exact folder?</h2><p class="path">${esc(inspection.path)}</p><p>Hotkey Runbook found <strong>${inspection.runbooks.length} runbook${inspection.runbooks.length === 1 ? "" : "s"}</strong> in ${inspection.files.length} YAML file${inspection.files.length === 1 ? "" : "s"}. It will sign digest <code>${esc(inspection.digest.slice(0, 16))}…</code> on this device. Any edit invalidates trust.</p>${inspection.warnings.map((warning) => `<div class="notice warning">${esc(warning)}</div>`).join("")}<label class="check"><input id="trust-check" type="checkbox"> I own or reviewed this folder and its commands.</label><div class="dialog-actions"><button class="button ghost" data-close>Cancel</button><button class="button primary" id="trust-button" disabled>Sign and add folder</button></div></section></div>`;
   const first = dialog.querySelector<HTMLElement>("[data-close]")!; first.focus();
@@ -170,6 +196,7 @@ async function prepare(runbook: RunbookSummary): Promise<void> {
 }
 
 function showReviewDialog(runbook: RunbookSummary, values: Record<string, unknown>, plan: PreparedRun): void {
+  dialogOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const dialog = app.querySelector<HTMLDivElement>("#dialog-root")!;
   dialog.innerHTML = `<div class="scrim"><section class="dialog review" role="dialog" aria-modal="true" aria-labelledby="review-title"><button class="dialog-close" data-close aria-label="Close">×</button><p class="eyebrow">Final consent · ${esc(riskLabel(plan.risk))}</p><h2 id="review-title">Review “${esc(plan.name)}”</h2><p>These exact processes will run locally. No shell is involved.</p><ol class="command-list">${plan.steps.map((step) => `<li><span>${esc(step.program)}</span> ${step.args.map((arg) => `<code>${esc(arg)}</code>`).join(" ")}${Object.keys(step.env).length ? `<small>environment: ${Object.entries(step.env).map(([key, value]) => `<code>${esc(key)}=${esc(value)}</code>`).join(" ")}</small>` : ""}${step.cwd ? `<small>in ${esc(step.cwd)}</small>` : ""}</li>`).join("")}</ol><aside class="rollback"><span aria-hidden="true">↶</span><div><strong>If you need to roll back</strong><p>${esc(plan.rollback)}</p></div></aside><label class="field"><span class="field-label"><span>Type the runbook name to confirm</span></span><input id="confirm-name" autocomplete="off" spellcheck="false"><small>Enter ${esc(plan.name)} exactly.</small></label><div class="dialog-actions"><button class="button ghost" data-close>Go back</button><button class="button danger" id="execute-button" disabled>Run ${esc(plan.name)}</button></div></section></div>`;
   dialog.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", closeDialog));
@@ -185,12 +212,18 @@ function showResult(result: RunResult): void {
   dialog.querySelector("[data-close]")?.addEventListener("click", closeDialog); (dialog.querySelector("[data-close]") as HTMLElement).focus(); trapDialog(dialog.querySelector(".dialog")!);
 }
 
-function closeDialog(): void { app.querySelector("#dialog-root")!.innerHTML = ""; }
+function closeDialog(): void {
+  app.querySelector("#dialog-root")!.innerHTML = "";
+  const fallback = app.querySelector<HTMLElement>("h1");
+  if (fallback) fallback.tabIndex = -1;
+  (dialogOpener?.isConnected ? dialogOpener : fallback)?.focus();
+  dialogOpener = null;
+}
 function trapDialog(dialog: HTMLElement): void { dialog.addEventListener("keydown", (event) => { if (event.key === "Escape") closeDialog(); if (event.key !== "Tab") return; const items = [...dialog.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]')]; if (!items.length) return; const first = items[0], last = items.at(-1)!; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } }); }
 
 function renderHistory(): void {
   const workspace = app.querySelector<HTMLElement>("#workspace")!;
-  const visibleHistory = license.unlocked ? historyItems : historyItems.slice(0, 10);
+  const visibleHistory = visibleFreeItems(historyItems, FREE_HISTORY_LIMIT, license.unlocked);
   workspace.innerHTML = `<section class="page"><div class="page-heading"><div><p class="eyebrow">Redacted logbook</p><h1>Execution history</h1></div>${historyItems.length ? `<button class="button ghost" id="clear-history">Clear history</button>` : ""}</div>${!license.unlocked && historyItems.length > 10 ? `<div class="notice"><strong>${historyItems.length - 10} older entries are preserved</strong><p>Activate a field license in Settings to view the full logbook.</p></div>` : ""}${visibleHistory.length ? `<ol class="history-list">${visibleHistory.map((item) => `<li><button data-history-id="${esc(item.id)}"><span class="status-dot ${item.status}" aria-hidden="true"></span><span><strong>${esc(item.name)}</strong><small>${new Date(item.startedAt).toLocaleString()} · ${item.durationMs} ms</small></span><span>${item.status}</span></button></li>`).join("")}</ol>` : `<div class="empty wide"><span aria-hidden="true">↺</span><h2>No runs recorded</h2><p>Completed and failed runs appear here with secrets redacted. History never leaves this device.</p></div>`}</section>`;
   workspace.querySelector("#clear-history")?.addEventListener("click", async () => { if (!confirm("Clear all local execution history? This cannot be undone.")) return; await bridge.clearHistory(); historyItems = []; renderHistory(); });
   workspace.querySelectorAll<HTMLButtonElement>("[data-history-id]").forEach((button) => button.addEventListener("click", () => { const result = historyItems.find((item) => item.id === button.dataset.historyId); if (result) showResult(result); }));
@@ -198,7 +231,7 @@ function renderHistory(): void {
 
 function renderSettings(): void {
   const workspace = app.querySelector<HTMLElement>("#workspace")!;
-  workspace.innerHTML = `<section class="page settings"><p class="eyebrow">Device field notes</p><h1>Settings</h1><section><h2>Trusted folders</h2>${state.directories.length ? `<ul class="directory-list">${state.directories.map((directory) => `<li><span><strong>${esc(directory.path)}</strong><small>${directory.valid ? `Signed ${new Date(directory.signedAt).toLocaleDateString()}` : esc(directory.error)}</small></span><button class="button ghost small" data-remove="${esc(directory.path)}">Remove</button></li>`).join("")}</ul>` : `<p class="muted">No folders are trusted on this device.</p>`}<button class="button" data-action="add">Add folder</button></section><section><h2>Field license</h2><p>${license.unlocked ? "License active. Unlimited runbooks and the full 100-entry history are available." : "The free field kit includes up to 3 runbooks and 10 history entries. A one-time license unlocks unlimited local runbooks and extended history."}</p>${!license.unlocked ? `<form id="license-form"><label class="field"><span class="field-label"><span>License token</span></span><input id="license-token" type="password" required autocomplete="off"></label><div class="inline-actions"><button class="button primary">Verify license</button><a class="button ghost" href="https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout" target="_blank" rel="noreferrer">Buy once</a></div><p id="license-status" aria-live="polite"></p></form>` : `<button class="text-button" id="remove-license">Remove license from this device</button>`}</section><section><h2>Privacy and safety</h2><p>No account, telemetry, remote orchestration, or secret vault. Commands run as direct local processes only after review. History is stored in the app data directory.</p></section></section>`;
+  workspace.innerHTML = `<section class="page settings"><p class="eyebrow">Device field notes</p><h1>Settings</h1><section><h2>Trusted folders</h2>${state.directories.length ? `<ul class="directory-list">${state.directories.map((directory) => `<li><span><strong>${esc(directory.path)}</strong><small>${directory.valid ? `Signed ${new Date(directory.signedAt).toLocaleDateString()}` : esc(directory.error)}</small></span><button class="button ghost small" data-remove="${esc(directory.path)}">Remove</button></li>`).join("")}</ul>` : `<p class="muted">No folders are trusted on this device.</p>`}<button class="button" data-action="add">Add folder</button></section><section><h2>Field license</h2><p>${license.unlocked ? "License active. Unlimited runbooks and the full 100-entry history are available." : "The free field kit includes up to 3 runbooks and 10 history entries. A one-time license unlocks unlimited local runbooks and extended history."}</p>${!license.unlocked ? `<form id="license-form"><label class="field"><span class="field-label"><span>License token</span></span><input id="license-token" type="password" required autocomplete="off"></label><div class="inline-actions"><button class="button primary">Verify license</button>${checkoutEnabled ? `<a class="button ghost" href="https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout" target="_blank" rel="noreferrer">Buy once</a>` : ""}</div>${checkoutEnabled ? "" : `<p class="muted">New purchases are temporarily unavailable. Existing licenses can still be restored.</p>`}<p id="license-status" aria-live="polite"></p></form>` : `<button class="text-button" id="remove-license">Remove license from this device</button>`}</section><section><h2>Privacy and safety</h2><p>No account, telemetry, remote orchestration, or secret vault. Commands run as direct local processes only after review. History is stored in the app data directory.</p></section></section>`;
   workspace.querySelectorAll('[data-action="add"]').forEach((button) => button.addEventListener("click", addDirectory));
   workspace.querySelectorAll<HTMLButtonElement>("[data-remove]").forEach((button) => button.addEventListener("click", async () => { if (!confirm(`Stop trusting ${button.dataset.remove}?`)) return; state = await bridge.removeDirectory(button.dataset.remove!); renderSettings(); }));
   workspace.querySelector<HTMLFormElement>("#license-form")?.addEventListener("submit", async (event) => { event.preventDefault(); const status = workspace.querySelector<HTMLElement>("#license-status")!; status.textContent = "Checking…"; license = await saveAndVerifyLicense((workspace.querySelector<HTMLInputElement>("#license-token")!).value); status.textContent = license.unlocked ? "License active." : license.reason === "offline" ? "Could not reach the license service. Try again when online." : "That license is not active for Hotkey Runbook."; if (license.unlocked) renderSettings(); });

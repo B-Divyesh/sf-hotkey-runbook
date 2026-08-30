@@ -2,22 +2,57 @@
   {
     "id": "demo-isolated",
     "claim": "Try the sample project without saving it to your real runbooks.",
-    "where": "/demo and landing-page primary action",
+    "where": "/demo, landing primary action, README",
     "test": "npm run test:e2e -- --grep @claim:demo-isolated",
-    "sandbox": "fresh browser context; run the sample; assert only the demo: session namespace is used and Reset demo removes it"
+    "sandbox": "fresh browser context; run sample; assert only the demo session namespace is used and reset removes it"
   },
   {
     "id": "exact-environment-review",
-    "claim": "Review process arguments and environment before confirming the sample run.",
-    "where": "/demo sample review and desktop review dialog",
+    "claim": "Review the exact executable, arguments, environment, working folder, and rollback note before consent.",
+    "where": "/demo, landing safety copy, desktop review, README",
     "test": "npm run test:e2e -- --grep @claim:exact-environment-review",
-    "sandbox": "fresh browser context; open sample review; assert masked environment is visible and execution remains disabled until exact-name consent"
+    "sandbox": "fresh browser context; open sample review; assert the process and masked environment are shown and run stays disabled until exact-name consent"
   },
   {
     "id": "demo-privacy",
-    "claim": "The sample demo sends no data to third parties.",
-    "where": "/demo banner and .factory/demo.md",
+    "claim": "The browser sample sends no data to third parties.",
+    "where": "/demo banner, README, .factory/demo.md",
     "test": "npm run test:e2e -- --grep @claim:demo-privacy",
-    "sandbox": "fresh browser context; complete the sample flow; record every request and assert all requests are same-origin"
+    "sandbox": "fresh browser context; complete sample flow; record every request and assert all are same-origin"
+  },
+  {
+    "id": "native-demo-controls",
+    "claim": "The installed sample has a persistent demo banner with Reset demo and Start for real controls.",
+    "where": "desktop sample, README, .factory/demo.md",
+    "test": "npm run test:unit -- --testNamePattern @claim:native-demo-controls",
+    "sandbox": "render the native demo-mode UI from active and inactive state; assert the banner, isolation notice, reset action, and exit action"
+  },
+  {
+    "id": "native-safety-contract",
+    "claim": "Reviewed folders reject symlinks and world-writable roots, enforce 64 KB, 100-file, and 20-step limits, and use content digests. Programs stay fixed; typed values use direct arguments and environment entries; secrets are masked and redacted; rollback notes remain attached.",
+    "where": "landing safety and method sections, desktop app, README safety model",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_native_safety_contract",
+    "sandbox": "temporary owned runbook directories; reject symlink and world-writable roots; enforce file, folder, and step limits; reject a parameterized program; prepare direct argv and environment; mask and redact a secret; retain rollback; edit YAML and assert the digest changes"
+  },
+  {
+    "id": "local-privacy",
+    "claim": "Runbooks, trust records, parameters, output, and history stay on the device; only release metadata and explicit license checks use documented services.",
+    "where": "landing facts, desktop settings, privacy page, README",
+    "test": "npm run test:unit -- --testNamePattern @claim:local-privacy",
+    "sandbox": "inspect every runtime source for network origins and assert demo and real history use separate local files"
+  },
+  {
+    "id": "free-tier-limits",
+    "claim": "The free app shows 3 runbooks and 10 history entries; a valid license shows up to the 100-entry local history limit.",
+    "where": "landing license section, desktop settings, README, terms",
+    "test": "npm run test:unit -- --testNamePattern @claim:free-tier-limits",
+    "sandbox": "100 deterministic items; assert free runbook and history slices, then assert the licensed view contains all 100"
+  },
+  {
+    "id": "installer-integrity",
+    "claim": "Release installers include a SHA-256 checksum file whose names match the downloadable assets.",
+    "where": "landing download section, install scripts, README",
+    "test": "npm run test:unit -- --testNamePattern @claim:installer-integrity",
+    "sandbox": "temporary cross-platform artifact tree with Tauri space-containing names; generate release assets and run sha256sum -c"
   }
 ]

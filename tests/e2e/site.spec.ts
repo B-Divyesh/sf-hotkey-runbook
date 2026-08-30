@@ -29,7 +29,7 @@ test("legal pages and mobile download path render", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#primary-download")).toBeVisible();
   await expect(page.locator("#primary-download")).toHaveAttribute("href", /github\.com\/download\/(windows|linux|macos-arm|macos-intel)/);
-  await expect(page.locator("img[alt]")).toBeVisible();
+  await expect(page.locator("img[alt]").first()).toBeVisible();
 });
 
 test("@claim:demo-isolated runs sample data in a separate browser namespace", async ({ page }) => {
@@ -47,7 +47,11 @@ test("@claim:demo-isolated runs sample data in a separate browser namespace", as
 test("@claim:exact-environment-review shows masked environment before the sample can run", async ({ page }) => {
   await page.goto("/demo/");
   await page.getByRole("button", { name: "Review exact process" }).click();
+  await expect(page.getByText("printf", { exact: true })).toBeVisible();
+  await expect(page.getByText('"Checking %s deployment\\n"', { exact: true })).toBeVisible();
   await expect(page.getByText("HOTKEY_SAMPLE_TOKEN=[SECRET]")).toBeVisible();
+  await expect(page.getByText("working folder: app data/demo-sample-project")).toBeVisible();
+  await expect(page.getByRole("dialog").getByText("This sample only prints a status line. No rollback is needed.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Run sample check" })).toBeDisabled();
   await page.locator("#demo-confirm").fill("Inspect sample deployment");
   await expect(page.getByRole("button", { name: "Run sample check" })).toBeEnabled();
@@ -70,7 +74,39 @@ test("sample demo is keyboard-ready and has no serious accessibility violations"
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
   await page.getByRole("button", { name: "Review exact process" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.locator(".scrim")).toHaveCSS("position", "fixed");
+  const dialogBox = await page.getByRole("dialog").boundingBox();
+  expect(dialogBox?.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  expect(dialogBox?.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+  const dialogAxe = await new AxeBuilder({ page }).include("#demo-dialog").analyze();
+  expect(dialogAxe.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.getByRole("button", { name: "Close" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.getByRole("button", { name: "Go back" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Review exact process" })).toBeFocused();
+  await page.getByRole("button", { name: "Review exact process" }).click();
   await page.locator("#demo-confirm").fill("Inspect sample deployment");
   await page.getByRole("button", { name: "Run sample check" }).press("Enter");
   await expect(page.getByText("Completed sample check")).toBeVisible();
+});
+
+test("all repeated navigation targets meet the 44 px minimum", async ({ page }) => {
+  await page.goto("/");
+  for (const target of await page.locator("a, button, input, select, [tabindex='0']").all()) {
+    const box = await target.boundingBox();
+    if (box) expect(box.height).toBeGreaterThanOrEqual(44);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+});
+
+test("checkout is gated and existing-license recovery stays available", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("New purchases are temporarily unavailable.")).toBeVisible();
+  await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "Have a license? Restore it" }).click();
+  await expect(page.getByLabel("Paste license token")).toBeVisible();
 });
