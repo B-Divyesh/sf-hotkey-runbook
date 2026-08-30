@@ -2,11 +2,10 @@ import "./style.css";
 import { consumeLicenseFromUrl, saveAndVerifyLicense, verifyLicense } from "../src/license";
 
 const REPO = "B-Divyesh/sf-hotkey-runbook";
-const RELEASE_MANIFEST = `https://github.com/${REPO}/releases/latest/download/latest.json`;
+const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const RELEASE_PAGE = `https://github.com/${REPO}/releases/latest`;
-const MANIFEST = "/latest.json";
-interface Asset { url: string; sha256: string; file: string }
-interface ReleaseManifest { version: string; platforms: Record<string, Asset> }
+interface GithubAsset { name: string; browser_download_url: string }
+interface GithubRelease { tag_name: string; assets: GithubAsset[] }
 
 function platform(): string {
   const source = `${navigator.userAgent} ${navigator.platform}`.toLowerCase();
@@ -23,15 +22,19 @@ async function downloads(): Promise<void> {
   const primary = document.querySelector<HTMLAnchorElement>("#primary-download")!;
   const status = document.querySelector<HTMLElement>("#download-status")!;
   const detected = platform();
-  primary.dataset.releaseManifest = RELEASE_MANIFEST;
+  const cached = localStorage.getItem("hkr:release:latest");
   try {
-    const response = await fetch(MANIFEST, { headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error("release manifest unavailable");
-    const manifest = await response.json() as ReleaseManifest;
-    document.querySelectorAll<HTMLAnchorElement>("[data-platform]").forEach((link) => { const asset = manifest.platforms[link.dataset.platform!]; if (asset) { link.href = asset.url; link.setAttribute("download", asset.file); } });
-    const asset = manifest.platforms[detected];
-    if (asset) { primary.href = asset.url; primary.innerHTML = `Download for ${label(detected)} <span aria-hidden="true">↓</span>`; primary.setAttribute("download", asset.file); }
-    status.textContent = `${manifest.version} · ${asset ? asset.file : "Choose a platform below"} · SHA-256 published`;
+    let release: GithubRelease;
+    if (cached) {
+      const stored = JSON.parse(cached) as { expires: number; value: GithubRelease };
+      release = stored.expires > Date.now() ? stored.value : await fetchRelease();
+    } else release = await fetchRelease();
+    const assets = Object.fromEntries(release.assets.map((asset) => [asset.name, asset]));
+    const assetFor = (key: string) => Object.values(assets).find((asset) => asset.name.includes(`_${key}.`));
+    document.querySelectorAll<HTMLAnchorElement>("[data-platform]").forEach((link) => { const asset = assetFor(link.dataset.platform!); if (asset) { link.href = asset.browser_download_url; link.setAttribute("download", asset.name); } });
+    const asset = assetFor(detected);
+    if (asset) { primary.href = asset.browser_download_url; primary.innerHTML = `Download for ${label(detected)} <span aria-hidden="true">↓</span>`; primary.setAttribute("download", asset.name); }
+    status.textContent = `${release.tag_name} · ${asset ? asset.name : "Choose a platform below"} · SHA-256 published`;
   } catch {
     primary.textContent = `See downloads for ${label(detected)}`;
     primary.href = RELEASE_PAGE;
@@ -39,14 +42,24 @@ async function downloads(): Promise<void> {
   }
 }
 
-const restore = document.querySelector<HTMLButtonElement>("#restore-license")!;
-const form = document.querySelector<HTMLFormElement>("#license-form")!;
-restore.addEventListener("click", () => { form.hidden = false; restore.hidden = true; document.querySelector<HTMLInputElement>("#license-token")!.focus(); });
-form.addEventListener("submit", async (event) => {
-  event.preventDefault(); const message = document.querySelector<HTMLElement>("#license-message")!; message.textContent = "Checking…";
-  const result = await saveAndVerifyLicense(document.querySelector<HTMLInputElement>("#license-token")!.value);
-  message.textContent = result.unlocked ? "License verified. Open the app and paste the same token in Settings." : result.reason === "offline" ? "Could not reach the license service. Try again when online." : "That license is not active for Hotkey Runbook.";
-});
-consumeLicenseFromUrl();
-verifyLicense().then((result) => { if (result.unlocked) { restore.textContent = "License active on this browser"; restore.disabled = true; } });
-downloads();
+async function fetchRelease(): Promise<GithubRelease> {
+  const response = await fetch(RELEASE_API, { headers: { Accept: "application/vnd.github+json" } });
+  if (!response.ok) throw new Error("release metadata unavailable");
+  const release = await response.json() as GithubRelease;
+  localStorage.setItem("hkr:release:latest", JSON.stringify({ expires: Date.now() + 60 * 60 * 1000, value: release }));
+  return release;
+}
+
+const restore = document.querySelector<HTMLButtonElement>("#restore-license");
+const form = document.querySelector<HTMLFormElement>("#license-form");
+if (restore && form) {
+  restore.addEventListener("click", () => { form.hidden = false; restore.hidden = true; document.querySelector<HTMLInputElement>("#license-token")!.focus(); });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); const message = document.querySelector<HTMLElement>("#license-message")!; message.textContent = "Checking…";
+    const result = await saveAndVerifyLicense(document.querySelector<HTMLInputElement>("#license-token")!.value);
+    message.textContent = result.unlocked ? "License verified. Open the app and paste the same token in Settings." : result.reason === "offline" ? "Could not reach the license service. Try again when online." : "That license is not active for Hotkey Runbook.";
+  });
+  consumeLicenseFromUrl();
+  verifyLicense().then((result) => { if (result.unlocked) { restore.textContent = "License active on this browser"; restore.disabled = true; } });
+}
+if (document.querySelector("#primary-download")) downloads();

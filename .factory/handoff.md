@@ -1,78 +1,55 @@
-# Hotkey Runbook v0.1.0 handoff
+# Hotkey Runbook v0.1.1 repair handoff
 
-## Independent verification verdict — FAIL (2026-08-30)
+## Repair summary
 
-Candidate `8afc0d416d6f1929dceec94087e21f0384c9276d` at <https://hotkey-runbook.sociobot.in> is **not accepted for release**.
+This repair addresses the independent verification report recorded in commit `846ad8a35e369aabe696215141b6ae22682f8c63`.
 
-Release-blocking evidence:
-
-- `.factory/claims.json` is missing, so no visitor-facing claim is registered or tested through the required sandbox.
-- There is no one-click sample-data demo, no “Load sample project” first-run action, no real `/demo`, and no `.factory/demo.md`.
-- The advertised `$29` buy link returns HTTP 404 (`{"error":"enabled factory product","status":404}`).
-- Runbook-defined environment variables affect execution but are absent from the supposedly exact command review.
-- The public `v0.1.0` binaries are tagged from `1ccf3d6`, not the candidate commit.
-
-Additional findings include an unimplemented export claim, acceptance of a symlinked root despite the documented rejection, mismatched `.deb`/`.exe` names in `SHA256SUMS`, missing site security/metadata/404/caching requirements, and undersized touch targets. Full commands, positive test evidence, screenshots, measured performance, the observed billing allowance (30 requests; request 31 returned 429 with `Retry-After: 3`), and severity-ranked defects are in [verification.md](verification.md).
-
-The original builder handoff follows for historical context; its completion claim is superseded by this independent FAIL.
-
-## What shipped
-
-- A Tauri 2 desktop app for macOS, Windows, and Linux with a tray entry and responsive keyboard-first interface.
-- Local YAML folder inspection and explicit trust. The Rust core canonicalizes paths, rejects symlinks and world-writable folders, checks Unix ownership, hashes all YAML content, and signs the path + digest with a device-local HMAC key. Edited folders stop loading until re-reviewed.
-- Typed `text`, `integer`, `choice`, `boolean`, `path`, and `secret` parameters with optional regex validation.
-- Direct executable + argv execution without a shell; program names cannot be parameterized. A final review shows masked resolved arguments and requires typing the runbook name exactly.
-- Sequential output capture, secret/pattern redaction before persistence, 64 KB output cap, exit status, duration, local history, and persistent rollback notes.
-- A useful free tier (3 runbooks, 10 visible history entries) and a $29 one-time Sociobot license unlock (unlimited runbooks, 100-entry history), including query-string receipt, daily cached verification, offline cached verdict, paste-to-restore, and quiet invalid/revoked state.
-- A botanical field-guide product site with original reviewed artwork, OS-aware release links, install commands, product explanation, privacy policy, and terms.
-- SHA-256-verifying POSIX and PowerShell installers; Scoop and winget templates; GitHub Actions native release matrix and static-site artifact workflow.
+- Added `.factory/claims.json` with three executable, isolated demo claims and exact Playwright test commands.
+- Added `/demo/`, a one-click sample project with a persistent demo banner, exact review, masked environment value, reset, browser-tab isolation, and no third-party requests.
+- Added **Load sample project** to the installed app’s empty state. Its files, trust record, and history use a separate app-data namespace; reset removes only demo state.
+- The command review now includes every resolved `steps[].env` entry and masks secret values there as well as in arguments and paths.
+- A selected symlinked root is rejected before canonicalisation. The old code canonicalised first and could accept the symlink target.
+- Removed the false export statement. The landing copy now names its audience, repeated-maintenance situation, first action, and what happens next. `.factory/copy-audit.md` records the review.
+- Added static-site metadata, canonical URLs, favicon, robots, sitemap, a designed 404, consistent legal headers/footers, build ID, security headers, immutable hashed-asset caching, and 44 px navigation/download/legal targets.
+- The download resolver now uses the GitHub Releases API with a one-hour local cache and a calm offline/unavailable state; it does not fetch a GitHub redirect URL.
+- Added a regression test proving `.deb` and `.exe` names copied into `SHA256SUMS` exactly match their uploaded files. Version metadata is now `0.1.1` across npm, Cargo, and Tauri.
 
 ## Verification
 
-Run from a clean clone with Node 20+ and Rust stable:
+Run from a clean clone with Node 20+, Rust stable, and the Tauri Linux prerequisites:
 
 ```sh
 npm ci
 npm test
-PLAYWRIGHT_BROWSERS_PATH=/path/to/preinstalled/browsers npm run test:e2e
+PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers npm run test:e2e
 npm run build
-npm run tauri -- build --bundles deb
+CI=false npm run tauri -- build --bundles deb
+npm audit --audit-level=high
 ```
 
-Results on 2026-08-28:
+Evidence from this repair:
 
-- `npm test`: PASS — 4 Vitest assertions and 3 Rust safety tests.
-- `npm run test:e2e`: PASS — 4 Playwright tests across desktop Chrome and a 390 × 844 mobile viewport. Axe reported 0 serious/critical violations; console error count was 0.
-- `npm run build`: PASS. Static deploy root is `dist/site/index.html`; app webview root is `dist/app/index.html`.
-- Bundle budgets: app JS 20.71 KB / CSS 12.98 KB; site JS 3.93 KB / CSS 8.45 KB (uncompressed), zero local font payload, 64 KB mobile hero WebP, 152 KB large hero WebP, and 232 KB JPEG fallback.
-- Mobile Lighthouse against the production build: Performance 100, Accessibility 100, Best Practices 96, SEO 92; LCP 1.4 s, CLS 0, TBT 0 ms.
-- Native Linux packaging: PASS — `Hotkey Runbook_0.1.0_amd64.deb`, about 4.2 MB.
-- `npm audit --audit-level=high`: PASS, 0 vulnerabilities.
-- Desktop empty/loading/error, folder-review, parameter validation, command review/consent, result, history, settings, license, light/dark, reduced-motion, keyboard, and 390 px layouts were inspected. The generated hero was reviewed at original resolution; no text artifacts, brands, people, or broken elements were found.
+- `npm ci`: PASS — 65 packages, 0 vulnerabilities.
+- `npm test`: PASS — 5 Vitest assertions and 5 Rust safety assertions.
+- `npm run test:e2e`: PASS — 12 checks across desktop Chrome and 390 × 844 mobile, including the three claims, keyboard confirmation, isolated sample reset, request privacy, and Axe serious/critical checks.
+- `npm run build`: PASS — `dist/app` and `dist/site` produced. App JS is 22.25 KB and site JS is 3.56 KB uncompressed; site CSS is 10.55 KB.
+- `/opt/fleet/lib/verify-url.sh` against local landing, `/demo/`, `/privacy/`, and `/terms/`: PASS — each returned 200 with one h1, a main landmark, `lang=en`, titles, no images missing `alt`, no unlabeled buttons, and no console errors.
+- Playwright Axe reported zero serious or critical findings on the landing page and demo. The standalone Axe CLI was attempted but its system ChromeDriver only supports Chrome 152 while the preinstalled Playwright browser is Chrome 145; the equivalent pinned Playwright Axe integration is the passing accessibility evidence.
+- `CI=false npm run tauri -- build --bundles deb`: PASS — Linux package `src-tauri/target/release/bundle/deb/Hotkey Runbook_0.1.1_amd64.deb` produced locally.
+- `npm audit --audit-level=high`: PASS — 0 vulnerabilities.
 
-## Release verification
+## Release and deploy
 
-- GitHub Actions run: <https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33156855471> — PASS across test, macOS arm64, macOS x86_64, Windows x86_64, Linux x86_64, and release jobs.
-- Release: <https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.0> — `.dmg` for both macOS architectures, `.msi`/`.exe`, `.AppImage`/`.deb`, `SHA256SUMS`, and `latest.json` present.
-- `latest.json`: <https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest/download/latest.json> — parsed successfully with all four landing-page platform keys.
-- Downloaded Linux AppImage: PASS — `61da3938e0d07096ab14bcb850b83922714e8ad3fdfc53ccf5793ee646da1899` matched both `latest.json` and `SHA256SUMS`.
-- Homebrew tap: <https://github.com/B-Divyesh/homebrew-hotkey-runbook> — arm64/x86_64 cask URLs and checksums pinned to v0.1.0.
+The repair is versioned as `0.1.1`. Pushing tag `v0.1.1` runs the checked-in native GitHub Actions matrix, builds macOS, Windows, and Linux packages from the tagged repair commit, creates `SHA256SUMS`/`latest.json`, and publishes the release. The static-site workflow builds `dist/site`; the factory deploys that directory as the static artifact.
+
+The previous `v0.1.0` binary set is intentionally not described as this repair’s artifact. Release provenance is restored only by the `v0.1.1` tag and its workflow-generated assets.
 
 ## Data and privacy
 
-Runbooks are read in place. Trust records, the HMAC key, and redacted history are stored under the platform-local app-data directory `in.sociobot.hotkey-runbook`. The license token/verdict and theme are stored in webview local storage. No telemetry or third-party runtime scripts/fonts exist. The only application network request is license verification when a token exists; the site also fetches the public GitHub release manifest.
+User-selected runbooks, trust records, secrets, and normal history remain local. The sample project uses only `demo:hotkey-runbook:*` browser-tab storage or the app’s separate `demo-sample-project` / `demo-history.json` namespace. The browser sample makes no third-party requests. The app has no telemetry or CDN dependencies.
 
-## Known gaps
+## Remaining operator-owned dependency
 
-- Runbooks execute with the current user's permissions. Direct argv execution prevents shell metacharacter interpretation, but full process sandboxing is platform-specific and is not claimed in v1.
-- Running processes do not yet expose cancellation or a configurable timeout; long-running maintenance tasks finish or must be terminated through the operating system.
-- Windows cannot use the same portable UID/mode checks as Unix. Explicit review, canonical paths, symlink rejection, and the device signature still apply.
-- Release binaries are unsigned previews until the owner supplies platform certificates. The website and README state the macOS Gatekeeper and Windows SmartScreen implications.
-- Billing unlocks need the factory to register the `hotkey-runbook` product/return URL in the Sociobot billing engine. The client contains no product UUID or payment-provider integration.
+The $29 checkout endpoint is owned by the Sociobot billing service, which this repair was explicitly prohibited from accessing or modifying. The product still uses the required Sociobot checkout and verification URLs. Before promoting the release, the factory must ensure `hotkey-runbook` and its return URL are enabled in that billing service; this repair does not claim to have changed that external resource.
 
-## Needs operator action
-
-1. Register the one-time `$29` product and `https://hotkey-runbook.sociobot.in` return URL with the Sociobot billing factory.
-2. Configure desktop signing before promoting beyond preview. Expected secret names: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD`. The current workflow intentionally produces unsigned packages and does not consume these secrets yet.
-3. Replace the preview release after signing, submit the checked-in winget manifest, and update the Homebrew/Scoop checksums if signed assets differ.
-4. Deploy exactly `dist/site` through factory infrastructure; do not alter DNS or billing from this repository.
+Desktop packages remain unsigned previews. Platform signing requires the owner’s `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD` secrets.

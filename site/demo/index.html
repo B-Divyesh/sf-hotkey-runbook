@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Try a safe sample Hotkey Runbook without adding a local folder." />
+    <meta name="theme-color" content="#f3f0e4" />
+    <meta name="robots" content="noindex" />
+    <title>Demo — Hotkey Runbook</title>
+    <link rel="canonical" href="https://hotkey-runbook.sociobot.in/demo/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to sample runbook</a>
+    <header class="site-header"><a class="wordmark" href="/"><span aria-hidden="true">⌁</span><strong>Hotkey Runbook</strong></a><nav aria-label="Primary navigation"><a href="/">Home</a><a href="/privacy/">Privacy</a><a class="nav-download" href="/#download">Download</a></nav></header>
+    <aside class="site-demo-banner" aria-label="Demo mode"><span><strong>Demo</strong> — sample data, nothing is saved to your real runbooks.</span><button id="reset-demo" class="text-button">Reset demo</button><a href="/" class="text-link">Start for real</a></aside>
+    <main id="main" class="demo-main">
+      <section class="demo-intro"><p class="eyebrow">Sample project</p><h1>Review a sample deployment check.</h1><p>Choose a sample environment, inspect every value that would reach the process, then run a safe simulated check.</p></section>
+      <section class="demo-workspace" aria-label="Sample runbook">
+        <aside class="demo-list"><p class="eyebrow">Runbooks</p><button class="demo-runbook" aria-current="true"><strong>Inspect sample deployment</strong><span>sample · low risk</span></button><p class="muted">This bundled example never reads your folders.</p></aside>
+        <article class="demo-sheet"><p class="eyebrow">Operational sample</p><h2>Inspect sample deployment</h2><p class="lede">Print a sample deployment status without changing your computer.</p><form id="sample-form"><label class="field"><span class="field-label">Sample environment</span><select id="sample-environment" name="environment"><option value="staging">Staging</option><option value="production">Production</option></select></label><label class="field"><span class="field-label">Sample access token</span><input id="sample-token" name="token" type="password" value="sample-token" autocomplete="off" required><small>This value is masked in the review and result.</small></label><aside class="rollback"><span aria-hidden="true">↶</span><div><strong>Rollback note</strong><p>This sample only prints a status line. No rollback is needed.</p></div></aside><button class="button primary full">Review exact process <span aria-hidden="true">→</span></button></form><section id="demo-result" aria-live="polite"></section></article>
+      </section>
+    </main>
+    <div id="demo-dialog"></div>
+    <footer><a class="wordmark" href="/"><span aria-hidden="true">⌁</span><strong>Hotkey Runbook</strong></a><p>Review local YAML procedures before they run.</p><nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-hotkey-runbook">GitHub</a></nav><small>Build 0.1.1 · Sample data is stored only in this browser tab.</small></footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

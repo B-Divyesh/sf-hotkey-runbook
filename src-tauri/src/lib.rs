@@ -126,7 +126,7 @@ struct TrustedDirectory { path: String, digest: String, signed_at: DateTime<Utc>
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct AppState { runbooks: Vec<RunbookSummary>, directories: Vec<TrustedDirectory>, errors: Vec<String> }
+struct AppState { runbooks: Vec<RunbookSummary>, directories: Vec<TrustedDirectory>, errors: Vec<String>, demo_mode: bool }
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -134,7 +134,7 @@ struct DirectoryInspection { path: String, digest: String, files: Vec<String>, r
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PreparedStep { program: String, args: Vec<String>, cwd: Option<String>, display: String }
+struct PreparedStep { program: String, args: Vec<String>, cwd: Option<String>, env: BTreeMap<String, String>, display: String }
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -205,6 +205,15 @@ fn assert_owned(path: &Path) -> AppResult<Vec<String>> {
         if metadata.mode() & 0o002 != 0 { return Err(AppError::Message("The selected folder is writable by other users. Restrict its permissions before trusting it.".into())); }
     }
     Ok(warnings)
+}
+
+/// Check the path selected by the person before resolving it. Checking only
+/// after canonicalisation would turn a symlink into its target and silently
+/// accept a folder the person did not select.
+fn assert_not_symlinked_root(path: &Path) -> AppResult<()> {
+    let metadata = fs::symlink_metadata(path).map_err(|_| AppError::Message("That folder no longer exists or is not readable.".into()))?;
+    if metadata.file_type().is_symlink() { return Err(AppError::Message("Symlinked runbook folders are not accepted.".into())); }
+    Ok(())
 }
 
 fn yaml_files(path: &Path) -> AppResult<Vec<PathBuf>> {
@@ -278,6 +287,7 @@ fn summary(item: &LoadedRunbook) -> RunbookSummary {
 }
 
 fn inspect_path(path: &str) -> AppResult<(DirectoryInspection, Vec<LoadedRunbook>)> {
+    assert_not_symlinked_root(Path::new(path))?;
     let canonical = fs::canonicalize(path).map_err(|_| AppError::Message("That folder no longer exists or is not readable.".into()))?;
     #[allow(unused_mut)]
     let mut warnings = assert_owned(&canonical)?;
@@ -310,7 +320,8 @@ fn verified_runbooks() -> AppResult<(Vec<LoadedRunbook>, Vec<TrustedDirectory>, 
 fn current_state() -> AppResult<AppState> {
     let (mut loaded, directories, errors) = verified_runbooks()?;
     loaded.sort_by(|a, b| a.runbook.name.to_lowercase().cmp(&b.runbook.name.to_lowercase()));
-    Ok(AppState { runbooks: loaded.iter().map(summary).collect(), directories, errors })
+    let demo_mode = directories.iter().any(|directory| directory.path == sample_project_dir().map(|path| path.display().to_string()).unwrap_or_default());
+    Ok(AppState { runbooks: loaded.iter().map(summary).collect(), directories, errors, demo_mode })
 }
 
 #[tauri::command]
@@ -332,6 +343,64 @@ fn trust_directory(path: String, digest: String, acknowledged: bool) -> AppResul
 
 #[tauri::command]
 fn remove_directory(path: String) -> AppResult<AppState> { let mut records = trust_records()?; records.retain(|record| record.path != path); save_trust_records(&records)?; current_state() }
+
+const SAMPLE_RUNBOOK: &str = r#"version: 1
+id: inspect-sample-deployment
+name: Inspect sample deployment
+description: Checks a bundled sample target without changing your computer.
+risk: low
+tags: [sample, review]
+parameters:
+  - name: environment
+    label: Sample environment
+    type: choice
+    required: true
+    choices: [staging, production]
+    default: staging
+  - name: access_token
+    label: Sample access token
+    type: secret
+    required: true
+    default: sample-token
+steps:
+  - program: printf
+    args: ["Checking %s deployment\\n", "{{environment}}"]
+    env:
+      HOTKEY_SAMPLE_TOKEN: "{{access_token}}"
+rollback: This sample only prints a status line. No rollback is needed.
+"#;
+
+fn sample_project_dir() -> AppResult<PathBuf> { Ok(app_data_dir()?.join("demo-sample-project")) }
+
+fn is_sample_runbook(item: &LoadedRunbook) -> bool {
+    item.source.parent().is_some_and(|parent| sample_project_dir().is_ok_and(|sample| parent == sample))
+}
+
+#[tauri::command]
+fn load_sample_project() -> AppResult<AppState> {
+    let directory = sample_project_dir()?;
+    fs::create_dir_all(&directory)?;
+    fs::write(directory.join("inspect-sample-deployment.yaml"), SAMPLE_RUNBOOK)?;
+    let (inspection, _) = inspect_path(&directory.display().to_string())?;
+    let mut records = trust_records()?;
+    records.retain(|record| record.path != inspection.path);
+    records.push(TrustRecord { path: inspection.path.clone(), digest: inspection.digest.clone(), signed_at: Utc::now(), signature: sign(&inspection.path, &inspection.digest)? });
+    save_trust_records(&records)?;
+    current_state()
+}
+
+#[tauri::command]
+fn reset_sample_project() -> AppResult<AppState> {
+    let directory = sample_project_dir()?;
+    let path = directory.display().to_string();
+    let mut records = trust_records()?;
+    records.retain(|record| record.path != path);
+    save_trust_records(&records)?;
+    if directory.exists() { fs::remove_dir_all(&directory)?; }
+    let demo_history = app_data_dir()?.join("demo-history.json");
+    if demo_history.exists() { fs::remove_file(demo_history)?; }
+    current_state()
+}
 
 fn value_string(parameter: &Parameter, values: &HashMap<String, Value>) -> AppResult<String> {
     let raw = values.get(&parameter.name).cloned().or_else(|| parameter.default.clone());
@@ -378,8 +447,9 @@ fn prepare_loaded(item: &LoadedRunbook, values: &HashMap<String, Value>) -> AppR
     for step in &item.runbook.steps {
         let args: Vec<String> = step.args.iter().map(|arg| substitute(arg, &resolved)).collect::<AppResult<_>>()?;
         let cwd = step.cwd.as_ref().map(|value| substitute(value, &resolved)).transpose()?;
+        let env: BTreeMap<String, String> = step.env.iter().map(|(key, value)| Ok((key.clone(), substitute(value, &resolved)?))).collect::<AppResult<_>>()?;
         let display = std::iter::once(&step.program).chain(args.iter()).map(|part| if part.chars().all(|c| c.is_ascii_alphanumeric() || "-._/:=@".contains(c)) { part.clone() } else { format!("{:?}", part) }).collect::<Vec<_>>().join(" ");
-        steps.push(PreparedStep { program: step.program.clone(), args, cwd, display });
+        steps.push(PreparedStep { program: step.program.clone(), args, cwd, env, display });
     }
     Ok((PreparedRun { runbook_id: item.key.clone(), name: item.runbook.name.clone(), risk: item.runbook.risk.clone(), rollback: item.runbook.rollback.clone(), steps }, resolved))
 }
@@ -392,6 +462,7 @@ fn mask_plan_secrets(plan: &mut PreparedRun, runbook: &RunbookFile, resolved: &H
             for step in &mut plan.steps {
                 step.args.iter_mut().for_each(|arg| *arg = arg.replace(secret, "[SECRET]"));
                 if let Some(cwd) = &mut step.cwd { *cwd = cwd.replace(secret, "[SECRET]"); }
+                step.env.values_mut().for_each(|value| *value = value.replace(secret, "[SECRET]"));
                 step.display = step.display.replace(secret, "[SECRET]");
             }
         }
@@ -413,9 +484,9 @@ fn redact(mut output: String, runbook: &RunbookFile, resolved: &HashMap<String, 
     output
 }
 
-fn history_path() -> AppResult<PathBuf> { Ok(app_data_dir()?.join("history.json")) }
-fn history() -> AppResult<Vec<RunResult>> { read_json(&history_path()?) }
-fn save_history_entry(entry: RunResult) -> AppResult<()> { let mut items = history()?; items.insert(0, entry); items.truncate(MAX_HISTORY); write_json(&history_path()?, &items) }
+fn history_path(demo: bool) -> AppResult<PathBuf> { Ok(app_data_dir()?.join(if demo { "demo-history.json" } else { "history.json" })) }
+fn history(demo: bool) -> AppResult<Vec<RunResult>> { read_json(&history_path(demo)?) }
+fn save_history_entry(entry: RunResult, demo: bool) -> AppResult<()> { let mut items = history(demo)?; items.insert(0, entry); items.truncate(MAX_HISTORY); write_json(&history_path(demo)?, &items) }
 
 #[tauri::command]
 fn execute_run(runbook_id: String, parameters: HashMap<String, Value>, confirmation: String) -> AppResult<RunResult> {
@@ -423,7 +494,7 @@ fn execute_run(runbook_id: String, parameters: HashMap<String, Value>, confirmat
     if confirmation != item.runbook.name { return Err(AppError::Message("The confirmation name did not match. Nothing was run.".into())); }
     let (plan, resolved) = prepare_loaded(&item, &parameters)?;
     let started_at = Utc::now(); let clock = Instant::now(); let mut combined = String::new(); let mut status = "success".to_string(); let mut last_code = Some(0);
-    for (index, step) in item.runbook.steps.iter().enumerate() {
+    for (index, _) in item.runbook.steps.iter().enumerate() {
         let prepared = &plan.steps[index];
         combined.push_str(&format!("$ {}\n", prepared.display));
         let mut command = Command::new(&prepared.program); command.args(&prepared.args);
@@ -432,21 +503,21 @@ fn execute_run(runbook_id: String, parameters: HashMap<String, Value>, confirmat
             if !canonical.is_dir() { return Err(AppError::Message(format!("Working directory is not a folder: {cwd}"))); }
             command.current_dir(canonical);
         }
-        for (key, value) in &step.env { command.env(key, substitute(value, &resolved)?); }
+        for (key, value) in &prepared.env { command.env(key, value); }
         let output = command.output().map_err(|error| AppError::Message(format!("Could not start {}: {error}", prepared.program)))?;
         combined.push_str(&String::from_utf8_lossy(&output.stdout)); combined.push_str(&String::from_utf8_lossy(&output.stderr));
         last_code = output.status.code();
         if !output.status.success() { status = "failed".into(); break; }
     }
     let result = RunResult { id: Uuid::new_v4().to_string(), runbook_id, name: item.runbook.name.clone(), started_at, duration_ms: clock.elapsed().as_millis(), status, exit_code: last_code, output: redact(combined, &item.runbook, &resolved), rollback: item.runbook.rollback.clone() };
-    save_history_entry(result.clone())?; Ok(result)
+    save_history_entry(result.clone(), is_sample_runbook(&item))?; Ok(result)
 }
 
 #[tauri::command]
-fn get_history() -> AppResult<Vec<RunResult>> { history() }
+fn get_history() -> AppResult<Vec<RunResult>> { history(current_state()?.demo_mode) }
 
 #[tauri::command]
-fn clear_history() -> AppResult<()> { write_json(&history_path()?, &Vec::<RunResult>::new()) }
+fn clear_history() -> AppResult<()> { write_json(&history_path(current_state()?.demo_mode)?, &Vec::<RunResult>::new()) }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -462,7 +533,7 @@ pub fn run() {
                 .build(app)?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_state, inspect_directory, trust_directory, remove_directory, prepare_run, execute_run, get_history, clear_history])
+        .invoke_handler(tauri::generate_handler![get_state, inspect_directory, trust_directory, remove_directory, load_sample_project, reset_sample_project, prepare_run, execute_run, get_history, clear_history])
         .run(tauri::generate_context!())
         .expect("error while running Hotkey Runbook");
 }
@@ -514,5 +585,36 @@ steps:
         let mut runbook: RunbookFile = serde_yaml::from_str(sample()).unwrap(); runbook.parameters[0].kind = ParameterType::Secret; runbook.redact_patterns = vec![r"token=\w+".into()];
         let values = HashMap::from([("cache".into(), "swordfish".into())]);
         assert_eq!(redact("swordfish token=abc".into(), &runbook, &values), "[REDACTED] [REDACTED]");
+    }
+
+    #[test]
+    fn rejects_a_symlinked_root_before_canonicalisation() {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::symlink;
+            let directory = tempfile::tempdir().unwrap();
+            let target = tempfile::tempdir().unwrap();
+            fs::write(target.path().join("sample.yaml"), sample()).unwrap();
+            let link = directory.path().join("linked-runbooks");
+            symlink(target.path(), &link).unwrap();
+            let error = inspect_path(&link.display().to_string()).unwrap_err().to_string();
+            assert_eq!(error, "Symlinked runbook folders are not accepted.");
+        }
+    }
+
+    #[test]
+    fn prepares_and_masks_environment_values_for_exact_review() {
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("environment.yaml");
+        let yaml = sample().replace("args: [\"cache=%s\\\\n\", \"{{cache}}\"]", "args: [\"cache=%s\\\\n\", \"{{cache}}\"]\n    env:\n      SAMPLE_TOKEN: \"{{cache}}\"");
+        fs::write(&file, yaml).unwrap();
+        let files = yaml_files(directory.path()).unwrap();
+        let mut books = load_files(directory.path(), &files).unwrap();
+        books[0].runbook.parameters[0].kind = ParameterType::Secret;
+        let values = HashMap::from([("cache".into(), Value::String("swordfish".into()))]);
+        let (mut plan, resolved) = prepare_loaded(&books[0], &values).unwrap();
+        assert_eq!(plan.steps[0].env.get("SAMPLE_TOKEN"), Some(&"swordfish".to_string()));
+        mask_plan_secrets(&mut plan, &books[0].runbook, &resolved);
+        assert_eq!(plan.steps[0].env.get("SAMPLE_TOKEN"), Some(&"[SECRET]".to_string()));
     }
 }

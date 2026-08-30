@@ -1,6 +1,6 @@
 # Hotkey Runbook
 
-Hotkey Runbook is a keyboard-first desktop utility for operators and developers who repeat local maintenance procedures. It reads reviewed YAML runbooks from folders you choose, validates typed parameters, shows the exact executable and argument vector, asks for explicit consent, runs locally, and keeps a redacted local history with the rollback note attached.
+Hotkey Runbook is a keyboard-first desktop utility for operators and developers who repeat local maintenance procedures. It reads reviewed YAML runbooks from folders you choose, validates typed parameters, shows the exact executable, arguments, working folder, and environment, asks for explicit consent, runs locally, and keeps a redacted local history with the rollback note attached.
 
 It is intentionally not remote orchestration, a secret vault, or a shell-script builder. There is no account, telemetry, or cloud sync.
 
@@ -10,7 +10,7 @@ Live site: <https://hotkey-runbook.sociobot.in>
 
 - A folder must be owned by the current Unix user (where the platform exposes ownership), must not be world-writable, and cannot contain symlinks.
 - Adding a folder signs its canonical path and SHA-256 content digest with a random device-local HMAC key. Any YAML edit invalidates trust until the folder is reviewed and signed again.
-- Each step names a fixed `program` plus an `args` array. Programs cannot be parameterized. The app never passes a generated string to a shell.
+- Each step names a fixed `program` plus `args` and optional `env` maps. Programs cannot be parameterized. The review shows resolved arguments, environment values, and the working folder before consent.
 - Parameters support `text`, `integer`, `choice`, `boolean`, `path`, and `secret`, plus author-supplied regular-expression validation.
 - Secret values are masked in review and redacted before output enters history. Authors can add `redactPatterns` for application-specific values.
 - Execution requires reviewing the resolved command and typing the runbook name exactly. A rollback note stays visible before and after the run.
@@ -62,11 +62,19 @@ npm run build:site  # exact static deploy command -> dist/site
 npm run tauri build # native bundle for the current OS
 ```
 
+Some CI containers set `CI=1`, which Tauri interprets as an invalid Boolean while bundling. Use `CI=false npm run tauri build` in that environment.
+
+## Try the sample project
+
+Open [the browser demo](https://hotkey-runbook.sociobot.in/demo/) or select **Try it with sample data** on the landing page. It contains one safe deployment-check sample, displays the complete review including a masked environment value, and stores only `demo:hotkey-runbook:history` in the current browser tab. **Reset demo** removes it.
+
+The installed app also provides **Load sample project** in its first empty state. It uses a separate `demo-sample-project` directory under Hotkey Runbook’s app data and never adds the sample to your selected folders. See [.factory/demo.md](.factory/demo.md) and [.factory/claims.json](.factory/claims.json) for the verification contract.
+
 The static deployment root is `dist/site`; `index.html` is written directly there. No third-party scripts, fonts, or analytics are loaded at runtime.
 
 ## Install and releases
 
-Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS` and `latest.json`. The landing page detects the visitor's OS and resolves the matching URL from that manifest.
+Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS` and `latest.json`. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
 
 One-line installers verify SHA-256 before installing:
 

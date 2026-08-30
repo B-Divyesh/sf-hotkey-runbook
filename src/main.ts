@@ -6,7 +6,7 @@ import { clearLicense, saveAndVerifyLicense, verifyLicense, type LicenseState } 
 import type { AppState, DirectoryInspection, PreparedRun, RunResult, RunbookSummary } from "./types";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
-let state: AppState = { runbooks: [], directories: [], errors: [] };
+let state: AppState = { runbooks: [], directories: [], errors: [], demoMode: false };
 let selectedId = "";
 let query = "";
 let historyItems: RunResult[] = [];
@@ -23,6 +23,7 @@ function shell(): void {
       <button class="brand" data-action="home" aria-label="Show runbooks"><span class="brand-mark" aria-hidden="true">⌁</span><span><strong>Hotkey Runbook</strong><small>Local specimen index</small></span></button>
       <div class="header-actions"><span class="local-badge">● Local only</span><button class="icon-button" data-action="theme" aria-label="Toggle color theme">◐</button></div>
     </header>
+    ${state.demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><span><strong>Demo</strong> — sample data, nothing is saved to your real runbooks.</span><span><button class="text-button" data-action="reset-demo">Reset demo</button><button class="text-button" data-action="start-real">Start for real</button></span></aside>` : ""}
     <main id="main" class="app-shell">
       <nav class="rail" aria-label="Primary">
         <button class="rail-button" data-view="runbooks" aria-current="page"><span aria-hidden="true">⌘</span> Runbooks</button>
@@ -48,6 +49,8 @@ function bindShell(): void {
     const next = root.dataset.theme === "dark" ? "light" : "dark";
     root.dataset.theme = next; localStorage.setItem("hkr-theme", next);
   });
+  app.querySelector('[data-action="reset-demo"]')?.addEventListener("click", async () => { state = await bridge.resetSampleProject(); historyItems = await bridge.history(); render(); toast("Sample project reset."); });
+  app.querySelector('[data-action="start-real"]')?.addEventListener("click", async () => { state = await bridge.resetSampleProject(); historyItems = await bridge.history(); render(); toast("Sample project removed. Add a folder you reviewed."); });
 }
 
 function render(): void {
@@ -82,7 +85,7 @@ function renderRunbooks(): void {
 
 function emptyRunbooks(filtered: string): string {
   if (filtered) return `<div class="empty"><span aria-hidden="true">⌕</span><h2>No matching specimens</h2><p>Try a name, tag, or clear the filter.</p><button class="text-button" data-action="clear-search">Clear filter</button></div>`;
-  return `<div class="empty"><span class="botanical-mark" aria-hidden="true">⌁</span><h2>Your drawer is empty</h2><p>Add a folder containing reviewed <code>.yaml</code> runbooks. Hotkey Runbook signs its exact contents on this device and asks again after any change.</p><button class="button" data-action="add">Add runbook folder</button><a href="https://github.com/B-Divyesh/sf-hotkey-runbook/tree/main/examples" target="_blank" rel="noreferrer">See the YAML format</a></div>`;
+  return `<div class="empty"><span class="botanical-mark" aria-hidden="true">⌁</span><h2>Your drawer is empty</h2><p>Add a folder containing reviewed <code>.yaml</code> runbooks. Hotkey Runbook signs its exact contents on this device and asks again after any change.</p><div class="empty-actions"><button class="button primary" data-action="sample">Load sample project</button><button class="button" data-action="add">Add runbook folder</button></div><p class="muted">The sample is separate from your folders and can be reset at any time.</p><a href="https://github.com/B-Divyesh/sf-hotkey-runbook/tree/main/examples" target="_blank" rel="noreferrer">See the YAML format</a></div>`;
 }
 
 function detailTemplate(runbook: RunbookSummary): string {
@@ -114,6 +117,7 @@ function bindRunbooks(filtered: RunbookSummary[], selected?: RunbookSummary): vo
   const search = app.querySelector<HTMLInputElement>("#runbook-search");
   search?.addEventListener("input", () => { query = search.value; renderRunbooks(); app.querySelector<HTMLInputElement>("#runbook-search")?.focus(); });
   app.querySelectorAll<HTMLButtonElement>('[data-action="add"]').forEach((button) => button.addEventListener("click", addDirectory));
+  app.querySelector('[data-action="sample"]')?.addEventListener("click", loadSampleProject);
   app.querySelector('[data-action="clear-search"]')?.addEventListener("click", () => { query = ""; renderRunbooks(); });
   app.querySelectorAll<HTMLButtonElement>(".runbook-row").forEach((button) => button.addEventListener("click", () => { selectedId = button.dataset.id!; renderRunbooks(); }));
   app.querySelector<HTMLFormElement>("#run-form")?.addEventListener("submit", (event) => { event.preventDefault(); if (selected) prepare(selected); });
@@ -123,6 +127,11 @@ function bindRunbooks(filtered: RunbookSummary[], selected?: RunbookSummary): vo
     if (event.key === "Enter") app.querySelector<HTMLInputElement>("#run-form input, #run-form select")?.focus();
     else { selectedId = filtered[(index + (event.key === "ArrowDown" ? 1 : -1) + filtered.length) % filtered.length].id; renderRunbooks(); app.querySelector<HTMLInputElement>("#runbook-search")?.focus(); }
   });
+}
+
+async function loadSampleProject(): Promise<void> {
+  if (!bridge.available) return toast("Install the desktop app to load its bundled sample project.", true);
+  try { state = await bridge.loadSampleProject(); historyItems = await bridge.history(); query = ""; selectedId = ""; render(); toast("Sample project loaded. Nothing was added to your folders."); } catch (error) { toast(String(error), true); }
 }
 
 async function addDirectory(): Promise<void> {
@@ -162,7 +171,7 @@ async function prepare(runbook: RunbookSummary): Promise<void> {
 
 function showReviewDialog(runbook: RunbookSummary, values: Record<string, unknown>, plan: PreparedRun): void {
   const dialog = app.querySelector<HTMLDivElement>("#dialog-root")!;
-  dialog.innerHTML = `<div class="scrim"><section class="dialog review" role="dialog" aria-modal="true" aria-labelledby="review-title"><button class="dialog-close" data-close aria-label="Close">×</button><p class="eyebrow">Final consent · ${esc(riskLabel(plan.risk))}</p><h2 id="review-title">Review “${esc(plan.name)}”</h2><p>These exact processes will run locally. No shell is involved.</p><ol class="command-list">${plan.steps.map((step) => `<li><span>${esc(step.program)}</span> ${step.args.map((arg) => `<code>${esc(arg)}</code>`).join(" ")}${step.cwd ? `<small>in ${esc(step.cwd)}</small>` : ""}</li>`).join("")}</ol><aside class="rollback"><span aria-hidden="true">↶</span><div><strong>If you need to roll back</strong><p>${esc(plan.rollback)}</p></div></aside><label class="field"><span class="field-label"><span>Type the runbook name to confirm</span></span><input id="confirm-name" autocomplete="off" spellcheck="false"><small>Enter ${esc(plan.name)} exactly.</small></label><div class="dialog-actions"><button class="button ghost" data-close>Go back</button><button class="button danger" id="execute-button" disabled>Run ${esc(plan.name)}</button></div></section></div>`;
+  dialog.innerHTML = `<div class="scrim"><section class="dialog review" role="dialog" aria-modal="true" aria-labelledby="review-title"><button class="dialog-close" data-close aria-label="Close">×</button><p class="eyebrow">Final consent · ${esc(riskLabel(plan.risk))}</p><h2 id="review-title">Review “${esc(plan.name)}”</h2><p>These exact processes will run locally. No shell is involved.</p><ol class="command-list">${plan.steps.map((step) => `<li><span>${esc(step.program)}</span> ${step.args.map((arg) => `<code>${esc(arg)}</code>`).join(" ")}${Object.keys(step.env).length ? `<small>environment: ${Object.entries(step.env).map(([key, value]) => `<code>${esc(key)}=${esc(value)}</code>`).join(" ")}</small>` : ""}${step.cwd ? `<small>in ${esc(step.cwd)}</small>` : ""}</li>`).join("")}</ol><aside class="rollback"><span aria-hidden="true">↶</span><div><strong>If you need to roll back</strong><p>${esc(plan.rollback)}</p></div></aside><label class="field"><span class="field-label"><span>Type the runbook name to confirm</span></span><input id="confirm-name" autocomplete="off" spellcheck="false"><small>Enter ${esc(plan.name)} exactly.</small></label><div class="dialog-actions"><button class="button ghost" data-close>Go back</button><button class="button danger" id="execute-button" disabled>Run ${esc(plan.name)}</button></div></section></div>`;
   dialog.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", closeDialog));
   const input = dialog.querySelector<HTMLInputElement>("#confirm-name")!; const execute = dialog.querySelector<HTMLButtonElement>("#execute-button")!;
   input.addEventListener("input", () => execute.disabled = input.value !== runbook.name); input.focus();

@@ -4,7 +4,7 @@ import { basename, join, relative } from "node:path";
 
 const input = process.argv[2] || "artifacts";
 const output = process.argv[3] || "release-assets";
-const version = process.env.RELEASE_VERSION || "v0.1.0";
+const version = process.env.RELEASE_VERSION || "v0.1.1";
 const repository = process.env.GITHUB_REPOSITORY || "B-Divyesh/sf-hotkey-runbook";
 
 async function walk(directory) {

@@ -36,9 +36,10 @@ export interface AppState {
   runbooks: RunbookSummary[];
   directories: TrustedDirectory[];
   errors: string[];
+  demoMode: boolean;
 }
 
-export interface PreparedStep { program: string; args: string[]; cwd?: string; display: string; }
+export interface PreparedStep { program: string; args: string[]; cwd?: string; env: Record<string, string>; display: string; }
 export interface PreparedRun { runbookId: string; name: string; risk: string; rollback: string; steps: PreparedStep[]; }
 export interface RunResult { id: string; runbookId: string; name: string; startedAt: string; durationMs: number; status: "success" | "failed"; exitCode?: number; output: string; rollback: string; }
 export interface DirectoryInspection { path: string; digest: string; files: string[]; runbooks: RunbookSummary[]; warnings: string[]; }
@@ -49,6 +50,8 @@ export interface NativeBridge {
   inspectDirectory(path: string): Promise<DirectoryInspection>;
   trustDirectory(path: string, digest: string, acknowledged: boolean): Promise<AppState>;
   removeDirectory(path: string): Promise<AppState>;
+  loadSampleProject(): Promise<AppState>;
+  resetSampleProject(): Promise<AppState>;
   prepareRun(runbookId: string, parameters: Record<string, unknown>): Promise<PreparedRun>;
   executeRun(runbookId: string, parameters: Record<string, unknown>, confirmation: string): Promise<RunResult>;
   history(): Promise<RunResult[]>;

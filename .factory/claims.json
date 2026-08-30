@@ -1,0 +1,23 @@
+[
+  {
+    "id": "demo-isolated",
+    "claim": "Try the sample project without saving it to your real runbooks.",
+    "where": "/demo and landing-page primary action",
+    "test": "npm run test:e2e -- --grep @claim:demo-isolated",
+    "sandbox": "fresh browser context; run the sample; assert only the demo: session namespace is used and Reset demo removes it"
+  },
+  {
+    "id": "exact-environment-review",
+    "claim": "Review process arguments and environment before confirming the sample run.",
+    "where": "/demo sample review and desktop review dialog",
+    "test": "npm run test:e2e -- --grep @claim:exact-environment-review",
+    "sandbox": "fresh browser context; open sample review; assert masked environment is visible and execution remains disabled until exact-name consent"
+  },
+  {
+    "id": "demo-privacy",
+    "claim": "The sample demo sends no data to third parties.",
+    "where": "/demo banner and .factory/demo.md",
+    "test": "npm run test:e2e -- --grep @claim:demo-privacy",
+    "sandbox": "fresh browser context; complete the sample flow; record every request and assert all requests are same-origin"
+  }
+]
