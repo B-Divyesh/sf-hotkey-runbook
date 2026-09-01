@@ -1,66 +1,69 @@
-# Verification handoff — FAIL
+# Repair handoff — PASS
 
 ## Result
 
-Independent verification of candidate `0eb9c82eae6e80e0847d051818fca96afd14ab14` against <https://hotkey-runbook.sociobot.in> completed on 2026-09-01 UTC.
+Repaired verifier candidate `0eb9c82eae6e80e0847d051818fca96afd14ab14` from report commit `411d3ce582fa4c7b23d801ccde6c9e2ea4a10f68`.
 
-**FAIL — do not promote this candidate.**
+The repair source is commit `9fb451c` (`v0.1.7`), with release metadata refreshed from the published release. GitHub Release [v0.1.7](https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.7) was built from that tag on macOS arm64/x86_64, Windows x86_64, and Linux x86_64. The release workflow run is [33555813483](https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33555813483).
 
-The app, demo, accessibility, privacy behavior, builds, deployment identity, release assets, and request allowance checks passed. Three release blockers remain:
+## Repairs
 
-1. New customers cannot buy the advertised $29 one-time license. The live checkout endpoint returns HTTP 404 and the page has no buy action.
-2. The installed sample's review omits the actual working folder when `cwd` is absent, although the product and listed claim say the working folder is shown before consent. Execution inherits an undisclosed launch directory in that case.
-3. `.factory/claims.json` has no claim/test for the advertised keyboard-first desktop workflow or the stated one-line installer checksum behavior. The existing installer claim tests release manifest generation, not the installer scripts.
+1. **Effective working folder is now explicit and enforced.** During preparation, every native step resolves `cwd` once. An omitted `cwd` resolves to the canonical directory containing the YAML file. The final-consent review always renders that path, and the child `Command` always receives the same path with `current_dir`.
+2. **The unavailable shared checkout is honest.** New purchases remain visibly marked “temporarily unavailable” while the operator-gated shared checkout returns 404. There is no purchase link or dead buy action. Existing-license paste, local storage, and verification remain available.
+3. **Claims now cover the missing observable promises.** Added one-to-one tagged coverage for keyboard-first desktop control, the POSIX installer checksum path, and the PowerShell installer checksum path. The Windows workflow executes the shipped `install.ps1` against matching and tampered bytes before building its installer.
+4. **Windows checksum implementation is portable.** `install.ps1` now uses .NET `System.Security.Cryptography.SHA256`, rather than an unavailable `Get-FileHash` command, and stops before `msiexec` on mismatch.
 
-Full evidence and severity details are in `.factory/verification-3.md`. No product code or external product configuration was modified.
+## Verification
 
-## Verification summary
+Fresh local verification:
 
-- All 8 exact `.factory/claims.json` commands passed after `npm ci` and documented Tauri host prerequisites.
-- Cold first-read passed on desktop and 390px mobile, including the one-click sample action.
-- `npm test`: 15 Vitest + 6 Rust tests passed.
-- `npm run lint`: TypeScript, rustfmt, and strict Clippy passed.
-- `npm run test:e2e`: 18/18 local tests passed.
-- Live Playwright suite: 18/18 tests passed.
-- `npm run build`: `dist/app` and `dist/site` produced within bundle budgets.
-- `CI=false npm run tauri build -- --bundles deb,appimage`: passed.
-- Native fresh-profile flow passed sample load, validation/recovery, consent, execution, redaction, reset, exit, real-folder signing, and restart persistence.
-- Axe: zero serious/critical findings in checked landing/demo states.
-- Lighthouse mobile: 94 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.2 s; CLS 0.005.
-- Live response/request checks: no console/page/request errors; expected origins only; security headers present; immutable hashed-asset caching; designed 404 works.
-- Fresh production build: 31/31 deployable files byte-identical to live.
-- Release v0.1.3: all six native package names match `SHA256SUMS`; downloaded AppImage matched SHA-256 `d03d92b1bbfee1719dbacbc290f4115221488ab6365d4a89a9fc320f5f0ecfe9`.
-- License verification allowance: requests 1–30 returned normal verdicts; request 31 returned 429 with `Retry-After: 4`.
-- Checkout: HTTP 404 with no redirect.
+```sh
+npm ci                         # 0 audit vulnerabilities
+npm test                       # 18 Vitest + 7 Rust tests passed
+npm run lint                   # TypeScript, rustfmt, strict Clippy passed
+npm run test:e2e               # 18/18 Chromium tests passed
+npm run build                  # dist/app and dist/site produced
+npm audit --audit-level=high   # 0 vulnerabilities
+```
+
+- Exact claim commands in `.factory/claims.json` passed. Every `@claim:<id>` appears in exactly one test file.
+- `@claim:exact-environment-review` proves omitted `cwd` canonicalizes to the YAML parent and is supplied to `Command::current_dir`.
+- `@claim:keyboard-first-desktop` proves Ctrl/Command+K, wrapped arrow selection, Enter, and Ctrl/Command+Enter operation.
+- `@claim:installer-sh-checksum` runs the shipped shell installer with matching and mismatched bytes; mismatch leaves no executable on PATH.
+- `@claim:installer-ps1-checksum` ran successfully in the v0.1.7 Windows release job, exercising matching and tampered MSI fixtures before the Tauri build.
+- Fresh native Xvfb smoke test loaded the bundled sample, showed its resolved `demo-sample-project` folder in final review, confirmed with the keyboard, and completed with exit code 0.
+- `/opt/fleet/lib/verify-url.sh` against a rebuilt local site returned HTTP 200 with title, `lang`, one h1, main landmark, image alt text, and no browser console errors. Playwright axe checks reported no serious or critical issues on landing and demo at desktop and 390 px mobile widths.
+- Local Lighthouse: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.73 s, CLS 0.0047, total transferred bytes 161,056.
+
+## Release and deployment evidence
+
+- v0.1.7 release assets include both macOS DMGs, Windows MSI/EXE, Linux AppImage/DEB, `SHA256SUMS`, and `latest.json`.
+- Downloaded `Hotkey-Runbook_0.1.7_linux-x86_64.AppImage` SHA-256 was `0f7c44ed085178065effa4ff0cdd71a975d83d64d87510f363ac50fe4d5915ac`, exactly matching the published checksum.
+- `public/latest.json`, the Homebrew cask, Scoop manifest, and winget manifest are pinned to that release’s generated checksums. `@claim:installer-integrity` passes after the refresh.
+- The static deployment input remains `dist/site`; pushes to `main` run `.github/workflows/site.yml`. It refreshes the release manifest before building and uploads the deployable static artifact. No infrastructure, DNS, billing, or non-product service was touched.
+
+## Privacy, offline, and update posture
+
+- Local-first desktop history and trust state are unchanged. No analytics, third-party scripts, or remote fonts are added.
+- The browser demo remains isolated in `sessionStorage` under `demo:hotkey-runbook:history`; privacy tests assert same-origin demo traffic.
+- This is not a PWA and makes no offline-after-reload claim. The desktop app has no updater, so no updater manifest or update polling is shipped.
+
+## Known gaps / operator action
+
+- New purchases intentionally stay unavailable until the factory enables the shared checkout endpoint; do not add a buy link until it redirects to hosted checkout.
+- Packages are unsigned. To sign releases, an operator must provide `APPLE_CERTIFICATE` and `WINDOWS_CERT_PFX` to the release workflow. The current release deliberately documents unsigned platform behavior.
+- Long-running runbooks still have no cancellation control or configurable timeout; this is an existing non-blocking improvement, not part of this repair.
 
 ## Reproduce
 
 ```sh
-sudo apt-get update
 sudo apt-get install -y file libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 npm ci
 npm test
 npm run lint
 npm run test:e2e
-PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
 npm run build
 CI=false npm run tauri build -- --bundles deb,appimage
 ```
 
-Claim commands are authoritative in `.factory/claims.json`. The static output is `dist/site`; the sample is <https://hotkey-runbook.sociobot.in/demo/>.
-
-## Evidence
-
-- `.factory/verification-3.md`
-- `.factory/verification-3-lighthouse.json`
-- `.factory/verification-3-verify-url/`
-- `.factory/verification-3-live-mobile.png`
-- `.factory/verification-3-live-demo-mobile.png`
-- `.factory/verification-3-native-*.png`
-
-## Next steps
-
-1. Register/enable the `hotkey-runbook` checkout, enable the product buy link only after it returns a hosted checkout redirect, and confirm purchase/return/restore with the product's test registration.
-2. Resolve and always display the effective native working directory before consent, including when YAML omits `cwd`; make the claim test exercise the installed/native preparation path rather than a hard-coded browser-only line.
-3. Add one-to-one tagged claim tests for keyboard operation and both public installer scripts, or remove/narrow those visitor-facing claims.
-4. Consider cancellation and a configurable timeout for long-running native processes.
+Open `/demo/` for the isolated browser sample. In the installed desktop app, select **Load sample project** from the empty state.
