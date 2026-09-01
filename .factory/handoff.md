@@ -40,7 +40,8 @@ npm audit --audit-level=high   # 0 vulnerabilities
 - v0.1.7 release assets include both macOS DMGs, Windows MSI/EXE, Linux AppImage/DEB, `SHA256SUMS`, and `latest.json`.
 - Downloaded `Hotkey-Runbook_0.1.7_linux-x86_64.AppImage` SHA-256 was `0f7c44ed085178065effa4ff0cdd71a975d83d64d87510f363ac50fe4d5915ac`, exactly matching the published checksum.
 - `public/latest.json`, the Homebrew cask, Scoop manifest, and winget manifest are pinned to that release’s generated checksums. `@claim:installer-integrity` passes after the refresh.
-- The static deployment input remains `dist/site`; pushes to `main` run `.github/workflows/site.yml`. It refreshes the release manifest before building and uploads the deployable static artifact. No infrastructure, DNS, billing, or non-product service was touched.
+- Static workflow [33557383687](https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33557383687) completed successfully for final commit `02f59ad`. It refreshed the release manifest, built `dist/site`, and uploaded the deployable artifact. No infrastructure, DNS, billing, or non-product service was touched.
+- At 2026-09-01 20:48 UTC, `https://hotkey-runbook.sociobot.in/` still served `Build 0.1.3` with an August 30 Last-Modified value. This repository has no provider deployment action; promotion of the successful `site-dist` artifact is a factory deployment operation outside this repo. Do not treat the stale public origin as v0.1.7 until that artifact is promoted.
 
 ## Privacy, offline, and update posture
 
