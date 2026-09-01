@@ -77,7 +77,7 @@ try { & $Installer; throw 'The tampered installer was accepted.' } catch {
 }
 if ($global:HKRStarted) { throw 'The tampered installer started.' }
 `);
-      execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", harness, "-Installer", join(process.cwd(), "public/install.ps1"), "-Root", root, "-ExpectedHash", checksum("verified MSI bytes")]);
+      execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", harness, "-Installer", join(process.cwd(), "public/install.ps1"), "-Root", root, "-ExpectedHash", checksum("verified MSI bytes")], { timeout: 20_000 });
     }
-  });
+  }, 30_000);
 });
