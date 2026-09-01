@@ -1,6 +1,6 @@
 # Copy audit — 2026-09-01 repair
 
-The landing page was read in source order, including runtime status and checkout states. Button labels and headings are listed separately because they are not sentences. Word counts treat hyphenated terms and URLs as one word.
+The landing page was read in source order, including runtime status and purchase states. Button labels and headings are listed separately because they are not sentences. Word counts treat hyphenated terms and URLs as one word.
 
 | Sentence | Words | Result |
 | --- | ---: | --- |

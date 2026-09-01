@@ -4,7 +4,7 @@
 
 Repaired the release blocker from verifier report commit `71bf3aafad082512624733424eb947b27449e03b` for candidate `f75b74f6090019fdfd76b846740e176a9e102376`.
 
-The public Sociobot checkout was reproduced first on 2026-09-01 UTC. `GET https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout` returned HTTP 404 with `{"error":"enabled factory product","status":404}`. No Sociobot resource, setting, or secret was read or changed.
+The public Sociobot checkout was reproduced first on 2026-09-01 UTC. `GET https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout` returned HTTP 404 with `{"error":"enabled factory product","status":404}`. This public check did not read or change billing configuration, secrets, or unrelated Sociobot resources.
 
 Hotkey Runbook now states exactly: “The license price is $29 once. New purchases are unavailable.” The landing site and installed app contain no checkout link, buy action, or build-time switch that can expose the unavailable route. Existing-license paste and verification remain available.
 
@@ -48,7 +48,29 @@ Results:
 
 ## Release and deployment
 
-Release and live-deployment evidence will be added after the 0.1.8 tag is built and the static artifact is promoted.
+- Repair commit: `e3ac8f7790624805125e41580c188039ec097455`; annotated tag `v0.1.8` resolves to that exact commit.
+- GitHub Actions release run [33563691723](https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33563691723) passed its test job and all macOS arm64, macOS x86_64, Windows x86_64, and Linux x86_64 build jobs.
+- Public release: [v0.1.8](https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.8), published 2026-09-01T22:07:14Z. It contains both macOS DMGs, Windows MSI/EXE, Linux AppImage/DEB, `SHA256SUMS`, and `latest.json`.
+- The downloaded Linux AppImage matched the published checksum: `77d35d83e8860e5fc21c59d7ab5ce069c223ccb41295a05c416500af7c13d303`.
+- `public/latest.json`, the Homebrew cask, Scoop manifest, and winget manifest are pinned to the v0.1.8 release bytes. The installer-integrity claim passes after the refresh.
+- `/opt/fleet/lib/deploy-static.sh hotkey-runbook dist/site` deployed to the existing authorized `sf-hotkey-runbook` Static Web App in `centralus`; deployment ID `c725ec1f-a765-46bf-bc77-cb7f7d21f330` succeeded. The custom domain remained `Ready`.
+
+Live verification at `https://hotkey-runbook.sociobot.in`:
+
+- The site reports Build 0.1.8 and `/latest.json` reports v0.1.8.
+- Live `index.html` SHA-256 `54a779ba15cc3265daa0640aa99f5d01f15aec024024c26102d45ba2961767bb` exactly matches `dist/site/index.html`; live `latest.json` also matches the repository byte for byte.
+- `/opt/fleet/lib/verify-url.sh` returned HTTP 200 with no console errors and passed title, language, landmark, heading, and image-alt checks. Evidence is in `.factory/repair-4-live/`.
+- All 18 Playwright tests passed against the public domain across desktop and 390 px mobile, including the isolated demo, keyboard/dialog behavior, axe, privacy, and exact purchase-availability claim.
+- `/`, `/demo/`, `/privacy/`, `/terms/`, `robots.txt`, and `sitemap.xml` return 200. An unknown route returns the designed 404 with HTTP 404.
+- HTML returns CSP with `frame-ancestors 'none'`, HSTS, `nosniff`, Referrer Policy, `X-Frame-Options: DENY`, and Permissions Policy. Hashed JavaScript returns `public, max-age=31536000, immutable`.
+- Live Lighthouse: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.20 s, CLS 0.0047, TBT 59 ms, 141,042 transferred bytes. Evidence: `.factory/repair-4-live-lighthouse.json`.
+- The public checkout still returns the reproduced HTTP 404, while the live page renders the exact unavailable sentence and exposes no purchase action.
+
+## Offline and update posture
+
+- This is a local desktop app, not a PWA. Runbooks, trust state, and history stay usable without a network; only explicit license verification needs the Sociobot API.
+- The browser sample needs its first page load and makes only same-origin requests during use. No offline-reload claim is made.
+- The desktop app has no updater and publishes no updater manifest. New versions are installed from checksum-pinned release assets.
 
 ## Known gaps and operator action
 

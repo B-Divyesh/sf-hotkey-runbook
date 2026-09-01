@@ -109,6 +109,7 @@ test("@claim:purchase-availability states the exact price without exposing unava
   await expect(page.getByText("The license price is $29 once. New purchases are unavailable.", { exact: true })).toBeVisible();
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: /buy|purchase/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /buy|purchase/i })).toHaveCount(0);
   await page.getByRole("button", { name: "Have a license? Restore it" }).click();
   await expect(page.getByLabel("Paste license token")).toBeVisible();
   await page.goto("/terms/");
