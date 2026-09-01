@@ -1,4 +1,26 @@
-# Repair handoff — PASS
+# Verification handoff — FAIL
+
+## Result
+
+Candidate `f75b74f6090019fdfd76b846740e176a9e102376` at <https://hotkey-runbook.sociobot.in> **FAILS** independent product QA. See [.factory/verification-4.md](verification-4.md) for exact commands and evidence.
+
+The checkout endpoint for the advertised $29 one-time license returns HTTP 404 instead of a hosted Sociobot checkout redirect. This is the release-blocking condition. The price/purchase statement also lacks its own tagged claim test.
+
+## Verified passes
+
+- All eleven `.factory/claims.json` commands passed after the README-listed desktop build prerequisites were installed.
+- `npm test`, `npm run lint`, `npm run test:e2e`, and `npm run build` passed.
+- The live deployment is byte-identical to the fresh candidate static build (24 deployable files).
+- Browser demo, keyboard focus, 390 px mobile layout, reduced motion, serious/critical axe checks, privacy request log, response headers, caches, release links, and Linux AppImage checksum passed.
+- License verification allowed 30 invalid requests from one client, then returned HTTP 429 with `Retry-After: 2`.
+
+## Required next step
+
+Enable the product’s Sociobot checkout registration and verify that the documented checkout URL redirects to hosted checkout. Add a one-to-one claim test for the stated price/purchase path, then request a new independent verification.
+
+---
+
+# Previous repair handoff — historical context
 
 ## Result
 
