@@ -69,7 +69,7 @@ Some CI containers set `CI=1`, which Tauri interprets as an invalid Boolean whil
 
 Open [the browser demo](https://hotkey-runbook.sociobot.in/demo/) or select **Try it with sample data** on the landing page. It contains one safe deployment-check sample, displays the complete review including a masked environment value, and stores only `demo:hotkey-runbook:history` in the current browser tab. **Reset demo** removes it.
 
-The installed app also provides **Load sample project** in its first empty state. It uses a separate `demo-sample-project` directory under Hotkey Runbook’s app data, runs the bundled sample there, and never adds the sample to your selected folders. See [.factory/demo.md](.factory/demo.md) and [.factory/claims.json](.factory/claims.json) for the verification contract.
+The installed app also provides **Load sample project** in its first empty state. Its sample uses separate `demo-sample-project`, `demo-trusted-directories.json`, and `demo-history.json` files. During demo mode, only those bundled-sample files are read. Real trusted folders and history are not read or changed. **Start for real** removes demo files before the app loads your folders. See [.factory/demo.md](.factory/demo.md) and [.factory/claims.json](.factory/claims.json) for the verification contract.
 
 The static deployment root is `dist/site`; `index.html` is written directly there. No third-party scripts, fonts, or analytics are loaded at runtime.
 

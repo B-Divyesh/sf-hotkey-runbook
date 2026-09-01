@@ -271,6 +271,60 @@ fn save_trust_records(records: &[TrustRecord]) -> AppResult<()> {
     write_json(&app_data_dir()?.join("trusted-directories.json"), &records)
 }
 
+/// Demo trust lives in its own store. While it is present, no user-selected
+/// trusted folder is read, listed, prepared, executed, or written.
+fn demo_trust_records() -> AppResult<Vec<TrustRecord>> {
+    read_json(&app_data_dir()?.join("demo-trusted-directories.json"))
+}
+fn save_demo_trust_records(records: &[TrustRecord]) -> AppResult<()> {
+    write_json(
+        &app_data_dir()?.join("demo-trusted-directories.json"),
+        &records,
+    )
+}
+
+fn demo_mode_active() -> AppResult<bool> {
+    if !demo_trust_records()?.is_empty() {
+        return Ok(true);
+    }
+    // v0.1.8 wrote the bundled sample into the real trust store. Move only
+    // that known app-owned path once, before entering demo mode, so an update
+    // cannot surface user runbooks under a demo banner.
+    let sample_path = sample_project_dir()?.display().to_string();
+    let mut real_records = trust_records()?;
+    let mut legacy_sample = Vec::new();
+    real_records.retain(|record| {
+        if record.path == sample_path {
+            legacy_sample.push(record.clone());
+            false
+        } else {
+            true
+        }
+    });
+    if legacy_sample.is_empty() {
+        return Ok(false);
+    }
+    save_trust_records(&real_records)?;
+    save_demo_trust_records(&legacy_sample)?;
+    Ok(true)
+}
+
+fn select_active_store<T>(
+    demo_mode: bool,
+    demo_store: impl FnOnce() -> AppResult<T>,
+    real_store: impl FnOnce() -> AppResult<T>,
+) -> AppResult<T> {
+    if demo_mode {
+        demo_store()
+    } else {
+        real_store()
+    }
+}
+
+fn active_trust_records(demo_mode: bool) -> AppResult<Vec<TrustRecord>> {
+    select_active_store(demo_mode, demo_trust_records, trust_records)
+}
+
 fn assert_owned(path: &Path) -> AppResult<Vec<String>> {
     let metadata = fs::symlink_metadata(path)?;
     if !metadata.is_dir() {
@@ -528,11 +582,13 @@ fn inspect_path(path: &str) -> AppResult<(DirectoryInspection, Vec<LoadedRunbook
     Ok((inspection, loaded))
 }
 
-fn verified_runbooks() -> AppResult<(Vec<LoadedRunbook>, Vec<TrustedDirectory>, Vec<String>)> {
+fn verified_runbooks_from(
+    records: Vec<TrustRecord>,
+) -> AppResult<(Vec<LoadedRunbook>, Vec<TrustedDirectory>, Vec<String>)> {
     let mut loaded = Vec::new();
     let mut directories = Vec::new();
     let mut errors = Vec::new();
-    for record in trust_records()? {
+    for record in records {
         let mut valid = false;
         let mut error = None;
         match verify_record(&record) {
@@ -558,15 +614,16 @@ fn verified_runbooks() -> AppResult<(Vec<LoadedRunbook>, Vec<TrustedDirectory>, 
     Ok((loaded, directories, errors))
 }
 
+fn verified_runbooks_for_mode(
+    demo_mode: bool,
+) -> AppResult<(Vec<LoadedRunbook>, Vec<TrustedDirectory>, Vec<String>)> {
+    verified_runbooks_from(active_trust_records(demo_mode)?)
+}
+
 fn current_state() -> AppResult<AppState> {
-    let (mut loaded, directories, errors) = verified_runbooks()?;
+    let demo_mode = demo_mode_active()?;
+    let (mut loaded, directories, errors) = verified_runbooks_for_mode(demo_mode)?;
     loaded.sort_by_key(|item| item.runbook.name.to_lowercase());
-    let demo_mode = directories.iter().any(|directory| {
-        directory.path
-            == sample_project_dir()
-                .map(|path| path.display().to_string())
-                .unwrap_or_default()
-    });
     Ok(AppState {
         runbooks: loaded.iter().map(summary).collect(),
         directories,
@@ -587,6 +644,11 @@ fn inspect_directory(path: String) -> AppResult<DirectoryInspection> {
 
 #[tauri::command]
 fn trust_directory(path: String, digest: String, acknowledged: bool) -> AppResult<AppState> {
+    if demo_mode_active()? {
+        return Err(AppError::Message(
+            "Finish the sample first. Demo mode cannot change your trusted folders.".into(),
+        ));
+    }
     if !acknowledged {
         return Err(AppError::Message(
             "Confirm that you own or reviewed the folder before signing it.".into(),
@@ -612,6 +674,11 @@ fn trust_directory(path: String, digest: String, acknowledged: bool) -> AppResul
 
 #[tauri::command]
 fn remove_directory(path: String) -> AppResult<AppState> {
+    if demo_mode_active()? {
+        return Err(AppError::Message(
+            "Finish the sample first. Demo mode cannot change your trusted folders.".into(),
+        ));
+    }
     let mut records = trust_records()?;
     records.retain(|record| record.path != path);
     save_trust_records(&records)?;
@@ -663,7 +730,7 @@ fn load_sample_project() -> AppResult<AppState> {
         SAMPLE_RUNBOOK,
     )?;
     let (inspection, _) = inspect_path(&directory.display().to_string())?;
-    let mut records = trust_records()?;
+    let mut records = demo_trust_records()?;
     records.retain(|record| record.path != inspection.path);
     records.push(TrustRecord {
         path: inspection.path.clone(),
@@ -671,7 +738,7 @@ fn load_sample_project() -> AppResult<AppState> {
         signed_at: Utc::now(),
         signature: sign(&inspection.path, &inspection.digest)?,
     });
-    save_trust_records(&records)?;
+    save_demo_trust_records(&records)?;
     current_state()
 }
 
@@ -679,9 +746,9 @@ fn load_sample_project() -> AppResult<AppState> {
 fn reset_sample_project() -> AppResult<AppState> {
     let directory = sample_project_dir()?;
     let path = directory.display().to_string();
-    let mut records = trust_records()?;
+    let mut records = demo_trust_records()?;
     records.retain(|record| record.path != path);
-    save_trust_records(&records)?;
+    save_demo_trust_records(&records)?;
     if directory.exists() {
         fs::remove_dir_all(&directory)?;
     }
@@ -791,7 +858,7 @@ fn substitute(template: &str, values: &HashMap<String, String>) -> AppResult<Str
 }
 
 fn locate(key: &str) -> AppResult<LoadedRunbook> {
-    let (books, _, _) = verified_runbooks()?;
+    let (books, _, _) = verified_runbooks_for_mode(demo_mode_active()?)?;
     books
         .into_iter()
         .find(|book| book.key == key)
@@ -966,26 +1033,25 @@ fn history_path(demo: bool) -> AppResult<PathBuf> {
 fn history(demo: bool) -> AppResult<Vec<RunResult>> {
     read_json(&history_path(demo)?)
 }
-fn save_history_entry(entry: RunResult, demo: bool) -> AppResult<()> {
-    let mut items = history(demo)?;
+fn save_history_entry_at(path: &Path, entry: RunResult) -> AppResult<()> {
+    let mut items: Vec<RunResult> = read_json(path)?;
     items.insert(0, entry);
     items.truncate(MAX_HISTORY);
-    write_json(&history_path(demo)?, &items)
+    write_json(path, &items)
 }
 
-#[tauri::command]
-fn execute_run(
-    runbook_id: String,
+fn execute_loaded_run(
+    item: &LoadedRunbook,
     parameters: HashMap<String, Value>,
     confirmation: String,
+    history_file: &Path,
 ) -> AppResult<RunResult> {
-    let item = locate(&runbook_id)?;
     if confirmation != item.runbook.name {
         return Err(AppError::Message(
             "The confirmation name did not match. Nothing was run.".into(),
         ));
     }
-    let (plan, resolved) = prepare_loaded(&item, &parameters)?;
+    let (plan, resolved) = prepare_loaded(item, &parameters)?;
     let started_at = Utc::now();
     let clock = Instant::now();
     let mut combined = String::new();
@@ -994,9 +1060,20 @@ fn execute_run(
     for (index, _) in item.runbook.steps.iter().enumerate() {
         let prepared = &plan.steps[index];
         combined.push_str(&format!("$ {}\n", prepared.display));
-        let output = configured_command(prepared).output().map_err(|error| {
-            AppError::Message(format!("Could not start {}: {error}", prepared.program))
-        })?;
+        let output = match configured_command(prepared).output() {
+            Ok(output) => output,
+            Err(error) => {
+                status = "failed".into();
+                last_code = None;
+                combined.push_str(&format!(
+                    "Could not start {}: {error}\n[{} of {} steps completed before this failure.]\n",
+                    prepared.program,
+                    index,
+                    plan.steps.len()
+                ));
+                break;
+            }
+        };
         combined.push_str(&String::from_utf8_lossy(&output.stdout));
         combined.push_str(&String::from_utf8_lossy(&output.stderr));
         last_code = output.status.code();
@@ -1007,7 +1084,7 @@ fn execute_run(
     }
     let result = RunResult {
         id: Uuid::new_v4().to_string(),
-        runbook_id,
+        runbook_id: item.key.clone(),
         name: item.runbook.name.clone(),
         started_at,
         duration_ms: clock.elapsed().as_millis(),
@@ -1016,19 +1093,30 @@ fn execute_run(
         output: redact(combined, &item.runbook, &resolved),
         rollback: item.runbook.rollback.clone(),
     };
-    save_history_entry(result.clone(), is_sample_runbook(&item))?;
+    save_history_entry_at(history_file, result.clone())?;
     Ok(result)
 }
 
 #[tauri::command]
+fn execute_run(
+    runbook_id: String,
+    parameters: HashMap<String, Value>,
+    confirmation: String,
+) -> AppResult<RunResult> {
+    let item = locate(&runbook_id)?;
+    let history_file = history_path(is_sample_runbook(&item))?;
+    execute_loaded_run(&item, parameters, confirmation, &history_file)
+}
+
+#[tauri::command]
 fn get_history() -> AppResult<Vec<RunResult>> {
-    history(current_state()?.demo_mode)
+    history(demo_mode_active()?)
 }
 
 #[tauri::command]
 fn clear_history() -> AppResult<()> {
     write_json(
-        &history_path(current_state()?.demo_mode)?,
+        &history_path(demo_mode_active()?)?,
         &Vec::<RunResult>::new(),
     )
 }
@@ -1189,6 +1277,159 @@ steps:
             plan.steps[0].env.get("SAMPLE_TOKEN"),
             Some(&"[SECRET]".to_string())
         );
+    }
+
+    #[test]
+    fn regression_partial_spawn_failure_keeps_a_redacted_history_and_rollback_record() {
+        let directory = tempfile::tempdir().unwrap();
+        let marker = directory.path().join("first-step-ran");
+        let history_file = directory.path().join("history.json");
+        let missing = directory.path().join("missing-executable");
+        let yaml = format!(
+            r#"version: 1
+id: partial-spawn
+name: Partial spawn
+description: Reproduces a later executable start failure.
+risk: medium
+rollback: Remove the marker created by the first step.
+redactPatterns: ["first-step-ran"]
+parameters:
+  - name: token
+    label: Test token
+    type: secret
+    required: true
+steps:
+  - program: /usr/bin/touch
+    args: ["{}"]
+    env:
+      HOTKEY_TEST_TOKEN: "{{{{token}}}}"
+  - program: "{}"
+    args: []
+"#,
+            marker.display(),
+            missing.display()
+        );
+        let runbook_file = directory.path().join("partial.yaml");
+        fs::write(&runbook_file, yaml).unwrap();
+        let files = yaml_files(directory.path()).unwrap();
+        let books = load_files(directory.path(), &files).unwrap();
+        let parameters = HashMap::from([("token".into(), Value::String("swordfish".into()))]);
+
+        let result =
+            execute_loaded_run(&books[0], parameters, "Partial spawn".into(), &history_file)
+                .expect("a failed later spawn must still return a durable result");
+
+        assert!(marker.exists(), "the first command must have run");
+        assert_eq!(result.status, "failed");
+        assert!(result.output.contains("Could not start"));
+        assert!(!result.output.contains("swordfish"));
+        assert!(!result.output.contains("first-step-ran"));
+        assert!(result.output.contains("[REDACTED]"));
+        assert_eq!(
+            result.rollback,
+            "Remove the marker created by the first step."
+        );
+        let persisted: Vec<RunResult> = read_json(&history_file).unwrap();
+        assert_eq!(persisted.len(), 1);
+        assert_eq!(persisted[0].status, "failed");
+        assert_eq!(persisted[0].rollback, result.rollback);
+        assert!(!persisted[0].output.contains("swordfish"));
+        assert!(!persisted[0].output.contains("first-step-ran"));
+    }
+
+    #[test]
+    fn regression_demo_mode_reads_only_the_demo_trust_store() {
+        use std::cell::Cell;
+
+        let demo_reads = Cell::new(0);
+        let real_reads = Cell::new(0);
+        let active = select_active_store(
+            true,
+            || {
+                demo_reads.set(demo_reads.get() + 1);
+                Ok("bundled sample")
+            },
+            || {
+                real_reads.set(real_reads.get() + 1);
+                Ok("real trusted runbook")
+            },
+        )
+        .unwrap();
+
+        assert_eq!(active, "bundled sample");
+        assert_eq!(demo_reads.get(), 1);
+        assert_eq!(
+            real_reads.get(),
+            0,
+            "demo mode must not read real trusted state"
+        );
+    }
+
+    #[test]
+    fn regression_demo_mode_hides_real_runbooks_and_real_history_until_exit() {
+        let data = tempfile::tempdir().unwrap();
+        let real_folder = tempfile::tempdir().unwrap();
+        let previous_data_home = std::env::var_os("XDG_DATA_HOME");
+        unsafe { std::env::set_var("XDG_DATA_HOME", data.path()) };
+
+        let real_yaml = r#"version: 1
+id: real-inspection
+name: Real inspection
+description: A user-reviewed runbook that must stay outside demo mode.
+risk: low
+rollback: No rollback is needed.
+steps:
+  - program: /usr/bin/printf
+    args: ["real\n"]
+"#;
+        fs::write(real_folder.path().join("real.yaml"), real_yaml).unwrap();
+        let inspection = inspect_path(&real_folder.path().display().to_string())
+            .unwrap()
+            .0;
+        let real_state = trust_directory(inspection.path, inspection.digest, true).unwrap();
+        assert_eq!(real_state.runbooks.len(), 1);
+        assert_eq!(real_state.runbooks[0].name, "Real inspection");
+        write_json(
+            &history_path(false).unwrap(),
+            &vec![RunResult {
+                id: "real-history".into(),
+                runbook_id: real_state.runbooks[0].id.clone(),
+                name: "Real inspection".into(),
+                started_at: Utc::now(),
+                duration_ms: 1,
+                status: "success".into(),
+                exit_code: Some(0),
+                output: "real history".into(),
+                rollback: "No rollback is needed.".into(),
+            }],
+        )
+        .unwrap();
+
+        let demo_state = load_sample_project().unwrap();
+        assert!(demo_state.demo_mode);
+        assert_eq!(demo_state.runbooks.len(), 1);
+        assert_eq!(demo_state.runbooks[0].name, "Inspect sample deployment");
+        assert!(
+            get_history().unwrap().is_empty(),
+            "demo must not read real history"
+        );
+        clear_history().unwrap();
+        assert_eq!(
+            history(false).unwrap().len(),
+            1,
+            "demo clear must not change real history"
+        );
+
+        let restored = reset_sample_project().unwrap();
+        assert!(!restored.demo_mode);
+        assert_eq!(restored.runbooks.len(), 1);
+        assert_eq!(restored.runbooks[0].name, "Real inspection");
+        assert_eq!(get_history().unwrap().len(), 1);
+
+        match previous_data_home {
+            Some(value) => unsafe { std::env::set_var("XDG_DATA_HOME", value) },
+            None => unsafe { std::env::remove_var("XDG_DATA_HOME") },
+        }
     }
 
     #[test]

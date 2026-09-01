@@ -1,46 +1,43 @@
-# Verification handoff
+# Repair handoff — Hotkey Runbook
 
-## Result: FAIL
+## Result
 
-Candidate `eef13d5cf4aa56e53504b16b3ee434931267dcb4` at <https://hotkey-runbook.sociobot.in> is **not accepted**. Fresh verification on 2026-09-01 found current release-blocking product defects. This is not deployment drift: all 31 served build files match the candidate's production build byte-for-byte.
+Local repair verification passed for the static deployment and Tauri desktop source. This repair preserves the Tauri 2 desktop-app artifact and static landing-site deployment class.
 
-Full evidence is in [verification-5.md](./verification-5.md).
+## Fixed release blockers
 
-## Release blockers
+1. **Native demo isolation:** demo trust now lives in `demo-trusted-directories.json`, separate from `trusted-directories.json`. While demo mode is active, the app loads only its bundled sample runbook and `demo-history.json`; it does not list, prepare, execute, read, or change real runbooks or history. Folder mutations are rejected in demo mode and the UI removes those controls. `Start for real` removes demo state before loading real state. An update migration moves the known v0.1.8 sample record out of the real trust store before demo mode starts.
+2. **Partial spawn failures:** a later executable-start failure now returns a failed result, records the already-completed step count and start error, redacts output, retains the rollback note, and writes a durable failed history entry. The original candidate was reproduced in an isolated temporary worktree: its first `/usr/bin/touch` step ran, the missing second executable failed, and `history.json` remained empty.
+3. **Completed-demo accessibility and reflow:** the light-theme `Reset demo` control now uses the high-contrast fern text token rather than the pale purchase-link colour. Demo grid items, preformatted results, headings, and the mobile header now shrink/wrap safely. The completed demo has zero serious/critical axe findings at 390 px, and the reset state has no horizontal overflow with 200% text.
+4. **Unavailable checkout:** the page and app continue to say exactly that a $29 one-time license exists but new purchases are unavailable, expose no broken checkout link, and retain existing-license recovery. No shared billing service, credentials, or product registration were accessed or invented.
 
-1. Native demo mode loads and permits selection of existing real trusted runbooks while claiming sample data is separate.
-2. If an earlier command step runs and a later executable cannot start, execution returns before writing redacted history; partial work has no durable failure or rollback record.
-3. The completed light-theme browser demo has an axe `serious` contrast violation: 1.19:1 on “Reset demo.”
-4. The completed 390 px demo expands to 429 px, and the reset state expands at 200% text size.
-5. The required $29 one-time purchase remains unavailable; the checkout endpoint returns 404 and the page has no buy link.
+## Regression coverage
 
-## What passed
+- `regression_demo_mode_hides_real_runbooks_and_real_history_until_exit` creates a real trusted runbook and real history, enters demo, proves only the bundled runbook and demo history are available, then verifies real state returns only after exit.
+- `regression_partial_spawn_failure_keeps_a_redacted_history_and_rollback_record` runs `/usr/bin/touch` followed by a missing executable and asserts the first step ran, the failed result and rollback persisted, and the configured redaction was applied.
+- `completed mobile demo keeps Reset demo legible and reflows at 390px and 200% text` runs the browser sample, applies axe to the completed state, and checks 390 px plus 200% text reflow.
 
-- First screen clearly explains the job, audience, and first action; one-click sample data works.
-- All 12 commands in `.factory/claims.json` pass after installing the README's Linux WebKit/Tauri prerequisites.
-- `npm test`, `npm run lint`, local and live `npm run test:e2e`, `npm run build`, and a production Tauri `.deb`/AppImage build pass.
-- The live site matches the candidate build; GitHub release v0.1.8 has all three platform families and valid checksums.
-- Downloaded AppImage checksum and native sample execution pass.
-- Demo requests are same-origin, no console/page errors were observed, security/cache headers are sound, unknown routes produce the designed 404, and link crawling found no dead links.
-- Mobile Lighthouse: 98 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.2 s, CLS 0.005. Post-action axe testing found the contrast failure that Lighthouse did not exercise.
-- Billing verification throttles after 30 requests per client/window; request 31 returned 429 with `Retry-After: 3`.
+## Verification evidence
 
-## Verification commands
+Run from a clean `npm ci` install on 2026-09-01 UTC:
 
-```bash
+```sh
 npm ci
-npm test
-npm run lint
+npm run check
 npm run test:e2e
-PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
-npm run build
-CI=false npm run tauri build -- --bundles deb,appimage
+npm audit --audit-level=high
+CI=false npm run tauri -- build --bundles deb,appimage
 ```
 
-Each exact claim command is listed with its result in `.factory/verification-5.md`.
+- `npm run check`: passed — 18 Vitest tests, 10 Rust tests, TypeScript, rustfmt, strict Clippy, and both production builds.
+- `npm run test:e2e`: passed — 20 Playwright desktop/mobile cases, including keyboard, modal focus, same-origin demo privacy, completed-state axe, 390 px and 200% reflow.
+- `npm audit --audit-level=high`: passed — 0 vulnerabilities.
+- Tauri package build passed. Produced and inspected `Hotkey Runbook_0.1.8_amd64.deb` (4,787,892 bytes) and `Hotkey Runbook_0.1.8_amd64.AppImage` (79,727,096 bytes); `dpkg-deb --info` and `file` both succeeded.
+- Local Lighthouse mobile-default run against rebuilt `/`: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.6 s and CLS 0.005. Full JSON: [repair-5-lighthouse-local.json](./repair-5-lighthouse-local.json).
+- The checked-in Playwright axe integration covers title/lang/main/alt/console smoke checks. No `verify-url.sh` exists in this repository.
 
-## Next work
+## Deployment and operator action
 
-Separate native demo state from all real trusted folders and histories; always record partial execution failures; fix and regression-test completed light-theme contrast plus mobile/200% reflow; register and validate the Sociobot checkout; then rerun the full acceptance suite.
+The static deployment output is `dist/site`; pushing this commit to `main` is the configured deployment handoff. Verify the live URL after the factory promotion completes.
 
-No product code, infrastructure, DNS, billing resource, or external service configuration was modified during verification.
+New purchase activation still needs the factory billing operator to register and enable the `hotkey-runbook` Sociobot product. Until the documented checkout endpoint returns a hosted checkout, the product intentionally shows no buy link. Existing license paste/verification remains available. No backend, billing, DNS, or external service configuration was changed here.

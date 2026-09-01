@@ -22,5 +22,7 @@ describe("product claims", () => {
     expect(native).toContain('join("device-signing-key")');
     expect(native).toContain("fill_bytes(&mut key)");
     expect(native).toContain('join("trusted-directories.json")');
+    expect(native).toContain('join("demo-trusted-directories.json")');
+    expect(native).toContain("verified_runbooks_for_mode");
   });
 });

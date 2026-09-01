@@ -95,6 +95,23 @@ test("sample demo is keyboard-ready and has no serious accessibility violations"
   await expect(page.getByText("Completed sample check")).toBeVisible();
 });
 
+test("completed mobile demo keeps Reset demo legible and reflows at 390px and 200% text", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/demo/");
+  await page.getByRole("button", { name: "Review exact process" }).click();
+  await page.locator("#demo-confirm").fill("Inspect sample deployment");
+  await page.getByRole("button", { name: "Run sample check" }).click();
+  await expect(page.getByText("Completed sample check")).toBeVisible();
+
+  const completedAxe = await new AxeBuilder({ page }).analyze();
+  expect(completedAxe.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+
+  await page.getByRole("button", { name: "Reset demo" }).last().click();
+  await page.evaluate(() => document.documentElement.style.setProperty("font-size", "32px", "important"));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+});
+
 test("all repeated navigation targets meet the 44 px minimum", async ({ page }) => {
   await page.goto("/");
   for (const target of await page.locator("a, button, input, select, [tabindex='0']").all()) {

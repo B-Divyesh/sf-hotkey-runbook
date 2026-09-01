@@ -6,7 +6,7 @@ describe("native demo controls", () => {
   it("@claim:native-demo-controls renders persistent reset and exit controls only in demo mode", () => {
     const banner = demoBannerTemplate(true);
     expect(banner).toContain("Demo");
-    expect(banner).toContain("sample data, nothing is saved to your real runbooks");
+    expect(banner).toContain("real runbooks and history are not read or changed");
     expect(banner).toContain('data-action="reset-demo"');
     expect(banner).toContain('data-action="start-real"');
     expect(demoBannerTemplate(false)).toBe("");
