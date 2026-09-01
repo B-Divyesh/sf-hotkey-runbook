@@ -43,7 +43,7 @@ describe("public installers", () => {
 
   it("@claim:installer-ps1-checksum compares the downloaded file before the Windows installer can start", () => {
     const script = readFileSync("public/install.ps1", "utf8");
-    const hash = script.indexOf("Get-FileHash -Algorithm SHA256 -Path $download");
+    const hash = script.indexOf("[System.Security.Cryptography.SHA256]::Create()");
     const guard = script.indexOf('throw "SHA-256 verification failed; nothing was installed."');
     const start = script.indexOf("Start-Process msiexec.exe");
     expect(hash).toBeGreaterThanOrEqual(0);
@@ -56,12 +56,12 @@ describe("public installers", () => {
       temporary.push(root);
       const harness = join(root, "verify-installer.ps1");
       writeFileSync(harness, `
-param([string]$Installer, [string]$Root)
+param([string]$Installer, [string]$Root, [string]$ExpectedHash)
 $good = Join-Path $Root 'good.msi'
 $bad = Join-Path $Root 'bad.msi'
 [IO.File]::WriteAllText($good, 'verified MSI bytes')
 [IO.File]::WriteAllText($bad, 'tampered MSI bytes')
-$sha = (Get-FileHash -Algorithm SHA256 -Path $good).Hash.ToLowerInvariant()
+$sha = $ExpectedHash
 $script:Manifest = @{ platforms = @{ 'windows-x86_64' = @{ file = 'Hotkey.Runbook.msi'; sha256 = $sha; url = 'https://assets.invalid/Hotkey.Runbook.msi' } } } | ConvertTo-Json -Depth 5
 $script:Asset = $good
 $script:Started = $false
@@ -77,7 +77,7 @@ try { & $Installer; throw 'The tampered installer was accepted.' } catch {
 }
 if ($script:Started) { throw 'The tampered installer started.' }
 `);
-      execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", harness, "-Installer", join(process.cwd(), "public/install.ps1"), "-Root", root]);
+      execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", harness, "-Installer", join(process.cwd(), "public/install.ps1"), "-Root", root, "-ExpectedHash", checksum("verified MSI bytes")]);
     }
   });
 });

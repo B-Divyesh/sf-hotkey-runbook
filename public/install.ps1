@@ -9,7 +9,12 @@ try {
   $download = Join-Path $workDir $asset.file
   Write-Host "Downloading $($asset.file)..."
   Invoke-WebRequest -Uri $asset.url -OutFile $download
-  $actual = (Get-FileHash -Algorithm SHA256 -Path $download).Hash.ToLowerInvariant()
+  $hasher = [System.Security.Cryptography.SHA256]::Create()
+  try {
+    $actual = [System.BitConverter]::ToString($hasher.ComputeHash([System.IO.File]::ReadAllBytes($download))).Replace("-", "").ToLowerInvariant()
+  } finally {
+    $hasher.Dispose()
+  }
   if ($actual -ne $asset.sha256.ToLowerInvariant()) { throw "SHA-256 verification failed; nothing was installed." }
   Write-Host "SHA-256 verified. Starting the unsigned Windows installer..."
   $process = Start-Process msiexec.exe -ArgumentList "/i `"$download`" /passive" -Wait -PassThru
