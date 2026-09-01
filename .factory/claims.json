@@ -10,8 +10,8 @@
     "id": "exact-environment-review",
     "claim": "Review the exact executable, arguments, environment, working folder, and rollback note before consent.",
     "where": "/demo, landing safety copy, desktop review, README",
-    "test": "npm run test:e2e -- --grep @claim:exact-environment-review",
-    "sandbox": "fresh browser context; open sample review; assert the process and masked environment are shown and run stays disabled until exact-name consent"
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_exact_environment_review",
+    "sandbox": "temporary native runbook without cwd; prepare its real native plan; assert the canonical YAML folder is in the plan and is the command's current directory"
   },
   {
     "id": "demo-privacy",
@@ -51,8 +51,29 @@
   {
     "id": "installer-integrity",
     "claim": "Release installers include a SHA-256 checksum file whose names match the downloadable assets.",
-    "where": "landing download section, install scripts, README",
+    "where": "landing checksum link, release workflow, README",
     "test": "npm run test:unit -- --testNamePattern @claim:installer-integrity",
     "sandbox": "temporary cross-platform artifact tree with Tauri space-containing names; generate release assets and run sha256sum -c"
+  },
+  {
+    "id": "keyboard-first-desktop",
+    "claim": "Use the desktop app by keyboard: focus the filter, choose a runbook, prepare it, and confirm the reviewed run.",
+    "where": "README, desktop app keyboard hints",
+    "test": "npm run test:unit -- --testNamePattern @claim:keyboard-first-desktop",
+    "sandbox": "test the desktop keyboard controller for Ctrl/Command+K, wrapped arrow selection, Enter parameter focus, and Ctrl/Command+Enter review and confirmation shortcuts"
+  },
+  {
+    "id": "installer-sh-checksum",
+    "claim": "The macOS/Linux installer verifies SHA-256 before placing an app on PATH.",
+    "where": "landing download section, README, public/install.sh",
+    "test": "npm run test:unit -- --testNamePattern @claim:installer-sh-checksum",
+    "sandbox": "temporary HOME and mocked release download; run the shipped installer with matching bytes, then a mismatched checksum and assert nothing is installed"
+  },
+  {
+    "id": "installer-ps1-checksum",
+    "claim": "The Windows installer compares SHA-256 before it can start the MSI.",
+    "where": "landing download section, README, public/install.ps1",
+    "test": "npm run test:unit -- --testNamePattern @claim:installer-ps1-checksum",
+    "sandbox": "Windows release runner mocks the download and MSI launcher, then runs the shipped PowerShell script with matching and mismatched bytes; Unix test environments also assert the checksum guard precedes Start-Process"
   }
 ]
