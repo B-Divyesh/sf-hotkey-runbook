@@ -62,20 +62,20 @@ $bad = Join-Path $Root 'bad.msi'
 [IO.File]::WriteAllText($good, 'verified MSI bytes')
 [IO.File]::WriteAllText($bad, 'tampered MSI bytes')
 $sha = $ExpectedHash
-$script:Manifest = @{ platforms = @{ 'windows-x86_64' = @{ file = 'Hotkey.Runbook.msi'; sha256 = $sha; url = 'https://assets.invalid/Hotkey.Runbook.msi' } } } | ConvertTo-Json -Depth 5
-$script:Asset = $good
-$script:Started = $false
-function Invoke-RestMethod { param([string]$Uri) return ($script:Manifest | ConvertFrom-Json) }
-function Invoke-WebRequest { param([string]$Uri, [string]$OutFile) Copy-Item $script:Asset $OutFile }
-function Start-Process { param([string]$FilePath, [object[]]$ArgumentList, [switch]$Wait, [switch]$PassThru) $script:Started = $true; return [pscustomobject]@{ ExitCode = 0 } }
+$global:HKRManifest = @{ platforms = @{ 'windows-x86_64' = @{ file = 'Hotkey.Runbook.msi'; sha256 = $sha; url = 'https://assets.invalid/Hotkey.Runbook.msi' } } } | ConvertTo-Json -Depth 5
+$global:HKRAsset = $good
+$global:HKRStarted = $false
+function Invoke-RestMethod { param([string]$Uri) return ($global:HKRManifest | ConvertFrom-Json) }
+function Invoke-WebRequest { param([string]$Uri, [string]$OutFile) Copy-Item $global:HKRAsset $OutFile }
+function Start-Process { param([string]$FilePath, [object[]]$ArgumentList, [switch]$Wait, [switch]$PassThru) $global:HKRStarted = $true; return [pscustomobject]@{ ExitCode = 0 } }
 & $Installer
-if (-not $script:Started) { throw 'The verified installer did not start.' }
-$script:Asset = $bad
-$script:Started = $false
+if (-not $global:HKRStarted) { throw 'The verified installer did not start.' }
+$global:HKRAsset = $bad
+$global:HKRStarted = $false
 try { & $Installer; throw 'The tampered installer was accepted.' } catch {
   if ($_.Exception.Message -notmatch 'SHA-256 verification failed') { throw }
 }
-if ($script:Started) { throw 'The tampered installer started.' }
+if ($global:HKRStarted) { throw 'The tampered installer started.' }
 `);
       execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", harness, "-Installer", join(process.cwd(), "public/install.ps1"), "-Root", root, "-ExpectedHash", checksum("verified MSI bytes")]);
     }
