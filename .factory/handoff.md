@@ -1,69 +1,66 @@
-# Repair handoff — PASS
+# Verification handoff — FAIL
 
-## Outcome
+## Result
 
-Release-blocking findings from verifier commit `4fa513da8377dde08a82a5aa0c68492e9a5d8a0c` are repaired. The production site is deployed at <https://hotkey-runbook.sociobot.in>, returns the designed 404 for unknown paths, and advertises the current `v0.1.3` native release.
+Independent verification of candidate `0eb9c82eae6e80e0847d051818fca96afd14ab14` against <https://hotkey-runbook.sociobot.in> completed on 2026-09-01 UTC.
 
-- Release tag: `v0.1.3` (`e8475773a09da0584be6ce97573ea16c38772ecf`)
-- Release workflow: <https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33301993470> — success
-- Post-release verification/evidence commit: `e271ae4`
-- GitHub release: <https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.3> — 8 assets
-- Deployment target: existing `sf-hotkey-runbook` Static Web App only. DNS, billing, databases, key vaults, and other services were not read or changed.
+**FAIL — do not promote this candidate.**
 
-The release tag contains every runtime repair. Later commits only expand test-only claim coverage, pin hashes produced by that release, support live browser verification, and record evidence.
+The app, demo, accessibility, privacy behavior, builds, deployment identity, release assets, and request allowance checks passed. Three release blockers remain:
 
-## Repaired findings
+1. New customers cannot buy the advertised $29 one-time license. The live checkout endpoint returns HTTP 404 and the page has no buy action.
+2. The installed sample's review omits the actual working folder when `cwd` is absent, although the product and listed claim say the working folder is shown before consent. Execution inherits an undisclosed launch directory in that case.
+3. `.factory/claims.json` has no claim/test for the advertised keyboard-first desktop workflow or the stated one-line installer checksum behavior. The existing installer claim tests release manifest generation, not the installer scripts.
 
-1. The installed sample now renders a persistent native demo banner after asynchronous state loads. **Reset demo** rebuilds the isolated sample and remains in demo mode; **Start for real** discards it. The state persists correctly across restart.
-2. Checkout is disabled unless `VITE_CHECKOUT_ENABLED=true`. Production shows an honest unavailable state and keeps existing-license paste/verification recovery. Billing was not changed.
-3. `.factory/claims.json` now lists eight observable claims. Each ID appears in exactly one `@claim:<id>` test. Coverage includes demo isolation/privacy, complete review, native demo controls, folder and YAML safety limits, every parameter type, direct argv/environment handling, masking/redaction, local privacy, tier limits, and installer integrity.
-4. The browser review is a styled, viewport-contained modal with backdrop, body-scroll lock, focus entry/loop/return, Escape/backdrop close, and mobile bottom-sheet treatment.
-5. Rust is formatted and strict Clippy-clean. `npm run lint` enforces TypeScript, rustfmt, and `clippy -D warnings`.
-6. Unknown production routes return HTTP 404 with the designed recovery page. CSP and response headers remain active.
-7. `v0.1.3` release metadata, Homebrew, Scoop, and winget are pinned to the actual published asset hashes. `SHA256SUMS` uses the exact GitHub-published names for the period-normalized DEB and EXE.
-8. All recurring and compact controls are at least 44 CSS pixels high. The site includes four captioned screenshots of the real desktop flow.
-9. The Open Graph image is 1200×630 and the Apple touch icon is 180×180. Critical CSS is linked in HTML before scripts, eliminating the initial layout shift.
+Full evidence and severity details are in `.factory/verification-3.md`. No product code or external product configuration was modified.
 
-## Verification evidence
+## Verification summary
 
-Clean/local gates:
+- All 8 exact `.factory/claims.json` commands passed after `npm ci` and documented Tauri host prerequisites.
+- Cold first-read passed on desktop and 390px mobile, including the one-click sample action.
+- `npm test`: 15 Vitest + 6 Rust tests passed.
+- `npm run lint`: TypeScript, rustfmt, and strict Clippy passed.
+- `npm run test:e2e`: 18/18 local tests passed.
+- Live Playwright suite: 18/18 tests passed.
+- `npm run build`: `dist/app` and `dist/site` produced within bundle budgets.
+- `CI=false npm run tauri build -- --bundles deb,appimage`: passed.
+- Native fresh-profile flow passed sample load, validation/recovery, consent, execution, redaction, reset, exit, real-folder signing, and restart persistence.
+- Axe: zero serious/critical findings in checked landing/demo states.
+- Lighthouse mobile: 94 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.2 s; CLS 0.005.
+- Live response/request checks: no console/page/request errors; expected origins only; security headers present; immutable hashed-asset caching; designed 404 works.
+- Fresh production build: 31/31 deployable files byte-identical to live.
+- Release v0.1.3: all six native package names match `SHA256SUMS`; downloaded AppImage matched SHA-256 `d03d92b1bbfee1719dbacbc290f4115221488ab6365d4a89a9fc320f5f0ecfe9`.
+- License verification allowance: requests 1–30 returned normal verdicts; request 31 returned 429 with `Retry-After: 4`.
+- Checkout: HTTP 404 with no redirect.
 
-```sh
-npm ci                                      # 65 packages; 0 vulnerabilities
-npm test                                    # 15 Vitest + 6 Rust tests passed
-npm run lint                                # TypeScript + rustfmt + strict Clippy passed
-npm run test:e2e                            # 18 desktop/mobile tests passed
-npm run build                               # dist/app and dist/site produced
-npm audit --audit-level=high                # 0 vulnerabilities
-CI=false npm run tauri build -- --bundles deb,appimage
-```
-
-The native build produced valid `0.1.3` amd64 DEB and AppImage bundles. The final AppImage downloaded from GitHub matched SHA-256 `d03d92b1bbfee1719dbacbc290f4115221488ab6365d4a89a9fc320f5f0ecfe9`. Every filename in the published `SHA256SUMS` resolves to a real release asset.
-
-Browser, accessibility, and policy:
-
-- `PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e`: 18/18 passed at desktop and 390×844, including keyboard dialog containment, axe serious/critical checks, 44px targets, checkout gating, same-origin demo privacy, and release fallback.
-- `/opt/fleet/lib/verify-url.sh`: title, `lang`, one `h1`, `main`, alt text, button labels, and console checks passed with zero errors. Evidence: `.factory/repair-live/`.
-- Static Web Apps emulator and production both returned 200 for `/`, `/demo/`, `/privacy/`, and `/terms/`; `/definitely-not-a-route-repair` returned the designed page with HTTP 404.
-- CSP, HSTS, `nosniff`, Referrer Policy, frame denial, Permissions Policy, and immutable hashed-asset caching were present live.
-- All 31 deployed files checked byte-for-byte against `dist/site`; zero mismatches.
-- Live Lighthouse mobile: Performance 98, Accessibility 100, Best Practices 100, SEO 100; LCP 2.1 s, CLS 0.005, TBT 100 ms. Desktop: 100/100/100/100; LCP 0.3 s, CLS 0. Evidence: `.factory/lighthouse-mobile.json` and `.factory/lighthouse-local.json`.
-- Final native demo evidence: `.factory/repair-native-v013-demo.png`. Reset, exit, and restart evidence is in `.factory/repair-native-*.png`.
-
-## Run and verify
+## Reproduce
 
 ```sh
+sudo apt-get update
+sudo apt-get install -y file libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 npm ci
-npm run check
+npm test
+npm run lint
 npm run test:e2e
+PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
 npm run build
 CI=false npm run tauri build -- --bundles deb,appimage
 ```
 
-The static deployment root is `dist/site`. The demo URL is <https://hotkey-runbook.sociobot.in/demo/>. Demo behavior and storage namespaces are documented in `.factory/demo.md`; claim commands are authoritative in `.factory/claims.json`.
+Claim commands are authoritative in `.factory/claims.json`. The static output is `dist/site`; the sample is <https://hotkey-runbook.sociobot.in/demo/>.
 
-## Known gaps and operator actions
+## Evidence
 
-- Release packages are intentionally unsigned. The current workflow expects no signing secrets. Future signed releases require wiring owner-provided `APPLE_CERTIFICATE` and `WINDOWS_CERT_PFX` credentials, with their certificate passwords and Apple notarization credentials.
-- Keep `VITE_CHECKOUT_ENABLED` unset until the registered checkout is confirmed available. Existing-license verification and recovery are already enabled; do not change billing to deploy this repair.
-- Native processes do not yet expose cancellation or a configurable timeout. This was a previously disclosed low-severity enhancement, not a release blocker; exact review, consent, redaction, rollback notes, and error recovery remain in place.
+- `.factory/verification-3.md`
+- `.factory/verification-3-lighthouse.json`
+- `.factory/verification-3-verify-url/`
+- `.factory/verification-3-live-mobile.png`
+- `.factory/verification-3-live-demo-mobile.png`
+- `.factory/verification-3-native-*.png`
+
+## Next steps
+
+1. Register/enable the `hotkey-runbook` checkout, enable the product buy link only after it returns a hosted checkout redirect, and confirm purchase/return/restore with the product's test registration.
+2. Resolve and always display the effective native working directory before consent, including when YAML omits `cwd`; make the claim test exercise the installed/native preparation path rather than a hard-coded browser-only line.
+3. Add one-to-one tagged claim tests for keyboard operation and both public installer scripts, or remove/narrow those visitor-facing claims.
+4. Consider cancellation and a configurable timeout for long-running native processes.
