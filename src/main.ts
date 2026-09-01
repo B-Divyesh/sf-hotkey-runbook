@@ -6,6 +6,7 @@ import { clearLicense, saveAndVerifyLicense, verifyLicense, type LicenseState } 
 import type { AppState, DirectoryInspection, PreparedRun, RunResult, RunbookSummary } from "./types";
 import { demoBannerTemplate } from "./demo-ui";
 import { FREE_HISTORY_LIMIT, FREE_RUNBOOK_LIMIT, visibleFreeItems } from "./limits";
+import { catalogKeyAction, isConfirmShortcut, isFilterShortcut } from "./keyboard";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let state: AppState = { runbooks: [], directories: [], errors: [], demoMode: false };
@@ -147,10 +148,16 @@ function bindRunbooks(filtered: RunbookSummary[], selected?: RunbookSummary): vo
   app.querySelectorAll<HTMLButtonElement>(".runbook-row").forEach((button) => button.addEventListener("click", () => { selectedId = button.dataset.id!; renderRunbooks(); }));
   app.querySelector<HTMLFormElement>("#run-form")?.addEventListener("submit", (event) => { event.preventDefault(); if (selected) prepare(selected); });
   search?.addEventListener("keydown", (event) => {
-    if (!["ArrowDown", "ArrowUp", "Enter"].includes(event.key) || !filtered.length) return;
-    event.preventDefault(); const index = Math.max(0, filtered.findIndex((item) => item.id === selectedId));
-    if (event.key === "Enter") app.querySelector<HTMLInputElement>("#run-form input, #run-form select")?.focus();
-    else { selectedId = filtered[(index + (event.key === "ArrowDown" ? 1 : -1) + filtered.length) % filtered.length].id; renderRunbooks(); app.querySelector<HTMLInputElement>("#runbook-search")?.focus(); }
+    const action = catalogKeyAction(event.key, filtered.length, Math.max(0, filtered.findIndex((item) => item.id === selectedId)));
+    if (!action) return;
+    event.preventDefault();
+    if (action.type === "focus-parameters") app.querySelector<HTMLInputElement>("#run-form input, #run-form select")?.focus();
+    else { selectedId = filtered[action.index].id; renderRunbooks(); app.querySelector<HTMLInputElement>("#runbook-search")?.focus(); }
+  });
+  app.querySelector<HTMLFormElement>("#run-form")?.addEventListener("keydown", (event) => {
+    if (!isConfirmShortcut(event.key, event.metaKey, event.ctrlKey)) return;
+    event.preventDefault();
+    (event.currentTarget as HTMLFormElement).requestSubmit();
   });
 }
 
@@ -198,10 +205,16 @@ async function prepare(runbook: RunbookSummary): Promise<void> {
 function showReviewDialog(runbook: RunbookSummary, values: Record<string, unknown>, plan: PreparedRun): void {
   dialogOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const dialog = app.querySelector<HTMLDivElement>("#dialog-root")!;
-  dialog.innerHTML = `<div class="scrim"><section class="dialog review" role="dialog" aria-modal="true" aria-labelledby="review-title"><button class="dialog-close" data-close aria-label="Close">×</button><p class="eyebrow">Final consent · ${esc(riskLabel(plan.risk))}</p><h2 id="review-title">Review “${esc(plan.name)}”</h2><p>These exact processes will run locally. No shell is involved.</p><ol class="command-list">${plan.steps.map((step) => `<li><span>${esc(step.program)}</span> ${step.args.map((arg) => `<code>${esc(arg)}</code>`).join(" ")}${Object.keys(step.env).length ? `<small>environment: ${Object.entries(step.env).map(([key, value]) => `<code>${esc(key)}=${esc(value)}</code>`).join(" ")}</small>` : ""}${step.cwd ? `<small>in ${esc(step.cwd)}</small>` : ""}</li>`).join("")}</ol><aside class="rollback"><span aria-hidden="true">↶</span><div><strong>If you need to roll back</strong><p>${esc(plan.rollback)}</p></div></aside><label class="field"><span class="field-label"><span>Type the runbook name to confirm</span></span><input id="confirm-name" autocomplete="off" spellcheck="false"><small>Enter ${esc(plan.name)} exactly.</small></label><div class="dialog-actions"><button class="button ghost" data-close>Go back</button><button class="button danger" id="execute-button" disabled>Run ${esc(plan.name)}</button></div></section></div>`;
+  dialog.innerHTML = `<div class="scrim"><section class="dialog review" role="dialog" aria-modal="true" aria-labelledby="review-title"><button class="dialog-close" data-close aria-label="Close">×</button><p class="eyebrow">Final consent · ${esc(riskLabel(plan.risk))}</p><h2 id="review-title">Review “${esc(plan.name)}”</h2><p>These exact processes will run locally. No shell is involved.</p><ol class="command-list">${plan.steps.map((step) => `<li><span>${esc(step.program)}</span> ${step.args.map((arg) => `<code>${esc(arg)}</code>`).join(" ")}${Object.keys(step.env).length ? `<small>environment: ${Object.entries(step.env).map(([key, value]) => `<code>${esc(key)}=${esc(value)}</code>`).join(" ")}</small>` : ""}<small>working folder: ${esc(step.cwd)}</small></li>`).join("")}</ol><aside class="rollback"><span aria-hidden="true">↶</span><div><strong>If you need to roll back</strong><p>${esc(plan.rollback)}</p></div></aside><label class="field"><span class="field-label"><span>Type the runbook name to confirm</span></span><input id="confirm-name" autocomplete="off" spellcheck="false"><small>Enter ${esc(plan.name)} exactly.</small></label><div class="dialog-actions"><button class="button ghost" data-close>Go back</button><button class="button danger" id="execute-button" disabled>Run ${esc(plan.name)}</button></div></section></div>`;
   dialog.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", closeDialog));
   const input = dialog.querySelector<HTMLInputElement>("#confirm-name")!; const execute = dialog.querySelector<HTMLButtonElement>("#execute-button")!;
   input.addEventListener("input", () => execute.disabled = input.value !== runbook.name); input.focus();
+  input.addEventListener("keydown", (event) => {
+    if (isConfirmShortcut(event.key, event.metaKey, event.ctrlKey) && !execute.disabled) {
+      event.preventDefault();
+      execute.click();
+    }
+  });
   execute.addEventListener("click", async () => { execute.disabled = true; execute.textContent = "Running locally…"; try { const result = await bridge.executeRun(runbook.id, values, input.value); closeDialog(); showResult(result); } catch (error) { execute.disabled = false; execute.textContent = `Run ${runbook.name}`; toast(String(error), true); } });
   trapDialog(dialog.querySelector(".dialog")!);
 }
@@ -241,7 +254,7 @@ function renderSettings(): void {
 function toast(message: string, danger = false): void { const node = app.querySelector<HTMLElement>("#toast")!; node.textContent = message.replace(/^Error:\s*/, ""); node.classList.toggle("danger", danger); node.classList.add("visible"); window.setTimeout(() => node.classList.remove("visible"), 5000); }
 
 document.documentElement.dataset.theme = localStorage.getItem("hkr-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-document.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); view = "runbooks"; render(); app.querySelector<HTMLInputElement>("#runbook-search")?.focus(); } });
+document.addEventListener("keydown", (event) => { if (isFilterShortcut(event.key, event.metaKey, event.ctrlKey)) { event.preventDefault(); view = "runbooks"; render(); app.querySelector<HTMLInputElement>("#runbook-search")?.focus(); } });
 
 shell();
 Promise.all([bridge.getState(), bridge.history(), verifyLicense()]).then(([nextState, nextHistory, nextLicense]) => { state = nextState; historyItems = nextHistory; license = nextLicense; render(); }).catch((error) => toast(String(error), true));

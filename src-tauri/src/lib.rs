@@ -176,7 +176,7 @@ struct DirectoryInspection {
 struct PreparedStep {
     program: String,
     args: Vec<String>,
-    cwd: Option<String>,
+    cwd: String,
     env: BTreeMap<String, String>,
     display: String,
 }
@@ -814,11 +814,7 @@ fn prepare_loaded(
             .iter()
             .map(|arg| substitute(arg, &resolved))
             .collect::<AppResult<_>>()?;
-        let cwd = step
-            .cwd
-            .as_ref()
-            .map(|value| substitute(value, &resolved))
-            .transpose()?;
+        let cwd = resolve_working_directory(item, step, &resolved)?;
         let env: BTreeMap<String, String> = step
             .env
             .iter()
@@ -858,6 +854,41 @@ fn prepare_loaded(
     ))
 }
 
+/// Resolve this once during preparation so the consent screen and the child
+/// process use the same directory. A runbook without `cwd` deliberately runs
+/// beside its YAML file, never in the app launch directory.
+fn resolve_working_directory(
+    item: &LoadedRunbook,
+    step: &Step,
+    resolved: &HashMap<String, String>,
+) -> AppResult<String> {
+    let configured = step
+        .cwd
+        .as_ref()
+        .map(|value| substitute(value, resolved))
+        .transpose()?;
+    let candidate =
+        match configured {
+            Some(path) => PathBuf::from(path),
+            None => item.source.parent().map(Path::to_path_buf).ok_or_else(|| {
+                AppError::Message("The runbook file has no parent folder.".into())
+            })?,
+        };
+    let canonical = fs::canonicalize(&candidate).map_err(|_| {
+        AppError::Message(format!(
+            "Working directory does not exist: {}",
+            candidate.display()
+        ))
+    })?;
+    if !canonical.is_dir() {
+        return Err(AppError::Message(format!(
+            "Working directory is not a folder: {}",
+            candidate.display()
+        )));
+    }
+    Ok(canonical.display().to_string())
+}
+
 fn mask_plan_secrets(
     plan: &mut PreparedRun,
     runbook: &RunbookFile,
@@ -875,9 +906,7 @@ fn mask_plan_secrets(
                 step.args
                     .iter_mut()
                     .for_each(|arg| *arg = arg.replace(secret, "[SECRET]"));
-                if let Some(cwd) = &mut step.cwd {
-                    *cwd = cwd.replace(secret, "[SECRET]");
-                }
+                step.cwd = step.cwd.replace(secret, "[SECRET]");
                 step.env
                     .values_mut()
                     .for_each(|value| *value = value.replace(secret, "[SECRET]"));
@@ -885,6 +914,16 @@ fn mask_plan_secrets(
             }
         }
     }
+}
+
+fn configured_command(prepared: &PreparedStep) -> Command {
+    let mut command = Command::new(&prepared.program);
+    command.args(&prepared.args);
+    command.current_dir(&prepared.cwd);
+    for (key, value) in &prepared.env {
+        command.env(key, value);
+    }
+    command
 }
 
 #[tauri::command]
@@ -955,23 +994,7 @@ fn execute_run(
     for (index, _) in item.runbook.steps.iter().enumerate() {
         let prepared = &plan.steps[index];
         combined.push_str(&format!("$ {}\n", prepared.display));
-        let mut command = Command::new(&prepared.program);
-        command.args(&prepared.args);
-        if let Some(cwd) = &prepared.cwd {
-            let canonical = fs::canonicalize(cwd).map_err(|_| {
-                AppError::Message(format!("Working directory does not exist: {cwd}"))
-            })?;
-            if !canonical.is_dir() {
-                return Err(AppError::Message(format!(
-                    "Working directory is not a folder: {cwd}"
-                )));
-            }
-            command.current_dir(canonical);
-        }
-        for (key, value) in &prepared.env {
-            command.env(key, value);
-        }
-        let output = command.output().map_err(|error| {
+        let output = configured_command(prepared).output().map_err(|error| {
             AppError::Message(format!("Could not start {}: {error}", prepared.program))
         })?;
         combined.push_str(&String::from_utf8_lossy(&output.stdout));
@@ -1165,6 +1188,30 @@ steps:
         assert_eq!(
             plan.steps[0].env.get("SAMPLE_TOKEN"),
             Some(&"[SECRET]".to_string())
+        );
+    }
+
+    #[test]
+    // @claim:exact-environment-review
+    fn claim_exact_environment_review_resolves_and_uses_a_default_working_folder() {
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("review.yaml");
+        fs::write(&file, sample()).unwrap();
+        let files = yaml_files(directory.path()).unwrap();
+        let books = load_files(directory.path(), &files).unwrap();
+        let values = HashMap::from([("cache".into(), Value::String("pages".into()))]);
+
+        let (plan, _) = prepare_loaded(&books[0], &values).unwrap();
+        let expected = fs::canonicalize(directory.path())
+            .unwrap()
+            .display()
+            .to_string();
+        assert_eq!(plan.steps[0].cwd, expected);
+
+        let command = configured_command(&plan.steps[0]);
+        assert_eq!(
+            command.get_current_dir(),
+            Some(Path::new(&plan.steps[0].cwd))
         );
     }
 

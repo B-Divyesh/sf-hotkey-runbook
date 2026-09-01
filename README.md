@@ -10,7 +10,7 @@ Live site: <https://hotkey-runbook.sociobot.in>
 
 - A folder must be owned by the current Unix user (where the platform exposes ownership), must not be world-writable, and cannot contain symlinks.
 - Adding a folder signs its canonical path and SHA-256 content digest with a random device-local HMAC key. Any YAML edit invalidates trust until the folder is reviewed and signed again.
-- Each step names a fixed `program` plus `args` and optional `env` maps. Programs cannot be parameterized. The review shows resolved arguments, environment values, and the working folder before consent.
+- Each step names a fixed `program` plus `args` and optional `env` maps. Programs cannot be parameterized. The review shows resolved arguments, environment values, and the working folder before consent. When `cwd` is omitted, the app resolves it to the folder containing that YAML file and runs there.
 - Parameters support `text`, `integer`, `choice`, `boolean`, `path`, and `secret`, plus author-supplied regular-expression validation.
 - Secret values are masked in review and redacted before output enters history. Authors can add `redactPatterns` for application-specific values.
 - Execution requires reviewing the resolved command and typing the runbook name exactly. A rollback note stays visible before and after the run.
@@ -69,7 +69,7 @@ Some CI containers set `CI=1`, which Tauri interprets as an invalid Boolean whil
 
 Open [the browser demo](https://hotkey-runbook.sociobot.in/demo/) or select **Try it with sample data** on the landing page. It contains one safe deployment-check sample, displays the complete review including a masked environment value, and stores only `demo:hotkey-runbook:history` in the current browser tab. **Reset demo** removes it.
 
-The installed app also provides **Load sample project** in its first empty state. It uses a separate `demo-sample-project` directory under Hotkey Runbook’s app data and never adds the sample to your selected folders. See [.factory/demo.md](.factory/demo.md) and [.factory/claims.json](.factory/claims.json) for the verification contract.
+The installed app also provides **Load sample project** in its first empty state. It uses a separate `demo-sample-project` directory under Hotkey Runbook’s app data, runs the bundled sample there, and never adds the sample to your selected folders. See [.factory/demo.md](.factory/demo.md) and [.factory/claims.json](.factory/claims.json) for the verification contract.
 
 The static deployment root is `dist/site`; `index.html` is written directly there. No third-party scripts, fonts, or analytics are loaded at runtime.
 

@@ -44,7 +44,7 @@ test("@claim:demo-isolated runs sample data in a separate browser namespace", as
   await expect(page.evaluate(() => sessionStorage.getItem("demo:hotkey-runbook:history"))).resolves.toBeNull();
 });
 
-test("@claim:exact-environment-review shows masked environment before the sample can run", async ({ page }) => {
+test("browser sample shows masked environment before the sample can run", async ({ page }) => {
   await page.goto("/demo/");
   await page.getByRole("button", { name: "Review exact process" }).click();
   await expect(page.getByText("printf", { exact: true })).toBeVisible();
