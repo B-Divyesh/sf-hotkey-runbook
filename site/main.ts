@@ -3,8 +3,6 @@ import { consumeLicenseFromUrl, saveAndVerifyLicense, verifyLicense } from "../s
 const REPO = "B-Divyesh/sf-hotkey-runbook";
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const RELEASE_PAGE = `https://github.com/${REPO}/releases/latest`;
-const CHECKOUT_URL = "https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout";
-const checkoutEnabled = import.meta.env.VITE_CHECKOUT_ENABLED === "true";
 interface GithubAsset { name: string; browser_download_url: string }
 interface GithubRelease { tag_name: string; assets: GithubAsset[] }
 
@@ -53,12 +51,6 @@ async function fetchRelease(): Promise<GithubRelease> {
 
 const restore = document.querySelector<HTMLButtonElement>("#restore-license");
 const form = document.querySelector<HTMLFormElement>("#license-form");
-const checkoutState = document.querySelector<HTMLElement>("#checkout-state");
-if (checkoutState) {
-  checkoutState.innerHTML = checkoutEnabled
-    ? `<a class="button primary" href="${CHECKOUT_URL}">Buy the field license</a>`
-    : `<p class="checkout-unavailable"><strong>New purchases are temporarily unavailable.</strong><br>Already have a license? Restore it below.</p>`;
-}
 if (restore && form) {
   restore.addEventListener("click", () => { form.hidden = false; restore.hidden = true; document.querySelector<HTMLInputElement>("#license-token")!.focus(); });
   form.addEventListener("submit", async (event) => {

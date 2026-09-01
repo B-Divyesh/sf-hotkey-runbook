@@ -104,12 +104,15 @@ test("all repeated navigation targets meet the 44 px minimum", async ({ page }) 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
-test("checkout is gated and existing-license recovery stays available", async ({ page }) => {
+test("@claim:purchase-availability states the exact price without exposing unavailable checkout", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("New purchases are temporarily unavailable.")).toBeVisible();
+  await expect(page.getByText("The license price is $29 once. New purchases are unavailable.", { exact: true })).toBeVisible();
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /buy|purchase/i })).toHaveCount(0);
   await page.getByRole("button", { name: "Have a license? Restore it" }).click();
   await expect(page.getByLabel("Paste license token")).toBeVisible();
+  await page.goto("/terms/");
+  await expect(page.getByText("The license price is $29 once. New purchases are unavailable.", { exact: true })).toBeVisible();
 });
 
 test("unusable release metadata keeps a calm direct-download recovery path", async ({ page }) => {

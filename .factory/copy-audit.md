@@ -1,4 +1,4 @@
-# Copy audit — 2026-08-30 repair
+# Copy audit — 2026-09-01 repair
 
 The landing page was read in source order, including runtime status and checkout states. Button labels and headings are listed separately because they are not sentences. Word counts treat hyphenated terms and URLs as one word.
 
@@ -28,10 +28,11 @@ The landing page was read in source order, including runtime status and checkout
 | Secret parameters are hidden in the review and redacted before local history is written. | 14 | Pass |
 | The author’s recovery note appears before a run and beside its saved result. | 13 | Pass |
 | The free app opens 3 runbooks and shows 10 history entries. | 11 | Pass |
-| A $29 one-time license adds unlimited local runbooks and 100 history entries. | 12 | Pass |
+| A paid license adds unlimited local runbooks and 100 history entries. | 11 | Pass |
 | No subscription or account. | 4 | Pass |
-| Sociobot/Dodo is the merchant of record; refunds revoke the license. | 10 | Pass |
-| New purchases are temporarily unavailable. | 5 | Pass |
+| Sociobot/Dodo handles existing licenses and refunds. | 6 | Pass |
+| The license price is $29 once. | 7 | Pass |
+| New purchases are unavailable. | 4 | Pass |
 | Already have a license? | 4 | Pass |
 | Restore it below. | 3 | Pass |
 | Unsigned preview builds are produced in public GitHub Actions. | 9 | Pass |

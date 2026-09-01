@@ -75,5 +75,12 @@
     "where": "landing download section, README, public/install.ps1",
     "test": "npm run test:unit -- --testNamePattern @claim:installer-ps1-checksum",
     "sandbox": "Windows release runner mocks the download and MSI launcher, then runs the shipped PowerShell script with matching and mismatched bytes; Unix test environments also assert the checksum guard precedes Start-Process"
+  },
+  {
+    "id": "purchase-availability",
+    "claim": "The license price is $29 once. New purchases are unavailable.",
+    "where": "landing license section, desktop Settings, README, terms",
+    "test": "npm run test:e2e -- --grep @claim:purchase-availability",
+    "sandbox": "fresh browser context on the landing page; assert the exact price and purchase-availability copy, no checkout link, and existing-license recovery"
   }
 ]
