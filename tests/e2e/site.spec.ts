@@ -159,8 +159,8 @@ test("@claim:existing-license-recovery discloses and restores existing licenses 
     });
   });
   await page.goto("/");
-  await expect(page.getByText("Use an existing license.", { exact: true })).toBeVisible();
-  await expect(page.getByText("This page does not offer a checkout. Restore a valid token from an earlier purchase.")).toBeVisible();
+  await expect(page.getByText("New license sales are unavailable.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Checkout will be available after the operator registers it. Restore a valid token from an earlier purchase.")).toBeVisible();
   await expect(page.getByText(/\$29/)).toHaveCount(0);
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: /buy|purchase/i })).toHaveCount(0);
@@ -180,7 +180,7 @@ test("@claim:existing-license-recovery discloses and restores existing licenses 
   await expect(page.getByRole("button", { name: "License active on this browser" })).toBeDisabled();
   expect(verifyRequests).toEqual([verifyUrl]);
   await page.goto("/terms/");
-  await expect(page.locator("main")).toContainText("This site does not offer a checkout.");
+  await expect(page.locator("main")).toContainText("New license sales are unavailable until checkout is registered.");
 });
 
 test("unusable release metadata keeps a calm direct-download recovery path", async ({ page }) => {

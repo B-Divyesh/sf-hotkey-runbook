@@ -1,5 +1,5 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
-import type { AppState, DirectoryInspection, NativeBridge, PreparedRun, RunResult } from "./types";
+import type { AppState, BuildIdentity, DirectoryInspection, NativeBridge, PreparedRun, RunResult } from "./types";
 
 const unavailable = () => Promise.reject(new Error("Directory access and command execution are available in the installed desktop app."));
 
@@ -9,6 +9,7 @@ const demoState: AppState = {
 
 export const bridge: NativeBridge = isTauri() ? {
   available: true,
+  buildIdentity: () => invoke<BuildIdentity>("get_build_identity"),
   getState: () => invoke<AppState>("get_state"),
   inspectDirectory: (path) => invoke<DirectoryInspection>("inspect_directory", { path }),
   trustDirectory: (path, digest, acknowledged) => invoke<AppState>("trust_directory", { path, digest, acknowledged }),
@@ -22,6 +23,7 @@ export const bridge: NativeBridge = isTauri() ? {
   clearHistory: () => invoke<void>("clear_history"),
 } : {
   available: false,
+  buildIdentity: async () => ({ version: "browser demo", commit: "not-installed" }),
   getState: async () => demoState,
   inspectDirectory: unavailable,
   trustDirectory: unavailable,

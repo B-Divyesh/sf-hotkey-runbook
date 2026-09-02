@@ -92,7 +92,7 @@
   },
   {
     "id": "existing-license-recovery",
-    "claim": "Existing license tokens can be restored. This page does not offer a checkout.",
+    "claim": "Existing license tokens can be restored. New license sales are unavailable until checkout is registered.",
     "where": "landing license section, desktop Settings, README, terms",
     "test": "npm run test:e2e -- --grep @claim:existing-license-recovery",
     "sandbox": "fresh browser context on the landing page; assert no checkout link, price, or purchase action is offered, then disclose the form and restore an existing token"

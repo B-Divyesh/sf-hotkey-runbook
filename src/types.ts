@@ -44,9 +44,11 @@ export interface PreparedStep { program: string; args: string[]; cwd: string; en
 export interface PreparedRun { runbookId: string; name: string; risk: string; rollback: string; steps: PreparedStep[]; }
 export interface RunResult { id: string; runbookId: string; name: string; startedAt: string; durationMs: number; status: "success" | "failed"; exitCode?: number; output: string; rollback: string; }
 export interface DirectoryInspection { path: string; digest: string; files: string[]; runbooks: RunbookSummary[]; warnings: string[]; }
+export interface BuildIdentity { version: string; commit: string; }
 
 export interface NativeBridge {
   available: boolean;
+  buildIdentity(): Promise<BuildIdentity>;
   getState(): Promise<AppState>;
   inspectDirectory(path: string): Promise<DirectoryInspection>;
   trustDirectory(path: string, digest: string, acknowledged: boolean): Promise<AppState>;

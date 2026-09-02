@@ -8,7 +8,7 @@ on:
       version:
         description: Release tag (for example v0.1.8)
         required: true
-        default: v0.1.8
+        default: v0.1.10
 
 permissions:
   contents: write
@@ -24,6 +24,9 @@ jobs:
       - name: Linux webview dependencies
         run: sudo apt-get update && sudo apt-get install -y file libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: npm ci
+      - name: Verify tag names the checked-out release source
+        if: startsWith(github.ref, 'refs/tags/')
+        run: test "v$(node -p \"require('./package.json').version\")" = "$GITHUB_REF_NAME" && test -n "$(git rev-parse HEAD)"
       - run: npx playwright install --with-deps chromium
       - run: npm test
       - run: npm run lint
@@ -55,6 +58,9 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+      - id: source
+        shell: bash
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - uses: dtolnay/rust-toolchain@stable
@@ -69,8 +75,28 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOTKEY_BUILD_COMMIT: ${{ steps.source.outputs.commit }}
         with:
           args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: Verify packaged installed-build identity
+        if: matrix.name == 'linux-x86_64'
+        shell: bash
+        env:
+          EXPECTED_COMMIT: ${{ steps.source.outputs.commit }}
+        run: |
+          set -euo pipefail
+          appimage=$(find src-tauri/target/${{ matrix.target }}/release/bundle -name '*.AppImage' -print -quit)
+          test -n "$appimage"
+          expected_version=$(node -p "require('./package.json').version")
+          work=$(mktemp -d)
+          cp "$appimage" "$work/app.AppImage"
+          chmod +x "$work/app.AppImage"
+          (
+            cd "$work"
+            ./app.AppImage --appimage-extract >/dev/null
+            identity=$(./squashfs-root/AppRun --build-identity)
+            test "$identity" = "{\"version\":\"$expected_version\",\"commit\":\"$EXPECTED_COMMIT\"}"
+          )
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
@@ -87,20 +113,27 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.version }}
-      RELEASE_COMMIT: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
       - name: Build checksums and download manifest
-        run: node scripts/release-manifest.mjs artifacts release-assets
+        run: |
+          test "v$(node -p \"require('./package.json').version\")" = "$RELEASE_VERSION"
+          RELEASE_COMMIT=$(git rev-parse HEAD)
+          echo "RELEASE_COMMIT=$RELEASE_COMMIT" >> "$GITHUB_ENV"
+          RELEASE_COMMIT="$RELEASE_COMMIT" node scripts/release-manifest.mjs artifacts release-assets
       - name: Validate manifest and checksums
-        run: node -e "const m=JSON.parse(require('fs').readFileSync('release-assets/latest.json')); if (m.version !== process.env.RELEASE_VERSION || m.commit !== process.env.RELEASE_COMMIT) throw new Error('release metadata does not identify this tag commit');" && (cd release-assets && sha256sum -c SHA256SUMS)
+        run: |
+          node -e "const m=JSON.parse(require('fs').readFileSync('release-assets/latest.json')); if (m.version !== process.env.RELEASE_VERSION || m.commit !== process.env.RELEASE_COMMIT) throw new Error('release metadata does not identify this tag commit');"
+          node scripts/verify-release-identity.mjs release-assets "$RELEASE_COMMIT"
+          (cd release-assets && sha256sum -c SHA256SUMS)
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_VERSION }}
+          target_commitish: ${{ env.RELEASE_COMMIT }}
           name: Hotkey Runbook ${{ env.RELEASE_VERSION }}
           generate_release_notes: true
           prerelease: false

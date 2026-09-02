@@ -32,7 +32,8 @@ The landing page was read in source order, including runtime status and existing
 | The free app opens 3 runbooks and shows 10 history entries. | 11 | Pass |
 | A valid existing license adds unlimited local runbooks and 100 history entries. | 13 | Pass |
 | No subscription or account is needed for the free tier. | 10 | Pass |
-| This page does not offer a checkout. | 8 | Pass |
+| New license sales are unavailable. | 5 | Pass |
+| Checkout will be available after the operator registers it. | 9 | Pass |
 | Restore a valid token from an earlier purchase. | 9 | Pass |
 | Unsigned preview builds are produced in public GitHub Actions. | 9 | Pass |
 | On macOS, right-click the app and choose Open on first launch. | 11 | Pass |

@@ -48,8 +48,8 @@ describe("static site contract", () => {
       .map((path) => readFileSync(path, "utf8"))
       .join("\n");
     const nativeUi = readFileSync("src/main.ts", "utf8");
-    expect(publicCopy).toContain("This page does not offer a checkout.");
-    expect(nativeUi).toContain("This app does not offer checkout.");
+    expect(publicCopy).toContain("New license sales are unavailable until checkout is registered.");
+    expect(nativeUi).toContain("New license sales are unavailable until checkout is registered.");
     expect(publicCopy).not.toMatch(/\$29|one-time license/i);
     expect(nativeUi).not.toMatch(/\$29|one-time license/i);
     expect(publicCopy).not.toMatch(/href=["'][^"']*\/checkout/i);

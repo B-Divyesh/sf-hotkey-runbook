@@ -27,6 +27,25 @@ type HmacSha256 = Hmac<Sha256>;
 const MAX_FILE_BYTES: u64 = 65_536;
 const MAX_OUTPUT_BYTES: usize = 65_536;
 const MAX_HISTORY: usize = 100;
+const BUILD_COMMIT: &str = env!("HOTKEY_BUILD_COMMIT");
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct BuildIdentity {
+    pub version: String,
+    pub commit: String,
+}
+
+pub fn build_identity() -> BuildIdentity {
+    BuildIdentity {
+        version: env!("CARGO_PKG_VERSION").into(),
+        commit: BUILD_COMMIT.into(),
+    }
+}
+
+pub fn build_identity_json() -> String {
+    serde_json::to_string(&build_identity()).expect("build identity is serializable")
+}
 
 #[derive(Debug, Error)]
 enum AppError {
@@ -643,6 +662,11 @@ fn current_state() -> AppResult<AppState> {
 #[tauri::command]
 fn get_state() -> AppResult<AppState> {
     current_state()
+}
+
+#[tauri::command]
+fn get_build_identity() -> BuildIdentity {
+    build_identity()
 }
 
 #[tauri::command]
@@ -1314,6 +1338,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            get_build_identity,
             get_state,
             inspect_directory,
             trust_directory,
@@ -1656,6 +1681,26 @@ steps:
         assert_eq!(
             String::from_utf8_lossy(&output.stdout),
             "shown-in-consent\n"
+        );
+    }
+
+    #[test]
+    // @regression:installed-build-identity
+    fn installed_build_identity_is_versioned_and_tied_to_a_source_revision() {
+        let identity = build_identity();
+        assert_eq!(identity.version, env!("CARGO_PKG_VERSION"));
+        assert!(
+            identity.commit == "unrecorded"
+                || (identity.commit.len() == 40
+                    && identity
+                        .commit
+                        .chars()
+                        .all(|character| character.is_ascii_hexdigit())),
+            "build identity must expose a full source revision"
+        );
+        assert_eq!(
+            serde_json::from_str::<BuildIdentity>(&build_identity_json()).unwrap(),
+            identity
         );
     }
 

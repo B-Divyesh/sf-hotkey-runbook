@@ -76,7 +76,13 @@ The static deployment root is `dist/site`; `index.html` is written directly ther
 
 ## Install and releases
 
-Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS` and `latest.json`. The manifest records the release version, tagged commit, per-platform URL, and SHA-256. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
+Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS`, `latest.json`, and `installer-metadata.json`. The manifest records the release version, tagged commit, installed-build identity, per-platform URL, and SHA-256. The workflow extracts the packaged Linux app and fails before publishing unless `hotkey-runbook --build-identity` reports that exact source commit. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
+
+After installing, use this to inspect the exact native build:
+
+```sh
+hotkey-runbook --build-identity
+```
 
 One-line installers verify SHA-256 before installing:
 
@@ -92,6 +98,6 @@ Preview packages are unsigned. On macOS, right-click the app and choose **Open**
 
 ## License and privacy
 
-The free field kit supports three runbooks and ten visible history entries. A valid existing license adds unlimited runbooks and the 100-entry logbook. This release does not offer a checkout. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
+The free field kit supports three runbooks and ten visible history entries. A valid existing license adds unlimited runbooks and the 100-entry logbook. New license sales are unavailable until the operator registers checkout. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
 
 See the deployed [privacy policy](https://hotkey-runbook.sociobot.in/privacy/) and [terms](https://hotkey-runbook.sociobot.in/terms/). The source is MIT licensed; see [LICENSE](LICENSE).

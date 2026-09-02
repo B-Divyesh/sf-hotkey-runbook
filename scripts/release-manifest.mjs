@@ -45,4 +45,16 @@ for (const file of all.filter((item) => /\.(deb|exe)$/i.test(item))) {
   sums.push(`${createHash("sha256").update(await readFile(destination)).digest("hex")}  ${filename}`);
 }
 await writeFile(join(output, "SHA256SUMS"), `${sums.join("\n")}\n`);
-await writeFile(join(output, "latest.json"), `${JSON.stringify({ version, commit, publishedAt: new Date().toISOString(), platforms }, null, 2)}\n`);
+const installedBuild = {
+  version: version.replace(/^v/, ""),
+  commit,
+  command: "hotkey-runbook --build-identity",
+};
+const manifest = { version, commit, publishedAt: new Date().toISOString(), installedBuild, platforms };
+await writeFile(join(output, "latest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+await writeFile(join(output, "installer-metadata.json"), `${JSON.stringify({
+  tag: version,
+  sourceCommit: commit,
+  installedBuild,
+  platforms,
+}, null, 2)}\n`);
