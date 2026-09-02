@@ -112,4 +112,11 @@ describe("release manifest", () => {
     expect(() => assertReleaseIdentity({ manifest, metadata, sourceCommit: current, installedIdentity: { version: "9.9.9", commit: stale } }))
       .toThrow(/does not match tagged source/);
   });
+
+  it("@regression:installed-build-identity watches the active Git ref instead of reusing a prior build", () => {
+    const buildScript = readFileSync("src-tauri/build.rs", "utf8");
+    expect(buildScript).toContain("watch_current_git_ref");
+    expect(buildScript).toContain('git_dir.join("HEAD")');
+    expect(buildScript).toContain("git_dir.join(reference)");
+  });
 });
