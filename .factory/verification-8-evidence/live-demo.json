@@ -1,0 +1,27 @@
+{
+  "status": 200,
+  "initialAxe": [],
+  "completedAxe": [],
+  "initialFocus": {
+    "id": "demo-confirm",
+    "tag": "INPUT"
+  },
+  "wrongDisabled": true,
+  "returnFocus": "Review exact process →",
+  "banner": true,
+  "completed": true,
+  "sessionKeys": [
+    "demo:hotkey-runbook:history"
+  ],
+  "localKeys": [],
+  "overflow": 0,
+  "requests": [
+    "https://hotkey-runbook.sociobot.in/demo/",
+    "https://hotkey-runbook.sociobot.in/assets/demo-CH31MMMQ.js",
+    "https://hotkey-runbook.sociobot.in/assets/style-D2__u2uV.js",
+    "https://hotkey-runbook.sociobot.in/assets/style-DJxxg31f.css"
+  ],
+  "allSameOrigin": true,
+  "errors": [],
+  "pageErrors": []
+}

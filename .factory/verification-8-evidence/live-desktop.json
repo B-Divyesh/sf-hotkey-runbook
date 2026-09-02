@@ -1,0 +1,63 @@
+{
+  "status": 200,
+  "headers": {
+    "cache-control": "public, must-revalidate, max-age=30",
+    "content-encoding": "br",
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://api.github.com https://api.sociobot.in; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://api.sociobot.in; upgrade-insecure-requests",
+    "content-type": "text/html",
+    "date": "Wed, 02 Sep 2026 03:01:12 GMT",
+    "etag": "\"65179327\"",
+    "last-modified": "Wed, 02 Sep 2026 02:20:19 GMT",
+    "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=()",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "strict-transport-security": "max-age=10886400; includeSubDomains; preload",
+    "vary": "Accept-Encoding",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-frame-options": "DENY",
+    "x-xss-protection": "1; mode=block"
+  },
+  "desktop": {
+    "title": "Hotkey Runbook — run local YAML safely",
+    "lang": "en",
+    "h1": [
+      "Run reviewed local YAML safely."
+    ],
+    "main": 1,
+    "overflow": 0,
+    "focus": {
+      "text": "Skip to main content",
+      "class": "skip-link",
+      "outline": "rgb(163, 59, 43) solid 3px"
+    },
+    "minTargetHeight": 44,
+    "targetCount": 24,
+    "buttons": [
+      {
+        "name": "Restore an existing license",
+        "title": ""
+      },
+      {
+        "name": "Verify license",
+        "title": ""
+      }
+    ]
+  },
+  "lightAxe": [],
+  "darkAxe": [],
+  "toggleCount": 0,
+  "requests": [
+    "https://hotkey-runbook.sociobot.in/",
+    "https://hotkey-runbook.sociobot.in/assets/hero-field-guide-960.webp",
+    "https://hotkey-runbook.sociobot.in/assets/style-D2__u2uV.js",
+    "https://hotkey-runbook.sociobot.in/assets/main-NevKCg8w.js",
+    "https://hotkey-runbook.sociobot.in/assets/style-DJxxg31f.css",
+    "https://hotkey-runbook.sociobot.in/assets/walkthrough/01-load-sample.webp",
+    "https://hotkey-runbook.sociobot.in/assets/walkthrough/02-prepare.webp",
+    "https://hotkey-runbook.sociobot.in/assets/walkthrough/03-review.webp",
+    "https://hotkey-runbook.sociobot.in/assets/walkthrough/04-result.webp",
+    "https://api.github.com/repos/B-Divyesh/sf-hotkey-runbook/releases/latest"
+  ],
+  "errors": [],
+  "pageErrors": []
+}

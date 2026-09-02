@@ -1,0 +1,117 @@
+{
+  "pages": [
+    {
+      "path": "/",
+      "status": 200,
+      "title": "Hotkey Runbook — run local YAML safely",
+      "h1": [
+        "Run reviewed local YAML safely."
+      ]
+    },
+    {
+      "path": "/demo/",
+      "status": 200,
+      "title": "Demo — Hotkey Runbook",
+      "h1": [
+        "Review a sample deployment check."
+      ]
+    },
+    {
+      "path": "/privacy/",
+      "status": 200,
+      "title": "Privacy — Hotkey Runbook",
+      "h1": [
+        "Privacy"
+      ]
+    },
+    {
+      "path": "/terms/",
+      "status": 200,
+      "title": "Terms — Hotkey Runbook",
+      "h1": [
+        "Terms"
+      ]
+    },
+    {
+      "path": "/404.html",
+      "status": 200,
+      "title": "Page not found — Hotkey Runbook",
+      "h1": [
+        "This page is not in the runbook."
+      ]
+    },
+    {
+      "path": "/qa8-definitely-missing",
+      "status": 404,
+      "title": "Page not found — Hotkey Runbook",
+      "h1": [
+        "This page is not in the runbook."
+      ]
+    }
+  ],
+  "links": [
+    {
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook",
+      "status": 200,
+      "final": "https://github.com/B-Divyesh/sf-hotkey-runbook"
+    },
+    {
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_linux-x86_64.AppImage",
+      "status": 200,
+      "final": "https://release-assets.githubusercontent.com/github-production-release-asset/1349354159/97ced6b6-eae6-49c7-beb1-f71a734e0b95?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-09-02T03%3A54%3A44Z&rscd=attachment%3B+filename%3DHotkey-Runbook_0.1.9_linux-x86_64.AppImage&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-09-02T02%3A54%3A02Z&ske=2026-09-02T03%3A54%3A44Z&sks=b&skv=2018-11-09&sig=M7gyTumM0fxQ2V26B%2BpdoczfHGbcT%2F821dfENsUhZdY%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4ODMxOTk0MywibmJmIjoxNzg4MzE4MTQzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.fe56_UnLEOgct4E5ZdBDpDYcUBgT0tDK-XS6EfhTVCA&response-content-disposition=attachment%3B%20filename%3DHotkey-Runbook_0.1.9_linux-x86_64.AppImage&response-content-type=application%2Foctet-stream"
+    },
+    {
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_macos-arm64.dmg",
+      "status": 200,
+      "final": "https://release-assets.githubusercontent.com/github-production-release-asset/1349354159/fbd6cf66-5dd1-4d43-a7c4-4b60bf2a0385?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-09-02T04%3A01%3A47Z&rscd=attachment%3B+filename%3DHotkey-Runbook_0.1.9_macos-arm64.dmg&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-09-02T03%3A01%3A12Z&ske=2026-09-02T04%3A01%3A47Z&sks=b&skv=2018-11-09&sig=qpRsmc%2BXTFqbq1EcAdmzPtzX%2Bw2v29r3%2BjP5LwQ3ZI4%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4ODMxODQ0MywibmJmIjoxNzg4MzE4MTQzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.1K9cmjKvfDoiwBG1hYB1BQueQApVWc6HOlL3r7FB8k8&response-content-disposition=attachment%3B%20filename%3DHotkey-Runbook_0.1.9_macos-arm64.dmg&response-content-type=application%2Foctet-stream"
+    },
+    {
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_windows-x86_64.msi",
+      "status": 200,
+      "final": "https://release-assets.githubusercontent.com/github-production-release-asset/1349354159/2e50ae00-9aba-4236-a8f4-1db19e871e4b?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-09-02T04%3A01%3A58Z&rscd=attachment%3B+filename%3DHotkey-Runbook_0.1.9_windows-x86_64.msi&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-09-02T03%3A01%3A18Z&ske=2026-09-02T04%3A01%3A58Z&sks=b&skv=2018-11-09&sig=emjHXf7Ebi6i11IIwW4yedWnwPwD0feC1dlXbJ%2BnN3o%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4ODMxODQ0MywibmJmIjoxNzg4MzE4MTQzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.1K9cmjKvfDoiwBG1hYB1BQueQApVWc6HOlL3r7FB8k8&response-content-disposition=attachment%3B%20filename%3DHotkey-Runbook_0.1.9_windows-x86_64.msi&response-content-type=application%2Foctet-stream"
+    },
+    {
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/latest/download/SHA256SUMS",
+      "status": 200,
+      "final": "https://release-assets.githubusercontent.com/github-production-release-asset/1349354159/6b80d88c-399c-414e-94dc-580ab9c1f174?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-09-02T03%3A57%3A16Z&rscd=attachment%3B+filename%3DSHA256SUMS&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-09-02T02%3A56%3A43Z&ske=2026-09-02T03%3A57%3A16Z&sks=b&skv=2018-11-09&sig=KqVVU6%2Fw6j0T7IFg9okAzr0FRA615w4HsaJbrdotOOw%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4ODMxODQ0MywibmJmIjoxNzg4MzE4MTQzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.1K9cmjKvfDoiwBG1hYB1BQueQApVWc6HOlL3r7FB8k8&response-content-disposition=attachment%3B%20filename%3DSHA256SUMS&response-content-type=application%2Foctet-stream"
+    },
+    {
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/tree/main/examples",
+      "status": 200,
+      "final": "https://github.com/B-Divyesh/sf-hotkey-runbook/tree/main/examples"
+    },
+    {
+      "url": "https://hotkey-runbook.sociobot.in/",
+      "status": 200,
+      "final": "https://hotkey-runbook.sociobot.in/"
+    },
+    {
+      "url": "https://hotkey-runbook.sociobot.in/404.html",
+      "status": 200,
+      "final": "https://hotkey-runbook.sociobot.in/404.html"
+    },
+    {
+      "url": "https://hotkey-runbook.sociobot.in/demo/",
+      "status": 200,
+      "final": "https://hotkey-runbook.sociobot.in/demo/"
+    },
+    {
+      "url": "https://hotkey-runbook.sociobot.in/privacy/",
+      "status": 200,
+      "final": "https://hotkey-runbook.sociobot.in/privacy/"
+    },
+    {
+      "url": "https://hotkey-runbook.sociobot.in/terms/",
+      "status": 200,
+      "final": "https://hotkey-runbook.sociobot.in/terms/"
+    },
+    {
+      "url": "mailto:privacy@sociobot.in",
+      "status": "mailto"
+    },
+    {
+      "url": "mailto:support@sociobot.in",
+      "status": "mailto"
+    }
+  ]
+}

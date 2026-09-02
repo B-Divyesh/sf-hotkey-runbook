@@ -1,0 +1,33 @@
+{
+  "mobile": {
+    "overflow": 0,
+    "viewport": {
+      "w": 390,
+      "h": 844
+    },
+    "h1": "Run reviewed local YAML safely.",
+    "primary": {
+      "x": 20,
+      "y": 483.203125,
+      "width": 350,
+      "height": 50,
+      "top": 483.203125,
+      "right": 370,
+      "bottom": 533.203125,
+      "left": 20
+    },
+    "smallTargets": []
+  },
+  "mobileErrors": [],
+  "darkAxe": [],
+  "darkColors": {
+    "bodyBg": "rgb(23, 27, 22)",
+    "bodyColor": "rgb(240, 239, 226)"
+  },
+  "darkErrors": [],
+  "motion": {
+    "matches": true,
+    "animations": 0,
+    "scrollBehavior": "auto"
+  }
+}

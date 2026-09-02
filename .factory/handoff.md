@@ -1,104 +1,57 @@
-# Repair 7 handoff — Hotkey Runbook
+# Handoff — independent verification 8
 
 ## Result
 
-Repaired the release-blocking verification findings from independent report
-`bba981076d2ffd8d605680b062f2e73f9c130763` for candidate
-`43413fe38082e09e412fbb01c3c7ed22ac9e3338`. The product remains a Tauri 2
-desktop app with a static download/demo site.
+**FAIL — do not release.**
 
-## What changed
+Tested candidate `1c627893010a4ba0a1d92a10876de3380bef4056` from a clean checkout and live at <https://hotkey-runbook.sociobot.in> on 2026-09-02 UTC. The live static files match the candidate byte for byte.
 
-1. **Existing-license recovery now has an outcome-level regression test.**
-   The original tagged Playwright command was run first and passed while only
-   opening the token field, reproducing the verifier's failure. The repaired
-   `@claim:existing-license-recovery` test now submits
-   `existing-license-fixture-2026`, intercepts the exact product-scoped
-   `/verify?license=…` request with `{valid:true,reason:"ok"}`, asserts the
-   success message, `sb_license:hotkey-runbook`, the cached unlocked verdict,
-   and the unlocked browser state after reload.
-2. **The retained licensed-runbooks promise is registered and tested.**
-   `.factory/claims.json` adds `licensed-runbooks`. Its exact tagged Vitest
-   regression uses 101 deterministic reviewed runbooks, proves free mode shows
-   three, and proves the valid-license path returns every one without a product
-   runbook-count cap. This covers the landing, desktop Settings, README, and
-   Terms promise of unlimited local runbooks.
-3. **Unavailable checkout stays truthful and disabled.**
-   The recovery test continues to fixture the unregistered-checkout 404 while
-   proving the landing has no price, `/checkout` link, or buy/purchase control.
-   No purchase path was added.
+Full evidence and exact results: [verification-8.md](verification-8.md). Screenshots and machine-readable outputs: [verification-8-evidence](verification-8-evidence/).
 
-## Verification
+## Release blockers
 
-Ran from a clean `npm ci` on 2026-09-02 UTC after installing the repository
-release workflow's documented Linux WebKit/GTK prerequisites:
+1. The native child process inherits environment variables that are absent from the final consent screen. A fresh optimized-build reproduction passed `HOTKEY_QA8_INHERITED_MARKER=inherited-but-not-reviewed` to `/usr/bin/printenv` even though no environment entry appeared in review. This falsifies the `exact-environment-review` claim and can expose launcher secrets.
+2. New one-time license sales are unavailable. The required Sociobot checkout returns 404, and the live site has no price or buy action.
+3. The supplied safety contract requires platform sandboxing where available; execution is a direct `Command::output()` with no sandbox implementation.
+4. At 390 px and 200% text size, the landing page is 563 px wide and loses content horizontally.
+
+Additional defect: the existing-license form is visibly laid out despite its `hidden` attribute because `.purchase form { display:grid }` overrides it.
+
+## Verification summary
+
+- All 13 exact `.factory/claims.json` commands passed, but native observation disproved `exact-environment-review`, exposing a deficient claim test.
+- Cold first-read and one-click sample-data demo gate passed.
+- `npm ci`, `npm audit`, `npm run check`, local and live Playwright suites, production web build, Debian packaging, and optimized AppImage build passed.
+- 20/20 local and 20/20 live E2E tests passed.
+- Native sample load, invalid-input recovery, exact review, consent, redaction, history persistence, reset, and Start for real passed.
+- URL verifier passed. axe serious/critical: 0. Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.2 s, CLS 0.005.
+- Demo traffic was same-origin only. No analytics or external fonts/scripts were observed. Security and caching headers passed.
+- Published Linux AppImage downloaded, launched, and matched SHA-256 `94f01f417f25100603ac7d913a5549f80ce1746dd8ffe2a772840fcda831f2e6`.
+- License verification allowance observed: 30 successful requests per client/window; subsequent requests returned 429 with `Retry-After`.
+
+## How to rerun
+
+Install the README's Linux prerequisites, then run:
 
 ```sh
 npm ci
+jq -r '.[].test' .factory/claims.json
 npm run check
 npm run test:e2e
-npm audit --audit-level=high
-CI=false npm run tauri -- build --bundles deb,appimage
+PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
+CI=false npm run tauri -- build --bundles appimage
 ```
 
-- `npm run check`: passed — 20 Vitest tests, 10 Rust tests, TypeScript,
-  rustfmt, strict Clippy, and production `dist/app` plus `dist/site` builds.
-- `npm run test:e2e`: passed — all 20 Chromium desktop and 390 px mobile
-  checks. The recovery claim passes in both browser projects with stored and
-  unlocked state assertions.
-- All 13 exact commands declared by `.factory/claims.json` passed, including
-  the new `@claim:licensed-runbooks` command.
-- `npm audit --audit-level=high`: passed — 0 vulnerabilities.
-- Local static verification passed with
-  `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/` — title, `lang`, one
-  h1, main landmark, image alt text, and browser console all clean.
-- `npx @axe-core/cli` found 0 violations. It used the pinned Playwright Chrome
-  binary with a matching ChromeDriver 145 fixture; Playwright axe checks also
-  cover landing, demo, dialog, and completed mobile-demo states.
-- Local Lighthouse: Performance 100, Accessibility 100, Best Practices 100,
-  SEO 100; FCP 1.0 s, LCP 1.7 s, CLS 0.005, total transfer 140 KiB.
-- Linux package smoke test passed: `Hotkey Runbook_0.1.9_amd64.deb` has valid
-  metadata, the 34,974,543-byte AppImage is a 64-bit ELF AppImage, and the
-  extracted `.deb` desktop binary launched under Xvfb with an isolated
-  `XDG_DATA_HOME`.
+Run each claims command printed by `jq` separately and exactly as written.
 
-Local site evidence is in `.factory/repair-7-local/`:
-`verify.json`, `axe.json`, `lighthouse.json`, and desktop/mobile screenshots.
+## Known scope and changes
 
-## Deployment
+No product code, deployment, infrastructure, DNS, billing, app settings, or secrets were modified. This verification changes only `.factory` documentation and evidence. Sign-in, PWA service-worker behavior, and product-backend concurrency are not applicable to this account-free local desktop app.
 
-Deployed the freshly built `dist/site` at 2026-09-02 02:18 UTC to the
-product-scoped `sf-hotkey-runbook` Static Web App in resource group
-`sociobot`. Azure Static Web Apps confirmed deployment to
-`https://proud-dune-0462c4310.7.azurestaticapps.net`; the custom domain
-`https://hotkey-runbook.sociobot.in` is live.
+## Required next work
 
-- The live `index.html` SHA-256 is
-  `1365cf66452ad668ee44b4a0598824aa896762efc52a1258a670e9dc57c241ad`,
-  exactly matching the deployed local build.
-- The live `verify-url.sh` check passed with no console errors and the
-  required title, language, h1, main landmark, and image alt text.
-- Live `PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e`
-  passed all 20 desktop/mobile tests.
-- Live `/`, `/demo/`, `/privacy/`, `/terms/`, `/robots.txt`,
-  `/sitemap.xml`, `/latest.json`, and `/404.html` return 200; an unknown
-  route returns the designed page with HTTP 404.
-- The production response supplies HSTS, the configured restrictive CSP with
-  `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`,
-  `Referrer-Policy`, `X-Frame-Options: DENY`, and Permissions Policy.
-
-Live evidence is in `.factory/repair-7-live/`, including the captured HTML,
-headers, verification report, and desktop/mobile screenshots.
-
-## Known gap / next operator action
-
-New license sales intentionally remain unavailable. This is truthful in the
-site and desktop UI, but it remains a researched-brief monetization deviation:
-the brief says one-time monetization while no product-scoped Sociobot checkout
-is registered. Per this repair work order, no purchase flow was invented. A
-factory owner must register and enable the product checkout before a future
-release can offer new sales. Existing valid licenses continue to be recoverable.
-
-Published installers are unsigned. macOS users must right-click → Open on the
-first launch; Windows may show SmartScreen. Signing requires owner-managed
-certificates and was not attempted.
+1. Clear inherited child environments and explicitly pass only reviewed environment entries; add an execution-level claim test proving an unrelated parent variable is absent.
+2. Register and verify the Sociobot one-time checkout, price, return flow, and new-license unlock.
+3. Implement/document supported platform sandbox boundaries or formally revise the researched contract.
+4. Fix intrinsic mobile grid sizing at 200% text and add an automated resize/reflow test.
+5. Restore real hidden behavior for the license form and assert its initial state.
