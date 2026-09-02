@@ -1,27 +1,32 @@
 {
-  "version": "v0.1.9",
-  "commit": "689372f95bda391f1bdbf4bf1f8efd50f66b2318",
-  "publishedAt": "2026-09-02T00:47:37.357Z",
+  "version": "v0.1.12",
+  "commit": "7cf42e58b59f4305cc222c9ff9051a11bb68bea6",
+  "publishedAt": "2026-09-02T05:07:14.500Z",
+  "installedBuild": {
+    "version": "0.1.12",
+    "commit": "7cf42e58b59f4305cc222c9ff9051a11bb68bea6",
+    "command": "hotkey-runbook --build-identity"
+  },
   "platforms": {
     "macos-arm64": {
-      "file": "Hotkey-Runbook_0.1.9_macos-arm64.dmg",
-      "sha256": "db9bfef23aabca68823d3edcc68724c0359c64133ae37e2cd03e83a635b0807d",
-      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_macos-arm64.dmg"
+      "file": "Hotkey-Runbook_0.1.12_macos-arm64.dmg",
+      "sha256": "93efb6c74962a6af9d7ccb34a46564aaac9c8961d89f602db0d79d89b1fb44e1",
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.12/Hotkey-Runbook_0.1.12_macos-arm64.dmg"
     },
     "macos-x86_64": {
-      "file": "Hotkey-Runbook_0.1.9_macos-x86_64.dmg",
-      "sha256": "a1c6ccd465601783c4070e2c1e0c137014a6e7366a4da93ee6d8f5fcdefb868e",
-      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_macos-x86_64.dmg"
+      "file": "Hotkey-Runbook_0.1.12_macos-x86_64.dmg",
+      "sha256": "8335d47fce06a02fe4bc4b320a1df68e475ac0bfbe4fb326120ca7383cef66e8",
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.12/Hotkey-Runbook_0.1.12_macos-x86_64.dmg"
     },
     "windows-x86_64": {
-      "file": "Hotkey-Runbook_0.1.9_windows-x86_64.msi",
-      "sha256": "0f7e277a396017a168489cce06a161f19422848e618df7b2302f046964b73f31",
-      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_windows-x86_64.msi"
+      "file": "Hotkey-Runbook_0.1.12_windows-x86_64.msi",
+      "sha256": "fad4245e0a52aa704f5bd5050dba4add4913baf51fe338bc9fc11561dfb14229",
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.12/Hotkey-Runbook_0.1.12_windows-x86_64.msi"
     },
     "linux-x86_64": {
-      "file": "Hotkey-Runbook_0.1.9_linux-x86_64.AppImage",
-      "sha256": "94f01f417f25100603ac7d913a5549f80ce1746dd8ffe2a772840fcda831f2e6",
-      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_linux-x86_64.AppImage"
+      "file": "Hotkey-Runbook_0.1.12_linux-x86_64.AppImage",
+      "sha256": "0914ee0b3c9711ef62078c07b38c3b0bce88b03e07cbfd75b83818467ef31d28",
+      "url": "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.12/Hotkey-Runbook_0.1.12_linux-x86_64.AppImage"
     }
   }
 }
