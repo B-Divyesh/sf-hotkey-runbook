@@ -1,6 +1,6 @@
 [package]
 name = "hotkey-runbook"
-version = "0.1.10"
+version = "0.1.11"
 description = "A local, reviewable runbook launcher"
 authors = ["Param Factory"]
 license = "MIT"

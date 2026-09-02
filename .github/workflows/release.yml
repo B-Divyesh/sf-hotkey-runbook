@@ -8,7 +8,7 @@ on:
       version:
         description: Release tag (for example v0.1.8)
         required: true
-        default: v0.1.10
+        default: v0.1.11
 
 permissions:
   contents: write
@@ -26,7 +26,10 @@ jobs:
       - run: npm ci
       - name: Verify tag names the checked-out release source
         if: startsWith(github.ref, 'refs/tags/')
-        run: test "v$(node -p \"require('./package.json').version\")" = "$GITHUB_REF_NAME" && test -n "$(git rev-parse HEAD)"
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          test "v$version" = "$GITHUB_REF_NAME"
+          test -n "$(git rev-parse HEAD)"
       - run: npx playwright install --with-deps chromium
       - run: npm test
       - run: npm run lint
@@ -120,7 +123,8 @@ jobs:
           path: artifacts
       - name: Build checksums and download manifest
         run: |
-          test "v$(node -p \"require('./package.json').version\")" = "$RELEASE_VERSION"
+          version="$(node -p "require('./package.json').version")"
+          test "v$version" = "$RELEASE_VERSION"
           RELEASE_COMMIT=$(git rev-parse HEAD)
           echo "RELEASE_COMMIT=$RELEASE_COMMIT" >> "$GITHUB_ENV"
           RELEASE_COMMIT="$RELEASE_COMMIT" node scripts/release-manifest.mjs artifacts release-assets
