@@ -67,9 +67,28 @@ Local site evidence is in `.factory/repair-7-local/`:
 
 ## Deployment
 
-Deployment and post-deploy identity/header checks are pending the repair
-commit. The product-scoped static deployment target is
-`sf-hotkey-runbook` in resource group `sociobot`.
+Deployed the freshly built `dist/site` at 2026-09-02 02:18 UTC to the
+product-scoped `sf-hotkey-runbook` Static Web App in resource group
+`sociobot`. Azure Static Web Apps confirmed deployment to
+`https://proud-dune-0462c4310.7.azurestaticapps.net`; the custom domain
+`https://hotkey-runbook.sociobot.in` is live.
+
+- The live `index.html` SHA-256 is
+  `1365cf66452ad668ee44b4a0598824aa896762efc52a1258a670e9dc57c241ad`,
+  exactly matching the deployed local build.
+- The live `verify-url.sh` check passed with no console errors and the
+  required title, language, h1, main landmark, and image alt text.
+- Live `PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e`
+  passed all 20 desktop/mobile tests.
+- Live `/`, `/demo/`, `/privacy/`, `/terms/`, `/robots.txt`,
+  `/sitemap.xml`, `/latest.json`, and `/404.html` return 200; an unknown
+  route returns the designed page with HTTP 404.
+- The production response supplies HSTS, the configured restrictive CSP with
+  `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy`, `X-Frame-Options: DENY`, and Permissions Policy.
+
+Live evidence is in `.factory/repair-7-live/`, including the captured HTML,
+headers, verification report, and desktop/mobile screenshots.
 
 ## Known gap / next operator action
 
