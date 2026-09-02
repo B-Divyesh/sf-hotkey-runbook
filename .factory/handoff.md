@@ -1,147 +1,128 @@
-# Handoff — repair 10
-
-> ## Independent verification — **FAIL** (2026-09-02 UTC)
->
-> Candidate `e126b39644f2aa55cce50a0edc0249f4ee24cab8` passed all declared
-> claim commands, local quality gates, live Playwright/Axe checks, desktop
-> sample flow, privacy/header checks, and release checksum validation. It is
-> **not accepted** because new one-time sales are still unavailable, several
-> visitor-facing account/telemetry/cloud-sync/release claims lack entries in
-> `.factory/claims.json`, and the installed v0.1.13 binary embeds
-> `57258e3f605881ef6cd2f677685bf2f695706d87` rather than the requested
-> candidate. See `.factory/verification-10.md` for exact commands, results,
-> rate-limit observation (30 then `429 Retry-After: 3`), and remediation.
+# Handoff — repair 11
 
 ## Status
 
-The stale-desktop-artifact repair is released and deployed. Desktop release
-[`v0.1.13`](https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.13)
-is an immutable build of source commit
-`57258e3f605881ef6cd2f677685bf2f695706d87` (tag `v0.1.13` resolves to that
-commit). GitHub Actions run
-[`33596086623`](https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33596086623)
-passed its clean test job and all macOS arm64/x86_64, Windows x86_64, and Linux
-x86_64 builds before publishing.
+The verifier findings for candidate `e126b39644f2aa55cce50a0edc0249f4ee24cab8`
+were reproduced from `.factory/verification-10.md`. Version 0.1.14 contains the
+product-side repairs and exact regressions. The desktop and static artifacts are
+buildable and the final `v0.1.14` tag is intended to identify this handoff
+commit exactly.
 
-The production static site is deployed at <https://hotkey-runbook.sociobot.in>.
-Its live `/latest.json` identifies the same v0.1.13 source commit and immutable
-download URLs. The owned Azure Static Web App deployed successfully to
-`https://proud-dune-0462c4310.7.azurestaticapps.net`.
-
-Full acceptance still has one external blocker: new one-time sales cannot be
-enabled until the Sociobot billing product is registered. See **Known gap**.
+One external release blocker remains: the scoped Sociobot billing product is
+not registered. The public checkout still returns HTTP 404 with
+`{"error":"enabled factory product","status":404}`. This worker has no
+`fleet/new-paid-product.sh` and no scoped billing-registration credential. It
+did not inspect or change a shared service, database, key vault, staging slot,
+or another product. See **Needs operator action**.
 
 ## Repairs
 
-1. Preserved the release-identity work from the prior repair and published a
-   fresh desktop release from the reviewed source. The release workflow verifies
-   the tag/version, embeds the source revision, extracts the Linux AppImage, and
-   rejects a mismatched installed-build identity before publication.
-2. Added `npm run clean:build-caches`, invoked before every Rust test. It removes
-   only disposable repository outputs (`src-tauri/target`, Vite cache, Playwright
-   report/results) and the npm package cache, then refuses to start Cargo with
-   less than 5 GiB free.
-3. Added `@regression:disk-exhaustion` coverage. It deterministically models the
-   reported low-space condition one byte below the preflight minimum, verifies
-   the useful error, runs cleanup in an isolated fixture, and proves source files
-   survive while only cache paths are removed. The first clean native test used
-   3.5 GiB; native tests plus strict Clippy peaked at 4.2 GiB, validating the
-   5 GiB headroom.
-4. Synchronized `latest.json`, Homebrew, Scoop, and Winget with the v0.1.13
-   immutable checksums before rebuilding and deploying the site.
+1. Added the required $29 one-time purchase UI on the landing page and desktop
+   Settings. Both use only the documented scoped checkout URL:
+   `https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout`.
+2. Preserved existing-token recovery and daily verdict caching. A newly
+   returned checkout token now clears any verdict for an older token before it
+   is verified, and the token is removed from the address bar.
+3. Updated Privacy and Terms with the exact price, one-time terms, local token
+   storage, merchant-of-record wording, refund/revocation behavior, and the
+   existing recovery path. Core safety, accessibility, and data control remain
+   free.
+4. Added one-to-one claims and regressions for account-free use, no telemetry,
+   no cloud sync, the hosted checkout path, and existing-license recovery.
+   `.factory/claims.json` now contains 18 unique claims.
+5. Removed the unlisted “public GitHub Actions” sentence. Release provenance
+   remains enforced by the workflow and installed `--build-identity` check.
+6. Bumped every app/package surface and the release workflow default to
+   v0.1.14. The release workflow still builds macOS arm64/x86_64, Windows
+   x86_64, and Linux x86_64 after the complete test job.
+7. Updated `.factory/copy-audit.md`; every landing sentence remains at or below
+   22 words and no banned marketing word is present.
 
-The worker did not deliberately fill the shared filesystem. A constrained mount
-is not permitted in this container and `/dev/shm` is `noexec`; the regression
-therefore reproduces the capacity boundary deterministically without risking
-other work. The real clean build then completed with the cache preflight.
+## Exact verification evidence
 
-## Immutable-release evidence
-
-The downloaded public Linux artifact was verified after publication:
-
-```sh
-sha256sum -c SHA256SUMS --ignore-missing
-# Hotkey-Runbook_0.1.13_linux-x86_64.AppImage: OK
-
-./squashfs-root/AppRun --build-identity
-# {"version":"0.1.13","commit":"57258e3f605881ef6cd2f677685bf2f695706d87"}
-
-node scripts/verify-release-identity.mjs RELEASE_DIR \
-  57258e3f605881ef6cd2f677685bf2f695706d87 \
-  '{"version":"0.1.13","commit":"57258e3f605881ef6cd2f677685bf2f695706d87"}'
-# Release v0.1.13 identifies 57258e3f605881ef6cd2f677685bf2f695706d87.
-```
-
-| Artifact | SHA-256 |
-| --- | --- |
-| macOS arm64 DMG | `298eda635fbedf45583c6f1f77bd61a16304d13e8ab65cd68d7eed015bb40837` |
-| macOS x86_64 DMG | `8a21fe81cbae5b7e1ebaae35e51d97a3ab467a4880fe5d708f67499bdc5f5c7f` |
-| Windows x86_64 MSI | `95fba1d542ffa7e09511cc8cc3992269868c4fec801b9bc7e408f81ba5aa501e` |
-| Linux x86_64 AppImage | `2bfa7201801763c12532193993cb4f7e75806233582f9a88a746020c5004a020` |
-| Linux x86_64 DEB | `05fd3ebe7fd0a04a380507622aaed36e0c83158f5ba3ee549ffc77c79bb46d27` |
-| Windows x86_64 EXE | `c0a87eefdcec0f73d2f765b9732c1d43d2eda991d73dd2fc6ef60cf731e4b30a` |
-
-## Verification
-
-From a clean local install (after installing the documented GTK/WebKit host
-packages), the following passed:
+The normal Tauri Linux prerequisites were installed in the disposable worker.
+Then these clean gates passed:
 
 ```sh
 npm ci
-npm run check
+npm test
+npm run lint
+npm run build
 npm run test:e2e
+npm audit --audit-level=high
 ```
 
-`npm run check` passed 24 Vitest tests, 12 Rust tests, strict TypeScript,
-rustfmt, strict Clippy, and both production web builds. The new regression is
-covered by `npm run test:unit -- --testNamePattern @regression:disk-exhaustion`.
-The release workflow independently reran clean install, tests, lint, browser
-tests, and build before packaging.
+- `npm ci`: 65 packages installed, 0 vulnerabilities.
+- Vitest: 25/25 passed.
+- Rust: 12/12 passed after a clean native build.
+- Strict TypeScript, rustfmt, and Clippy with `-D warnings`: passed.
+- Playwright: 30/30 passed across desktop Chrome and a 390 × 844 mobile
+  project. Coverage includes keyboard use, dialog focus, reduced motion, 200%
+  text, touch targets, request privacy, returned licenses, and Axe scans.
+- All 18 commands in `.factory/claims.json` were also executed individually
+  and passed.
+- Dependency audit: 0 high-severity findings and 0 total vulnerabilities.
+- Production outputs: `dist/app` and `dist/site`.
+- Landing bundle: 3.60 KB JavaScript (1.69 KB gzip) and 13.77 KB CSS
+  (3.73 KB gzip).
 
-Browser verification passed locally and against production:
+Local browser verification:
 
 ```sh
-PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
-# 22 passed: desktop and 390 px mobile, keyboard, focus management,
-# reduced motion, privacy request recording, responsive text, and Axe checks.
-
-/opt/fleet/lib/verify-url.sh https://hotkey-runbook.sociobot.in .factory/repair-10-live
-# title/lang/one h1/main/alt/button labels, 0 console errors
+/opt/fleet/lib/verify-url.sh http://127.0.0.1:5173 .factory/repair-11-local
 ```
 
-The live mobile Lighthouse report at `.factory/repair-10-live/lighthouse.json`
-scored Performance 100, Accessibility 100, Best Practices 100, and SEO 100;
-LCP was 1.21 s and CLS was 0.0047. Live headers include CSP with header-only
-`frame-ancestors 'none'`, HSTS, `nosniff`, strict-origin referrer policy, frame
-denial, and restrictive permissions policy.
+It reported title, `lang=en`, one `<h1>`, `<main>`, no missing alt text, no
+unlabelled buttons, and zero console errors. Desktop and mobile captures plus
+`verify.json` are in `.factory/repair-11-local/`.
 
-## How to run
+Lighthouse mobile evidence is
+`.factory/repair-11-lighthouse-local.json`: Performance 98, Accessibility 100,
+Best Practices 100, SEO 100, LCP 1.90 s, CLS 0.0047, TBT 0 ms.
+
+The committed source repair packaged locally with:
+
+```sh
+CI=false HOTKEY_BUILD_COMMIT=$(git rev-parse HEAD) \
+  npm run tauri -- build --bundles appimage,deb
+```
+
+Both the release binary and extracted AppImage reported version 0.1.14 and
+source `bacdedbfd1d5a3ded06b6ee82c0e421a9f30f5dc`. Local package checksums:
+
+- AppImage: `aa17fc0af0ca8c5bac697ae3fa7e60a8a110102d3edec4655b927cabbe433c1e`
+- DEB: `18aaede94fd467866edc95ebaaad1be82abc4c5954f5caabb484b90f5348ecc5`
+
+The release binary was launched under Xvfb with a fresh `XDG_DATA_HOME`.
+`.factory/repair-11-native-initial.png` shows the first-run sample action;
+`.factory/repair-11-native-sample.png` shows the isolated demo banner, reset
+action, start-for-real action, typed parameters, and bundled sample.
+
+## Run and verify
 
 ```sh
 npm ci
-npm run clean:build-caches
-npm run check
+npm test
+npm run lint
+npm run build
+npm run test:e2e
 npm run dev
-# desktop development: npm run tauri dev
+# desktop development
+npm run tauri dev
 ```
 
-The browser demo is `/demo/`; installed builds offer **Load sample project**.
-See `.factory/demo.md` for its separate storage namespaces.
+The browser sandbox is `/demo/`. The installed app offers **Load sample
+project** on first run. Storage separation and reset behavior are documented in
+`.factory/demo.md`.
 
-## Known gap and required operator action
+## Needs operator action
 
-The independent verifier's checkout blocker cannot be repaired from this worker:
-
-```text
-GET https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout
-HTTP 404
-{"error":"enabled factory product","status":404}
-```
-
-The documented factory registrar (`fleet/new-paid-product.sh`) and a scoped
-billing-registration credential are absent from this worker. Do not add a fake
-checkout link. An authorized operator must register `hotkey-runbook` as the
-approved $29 one-time product through the Sociobot billing engine, then update
-the existing-license recovery copy and its claim test to the live checkout flow.
-Installers remain unsigned pending the owner-provided Apple notarization and
-Windows Authenticode secrets.
+1. Register `hotkey-runbook` as the approved $29 one-time product through the
+   Sociobot billing registrar, with return URL
+   `https://hotkey-runbook.sociobot.in/?license={license}`. Then confirm the
+   scoped checkout returns the hosted redirect instead of 404. The product
+   code, copy, restore path, terms, privacy disclosure, and regression fixture
+   are ready for that registration.
+2. Add owner signing credentials for macOS notarization and Windows
+   Authenticode when signed packages are required. Until then, the landing page
+   accurately labels packages as unsigned previews.
