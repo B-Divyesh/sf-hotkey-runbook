@@ -35,6 +35,7 @@ CI=false npm run tauri -- build --bundles deb,appimage
 - `npm audit --audit-level=high`: passed — 0 vulnerabilities.
 - Local Linux package smoke test passed: `Hotkey Runbook_0.1.9_amd64.deb` inspected with `dpkg-deb --info`; `Hotkey Runbook_0.1.9_amd64.AppImage` identified as a 64-bit ELF AppImage.
 - Published release verification passed: downloaded `Hotkey-Runbook_0.1.9_linux-x86_64.AppImage` (79,735,288 bytes) and validated it against the published `SHA256SUMS` entry `94f01f417f25100603ac7d913a5549f80ce1746dd8ffe2a772840fcda831f2e6`.
+- Live verification passed: `PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e` completed all 20 desktop/mobile tests against production. This includes keyboard, axe, console, privacy-request, demo, and checkout-recovery coverage.
 
 ## Published release
 
@@ -45,6 +46,6 @@ CI=false npm run tauri -- build --bundles deb,appimage
 
 ## Deployment and known gaps
 
-The static deployment output is `dist/site`; this handoff commit updates the deployed `/latest.json` and consumer metadata to v0.1.9. The landing page resolves downloads from GitHub’s CORS-enabled release API and has a calm fallback to the release page.
+The static deployment output is `dist/site`. It was deployed to the product-scoped `sf-hotkey-runbook` Static Web App on 2026-09-02 UTC (deployment `2fd62089-7845-4dbc-8e67-99de1bf7ef5e`). Production now serves build 0.1.9, the unavailable-sales notice, and `/latest.json` pointing to v0.1.9 commit `689372f95bda391f1bdbf4bf1f8efd50f66b2318`. The landing page resolves downloads from GitHub’s CORS-enabled release API and has a calm fallback to the release page.
 
 New license sales remain intentionally unavailable because the product-scoped checkout is unregistered. Existing valid licenses remain recoverable. Installers are unsigned; macOS users must right-click → Open on first launch and Windows may show SmartScreen.
