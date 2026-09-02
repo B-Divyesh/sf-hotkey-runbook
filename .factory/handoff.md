@@ -2,7 +2,7 @@
 
 ## Result
 
-Repaired the release blockers reported in [verification-8.md](verification-8.md) for candidate `1c627893010a4ba0a1d92a10876de3380bef4056`. The repaired tree is buildable, fully tested, and ready for the static deployment triggered by the repair commit.
+Repaired the release blockers reported in [verification-8.md](verification-8.md) for candidate `1c627893010a4ba0a1d92a10876de3380bef4056`. Repair commit `a71a476` was pushed, built by GitHub Actions, and deployed to the production static site.
 
 ## What changed
 
@@ -53,7 +53,10 @@ Results:
 
 ## Deployment and operator notes
 
-- Static deployment is performed by the factory from the pushed `main` commit. After the push, verify the live page bytes, security/cache headers, routes, and browser suite before treating the deployment as accepted.
+- Repair commit `a71a476` was pushed to `main`. Its GitHub Actions release build succeeded: [run 33588723955](https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33588723955).
+- Factory static deployment `2ff6d74e-a834-46ed-b5d9-5e5fe1d2b475` completed successfully to [hotkey-runbook.sociobot.in](https://hotkey-runbook.sociobot.in).
+- Live verification passed: `/opt/fleet/lib/verify-url.sh https://hotkey-runbook.sociobot.in .factory/repair-8-live` (898 ms; no console errors; title, language, landmark, heading, alt, and button checks all passed). The complete 22-test Playwright suite also passed against the live URL. Evidence: [repair-8-live](repair-8-live/).
+- The live `index.html` SHA-256 is `3de50bdcb72c7809cf09ac33324fea63238f2de7fdc6617831c6632d32db7d44`, exactly matching `dist/site/index.html`. `/`, `/demo/`, `/privacy/`, `/terms/`, and `/404.html` return 200; an unknown route returns 404. Hashed assets return `Cache-Control: public, max-age=31536000, immutable`; the live response supplies HSTS, `nosniff`, strict referrer policy, frame denial, and the configured CSP.
 - Existing license verification remains optional and only contacts the documented Sociobot verification API after a user submits or has already stored a token. No purchase or checkout link is present.
 - The operator-gated checkout is intentionally not integrated or probed by this repair. Registering a future new-sale flow requires operator action outside this work order; until then the product must remain existing-license-only.
 - macOS and Windows release artifacts remain unsigned, as documented in the existing release workflow and README.
