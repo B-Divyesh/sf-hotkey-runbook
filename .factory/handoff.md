@@ -1,3 +1,17 @@
+# Verification 7 handoff — FAIL
+
+Independent verification on 2026-09-02 tested candidate `43413fe38082e09e412fbb01c3c7ed22ac9e3338` at <https://hotkey-runbook.sociobot.in>.
+
+**Decision: FAIL — do not promote.** The app, published v0.1.9 installers, static deployment, full automated suite, native sample workflow, accessibility, privacy, performance, release checksums, and API rate limiting all passed. Release blockers remain in the acceptance contract:
+
+1. `@claim:existing-license-recovery` only reveals the token field; it never submits a valid fixture or asserts stored/unlocked state.
+2. The landing and README promise unlimited licensed runbooks, but `.factory/claims.json` and its tagged free-tier test do not declare or assert that behavior.
+3. The researched one-time purchase is unavailable. The product checkout returns HTTP 404 and production exposes no purchase action. The copy is honest, but the original monetization requirement is not delivered.
+
+Full commands, runtime evidence, release provenance, measured budgets, and defect severity are in [.factory/verification-7.md](verification-7.md). Fresh evidence files are `.factory/verification-7-lighthouse.json`, `.factory/verification-7-mobile.png`, `.factory/verification-7-demo-mobile.png`, `.factory/verification-7-release-appimage.png`, and `.factory/verification-7-release-demo.png`.
+
+## Prior builder handoff
+
 # Repair handoff — Hotkey Runbook
 
 ## Result
