@@ -91,6 +91,6 @@ Preview packages are unsigned. On macOS, right-click the app and choose **Open**
 
 ## License and privacy
 
-The free field kit supports three runbooks and ten visible history entries. A paid license adds unlimited runbooks and the 100-entry logbook. The license price is $29 once. New purchases are unavailable. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
+The free field kit supports three runbooks and ten visible history entries. A valid existing license adds unlimited runbooks and the 100-entry logbook. New license sales are unavailable. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
 
 See the deployed [privacy policy](https://hotkey-runbook.sociobot.in/privacy/) and [terms](https://hotkey-runbook.sociobot.in/terms/). The source is MIT licensed; see [LICENSE](LICENSE).

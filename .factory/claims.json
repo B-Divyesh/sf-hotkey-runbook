@@ -77,10 +77,10 @@
     "sandbox": "Windows release runner mocks the download and MSI launcher, then runs the shipped PowerShell script with matching and mismatched bytes; Unix test environments also assert the checksum guard precedes Start-Process"
   },
   {
-    "id": "purchase-availability",
-    "claim": "The license price is $29 once. New purchases are unavailable.",
+    "id": "existing-license-recovery",
+    "claim": "New license sales are unavailable. Existing license tokens can be restored.",
     "where": "landing license section, desktop Settings, README, terms",
-    "test": "npm run test:e2e -- --grep @claim:purchase-availability",
-    "sandbox": "fresh browser context on the landing page; assert the exact price and purchase-availability copy, no checkout link, and existing-license recovery"
+    "test": "npm run test:e2e -- --grep @claim:existing-license-recovery",
+    "sandbox": "fresh browser context on the landing page; reproduce a 404 checkout response with a route fixture, assert no checkout request, price, or purchase action is offered, and restore an existing token"
   }
 ]

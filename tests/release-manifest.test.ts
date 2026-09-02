@@ -41,7 +41,7 @@ describe("release manifest", () => {
       "linux-x86_64/Hotkey Runbook_amd64.deb": "linux deb",
     };
     for (const [relative, content] of Object.entries(files)) { const file = join(input, relative); mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, content); }
-    execFileSync("node", ["scripts/release-manifest.mjs", input, output], { cwd: process.cwd(), env: { ...process.env, RELEASE_VERSION: "v9.9.9", GITHUB_REPOSITORY: "example/hotkey" } });
+    execFileSync("node", ["scripts/release-manifest.mjs", input, output], { cwd: process.cwd(), env: { ...process.env, RELEASE_VERSION: "v9.9.9", RELEASE_COMMIT: "a".repeat(40), GITHUB_REPOSITORY: "example/hotkey" } });
     const sums = readFileSync(join(output, "SHA256SUMS"), "utf8");
     expect(sums).toContain("Hotkey.Runbook_x64-setup.exe");
     expect(sums).toContain("Hotkey.Runbook_amd64.deb");
@@ -68,10 +68,11 @@ describe("release manifest", () => {
       mkdirSync(dirname(file), { recursive: true });
       writeFileSync(file, content);
     }
-    execFileSync("node", ["scripts/release-manifest.mjs", input, output], { cwd: process.cwd(), env: { ...process.env, RELEASE_VERSION: "v9.9.9", GITHUB_REPOSITORY: "example/hotkey" } });
+    execFileSync("node", ["scripts/release-manifest.mjs", input, output], { cwd: process.cwd(), env: { ...process.env, RELEASE_VERSION: "v9.9.9", RELEASE_COMMIT: "b".repeat(40), GITHUB_REPOSITORY: "example/hotkey" } });
     execFileSync("sha256sum", ["-c", "SHA256SUMS"], { cwd: output });
     const manifest = JSON.parse(readFileSync(join(output, "latest.json"), "utf8"));
     expect(manifest.version).toBe("v9.9.9");
+    expect(manifest.commit).toBe("b".repeat(40));
     expect(Object.keys(manifest.platforms)).toEqual(["macos-arm64", "macos-x86_64", "windows-x86_64", "linux-x86_64"]);
     const workflow = readFileSync(".github/workflows/release.yml", "utf8");
     expect(workflow).toContain("macos-latest");

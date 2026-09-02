@@ -121,16 +121,23 @@ test("all repeated navigation targets meet the 44 px minimum", async ({ page }) 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
-test("@claim:purchase-availability states the exact price without exposing unavailable checkout", async ({ page }) => {
+test("@claim:existing-license-recovery leaves a 404 checkout unavailable and restores existing licenses", async ({ page }) => {
+  const checkoutRequests: string[] = [];
+  await page.route("https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout", async (route) => {
+    checkoutRequests.push(route.request().url());
+    await route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"enabled factory product","status":404}' });
+  });
   await page.goto("/");
-  await expect(page.getByText("The license price is $29 once. New purchases are unavailable.", { exact: true })).toBeVisible();
+  await expect(page.getByText("New license sales are unavailable.", { exact: true })).toBeVisible();
+  await expect(page.getByText(/\$29/)).toHaveCount(0);
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: /buy|purchase/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /buy|purchase/i })).toHaveCount(0);
-  await page.getByRole("button", { name: "Have a license? Restore it" }).click();
+  expect(checkoutRequests).toEqual([]);
+  await page.getByRole("button", { name: "Restore an existing license" }).click();
   await expect(page.getByLabel("Paste license token")).toBeVisible();
   await page.goto("/terms/");
-  await expect(page.getByText("The license price is $29 once. New purchases are unavailable.", { exact: true })).toBeVisible();
+  await expect(page.locator("main")).toContainText("New license sales are unavailable.");
 });
 
 test("unusable release metadata keeps a calm direct-download recovery path", async ({ page }) => {

@@ -1,6 +1,6 @@
 # Copy audit — 2026-09-01 repair
 
-The landing page was read in source order, including runtime status and purchase states. Button labels and headings are listed separately because they are not sentences. Word counts treat hyphenated terms and URLs as one word.
+The landing page was read in source order, including runtime status and existing-license recovery states. Button labels and headings are listed separately because they are not sentences. Word counts treat hyphenated terms and URLs as one word.
 
 | Sentence | Words | Result |
 | --- | ---: | --- |
@@ -28,13 +28,10 @@ The landing page was read in source order, including runtime status and purchase
 | Secret parameters are hidden in the review and redacted before local history is written. | 14 | Pass |
 | The author’s recovery note appears before a run and beside its saved result. | 13 | Pass |
 | The free app opens 3 runbooks and shows 10 history entries. | 11 | Pass |
-| A paid license adds unlimited local runbooks and 100 history entries. | 11 | Pass |
-| No subscription or account. | 4 | Pass |
-| Sociobot/Dodo handles existing licenses and refunds. | 6 | Pass |
-| The license price is $29 once. | 7 | Pass |
-| New purchases are unavailable. | 4 | Pass |
-| Already have a license? | 4 | Pass |
-| Restore it below. | 3 | Pass |
+| A valid existing license adds unlimited local runbooks and 100 history entries. | 13 | Pass |
+| No subscription or account is needed for the free tier. | 10 | Pass |
+| New license sales are unavailable. | 5 | Pass |
+| Existing license tokens can still be restored below. | 8 | Pass |
 | Unsigned preview builds are produced in public GitHub Actions. | 9 | Pass |
 | On macOS, right-click the app and choose Open on first launch. | 11 | Pass |
 | Windows may show a SmartScreen notice. | 6 | Pass |
@@ -54,7 +51,7 @@ No sentence exceeds 22 words. No banned marketing word is present. The first scr
 
 ## Interface labels and headings
 
-`Try it with sample data`, `Download for your computer`, `How it works`, `Review each step before it runs`, `Desktop walkthrough`, `See each decision before a run`, `Keep maintenance steps in plain YAML`, `Safety details`, `See the whole command before consent`, `One-time license`, `Keep the useful free tier`, `Download`, and `Install the desktop app` all name their action or section directly.
+`Try it with sample data`, `Download for your computer`, `How it works`, `Review each step before it runs`, `Desktop walkthrough`, `See each decision before a run`, `Keep maintenance steps in plain YAML`, `Safety details`, `See the whole command before consent`, `Existing licenses`, `Keep the useful free tier`, `Download`, and `Install the desktop app` all name their action or section directly.
 
 ## Terminology
 

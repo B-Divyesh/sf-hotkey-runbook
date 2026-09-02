@@ -6,6 +6,7 @@ const input = process.argv[2] || "artifacts";
 const output = process.argv[3] || "release-assets";
 const version = process.env.RELEASE_VERSION || "v0.1.3";
 const repository = process.env.GITHUB_REPOSITORY || "B-Divyesh/sf-hotkey-runbook";
+const commit = process.env.RELEASE_COMMIT || process.env.GITHUB_SHA || "unrecorded";
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -44,4 +45,4 @@ for (const file of all.filter((item) => /\.(deb|exe)$/i.test(item))) {
   sums.push(`${createHash("sha256").update(await readFile(destination)).digest("hex")}  ${filename}`);
 }
 await writeFile(join(output, "SHA256SUMS"), `${sums.join("\n")}\n`);
-await writeFile(join(output, "latest.json"), `${JSON.stringify({ version, publishedAt: new Date().toISOString(), platforms }, null, 2)}\n`);
+await writeFile(join(output, "latest.json"), `${JSON.stringify({ version, commit, publishedAt: new Date().toISOString(), platforms }, null, 2)}\n`);

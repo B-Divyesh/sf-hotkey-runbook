@@ -42,4 +42,17 @@ describe("static site contract", () => {
     expect(siteCss).toContain(".text-button { min-height:44px");
     expect(siteCss).toContain(".legal-page a { min-height:44px");
   });
+
+  it("does not promise unavailable license sales while preserving recovery", () => {
+    const publicCopy = ["site/index.html", "site/terms/index.html", "site/privacy/index.html", "README.md"]
+      .map((path) => readFileSync(path, "utf8"))
+      .join("\n");
+    const nativeUi = readFileSync("src/main.ts", "utf8");
+    expect(publicCopy).toContain("New license sales are unavailable.");
+    expect(nativeUi).toContain("New license sales are unavailable.");
+    expect(publicCopy).not.toMatch(/\$29|one-time license|\/checkout/i);
+    expect(nativeUi).not.toMatch(/\$29|one-time license|\/checkout/i);
+    expect(publicCopy).toContain("Existing license tokens can still be restored below.");
+    expect(nativeUi).toContain("Existing licenses can still be restored.");
+  });
 });
