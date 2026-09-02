@@ -1,6 +1,6 @@
 # Hotkey Runbook
 
-Hotkey Runbook is a keyboard-first desktop utility for operators and developers who repeat local maintenance procedures. It reads reviewed YAML runbooks from folders you choose, validates typed parameters, shows the exact executable, arguments, working folder, and environment, asks for explicit consent, runs locally, and keeps a redacted local history with the rollback note attached.
+Hotkey Runbook is a keyboard-first desktop utility for operators and developers who repeat local maintenance procedures. It reads reviewed YAML runbooks from folders you choose, validates typed parameters, shows the exact executable, arguments, child environment, working folder, and sandbox status, asks for explicit consent, runs locally, and keeps a redacted local history with the rollback note attached.
 
 It is intentionally not remote orchestration, a secret vault, or a shell-script builder. There is no account, telemetry, or cloud sync.
 
@@ -10,10 +10,11 @@ Live site: <https://hotkey-runbook.sociobot.in>
 
 - A folder must be owned by the current Unix user (where the platform exposes ownership), must not be world-writable, and cannot contain symlinks.
 - Adding a folder signs its canonical path and SHA-256 content digest with a random device-local HMAC key. Any YAML edit invalidates trust until the folder is reviewed and signed again.
-- Each step names a fixed `program` plus `args` and optional `env` maps. Programs cannot be parameterized. The review shows resolved arguments, environment values, and the working folder before consent. When `cwd` is omitted, the app resolves it to the folder containing that YAML file and runs there.
+- Each step names a fixed `program` plus `args` and optional `env` maps. Programs cannot be parameterized. The app clears the launch environment before each child starts, then passes only reviewed `env` entries. The review names the exact child environment, working folder, and sandbox status before consent. When `cwd` is omitted, the app resolves it to the folder containing that YAML file and runs there.
 - Parameters support `text`, `integer`, `choice`, `boolean`, `path`, and `secret`, plus author-supplied regular-expression validation.
 - Secret values are masked in review and redacted before output enters history. Authors can add `redactPatterns` for application-specific values.
 - Execution requires reviewing the resolved command and typing the runbook name exactly. A rollback note stays visible before and after the run.
+- On Linux systems that permit Landlock, the app applies `no_new_privs` and limits child file changes to the reviewed working folder. It does not isolate network access or file reads. macOS and Windows currently have no process sandbox; the consent screen says so before the run. Treat every runbook as code that runs with your user permissions.
 
 Runbooks still execute with the current operating-system user's permissions. Read unfamiliar YAML before trusting it.
 
@@ -91,6 +92,6 @@ Preview packages are unsigned. On macOS, right-click the app and choose **Open**
 
 ## License and privacy
 
-The free field kit supports three runbooks and ten visible history entries. A valid existing license adds unlimited runbooks and the 100-entry logbook. New license sales are unavailable. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
+The free field kit supports three runbooks and ten visible history entries. A valid existing license adds unlimited runbooks and the 100-entry logbook. This release does not offer a checkout. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
 
 See the deployed [privacy policy](https://hotkey-runbook.sociobot.in/privacy/) and [terms](https://hotkey-runbook.sociobot.in/terms/). The source is MIT licensed; see [LICENSE](LICENSE).

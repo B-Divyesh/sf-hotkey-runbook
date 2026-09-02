@@ -1,57 +1,59 @@
-# Handoff — independent verification 8
+# Handoff — repair 8
 
 ## Result
 
-**FAIL — do not release.**
+Repaired the release blockers reported in [verification-8.md](verification-8.md) for candidate `1c627893010a4ba0a1d92a10876de3380bef4056`. The repaired tree is buildable, fully tested, and ready for the static deployment triggered by the repair commit.
 
-Tested candidate `1c627893010a4ba0a1d92a10876de3380bef4056` from a clean checkout and live at <https://hotkey-runbook.sociobot.in> on 2026-09-02 UTC. The live static files match the candidate byte for byte.
+## What changed
 
-Full evidence and exact results: [verification-8.md](verification-8.md). Screenshots and machine-readable outputs: [verification-8-evidence](verification-8-evidence/).
+### Exact native process environment
 
-## Release blockers
+- `configured_command` now calls `env_clear()` before adding the reviewed YAML `env` map. A child receives no inherited launcher variables.
+- The desktop consent screen now always shows the child environment, including `none`, and explicitly says inherited launch variables are cleared. It also shows the step's sandbox status.
+- The `@claim:exact-environment-review` regression sets `HOTKEY_QA8_INHERITED_MARKER=inherited-but-not-reviewed` in the parent process and executes `/usr/bin/printenv` through the real command builder. It now proves exit `1` and empty stdout; a reviewed `HOTKEY_REVIEWED_VALUE` still prints `shown-in-consent`.
+- Before the fix, this exact regression failed with “an unreviewed parent environment value reached the child process,” reproducing verifier finding 1 before code changed.
 
-1. The native child process inherits environment variables that are absent from the final consent screen. A fresh optimized-build reproduction passed `HOTKEY_QA8_INHERITED_MARKER=inherited-but-not-reviewed` to `/usr/bin/printenv` even though no environment entry appeared in review. This falsifies the `exact-environment-review` claim and can expose launcher secrets.
-2. New one-time license sales are unavailable. The required Sociobot checkout returns 404, and the live site has no price or buy action.
-3. The supplied safety contract requires platform sandboxing where available; execution is a direct `Command::output()` with no sandbox implementation.
-4. At 390 px and 200% text size, the landing page is 563 px wide and loses content horizontally.
+### Platform sandbox boundary
 
-Additional defect: the existing-license form is visibly laid out despite its `hidden` attribute because `.purchase form { display:grid }` overrides it.
+- On Linux with Landlock ABI 1 or newer, each child receives `no_new_privs` and a Landlock policy that denies file mutations outside the canonical reviewed working folder. The direct execution stays the reviewed executable and argv; no wrapper changes what the user reviews.
+- The consent status and documentation state the actual boundary. It is deliberately narrow: it does **not** isolate file reads or network access. On macOS, Windows, and Linux environments where Landlock is unavailable, the review says no process sandbox is active and the process uses the user's normal OS permissions.
+- `@claim:platform-sandbox-boundary` writes inside and outside the reviewed folder. On this host Landlock ABI 3 was available; the inside write succeeded, the outside write was denied, and the process failed as expected.
 
-## Verification summary
+### Landing accessibility and license recovery
 
-- All 13 exact `.factory/claims.json` commands passed, but native observation disproved `exact-environment-review`, exposing a deficient claim test.
-- Cold first-read and one-click sample-data demo gate passed.
-- `npm ci`, `npm audit`, `npm run check`, local and live Playwright suites, production web build, Debian packaging, and optimized AppImage build passed.
-- 20/20 local and 20/20 live E2E tests passed.
-- Native sample load, invalid-input recovery, exact review, consent, redaction, history persistence, reset, and Start for real passed.
-- URL verifier passed. axe serious/critical: 0. Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.2 s, CLS 0.005.
-- Demo traffic was same-origin only. No analytics or external fonts/scripts were observed. Security and caching headers passed.
-- Published Linux AppImage downloaded, launched, and matched SHA-256 `94f01f417f25100603ac7d913a5549f80ce1746dd8ffe2a772840fcda831f2e6`.
-- License verification allowance observed: 30 successful requests per client/window; subsequent requests returned 429 with `Retry-After`.
+- Restored native hidden semantics with `[hidden] { display:none!important; }`; the existing-token form is initially absent from layout, then becomes visible and receives focus only after its disclosure button is activated.
+- Made the specimen code sheet, label, license grid, and purchase form shrinkable/wrappable. At 390 px with 200% root text, the landing now has no horizontal overflow before or after opening the license form.
+- Removed any checkout or new-sales implication. The app and site state only that this release does not offer checkout; owners of a valid earlier token can still restore it. No scoped checkout endpoint was accessed.
+- Updated README, Terms, Privacy, landing copy, and the copy audit to document the narrowed, platform-specific security boundary and the existing-license-only state.
 
-## How to rerun
+## Verification
 
-Install the README's Linux prerequisites, then run:
+Fresh setup and quality gates:
 
 ```sh
 npm ci
-jq -r '.[].test' .factory/claims.json
+npm audit --audit-level=high
 npm run check
 npm run test:e2e
-PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:4173 npm run test:e2e
 CI=false npm run tauri -- build --bundles appimage
 ```
 
-Run each claims command printed by `jq` separately and exactly as written.
+Results:
 
-## Known scope and changes
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+- `npm run check`: 20 Vitest tests, 11 Rust tests, TypeScript, rustfmt, strict Clippy, and both production builds passed.
+- All 14 exact commands in `.factory/claims.json` passed. This includes the two new native execution-level claims.
+- Playwright: 22/22 passed for both the source server and the production static build at desktop and 390 px mobile sizes. The new test asserts 200% reflow, bounding boxes, the hidden form, disclosure focus, no checkout action, and existing-token restoration.
+- Playwright Axe integration found 0 serious or critical violations on landing, demo, completed demo, and modal states. The standalone Axe CLI could not start its Selenium-managed Chrome in this container; the shipped Playwright Axe integration is the successful accessibility gate.
+- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173 .factory/repair-8-verify` passed: title, `lang`, one `h1`, `main`, image alts, named buttons, and no console errors. Evidence: [repair-8-verify](repair-8-verify/).
+- Lighthouse local mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.01 s, LCP 1.49 s, CLS 0.005. Evidence: [repair-8-lighthouse.json](repair-8-lighthouse.json).
+- Production static bundles: site JavaScript 3.53 KB raw / 1.69 KB gzip, shared CSS 13.68 KB raw / 3.72 KB gzip; desktop app JavaScript 23.91 KB raw / 8.19 KB gzip.
+- AppImage build passed. `src-tauri/target/release/bundle/appimage/Hotkey Runbook_0.1.9_amd64.AppImage` is a valid x86-64 ELF (79,739,384 bytes). The packaged binary launched under Xvfb with a fresh temporary data directory.
 
-No product code, deployment, infrastructure, DNS, billing, app settings, or secrets were modified. This verification changes only `.factory` documentation and evidence. Sign-in, PWA service-worker behavior, and product-backend concurrency are not applicable to this account-free local desktop app.
+## Deployment and operator notes
 
-## Required next work
-
-1. Clear inherited child environments and explicitly pass only reviewed environment entries; add an execution-level claim test proving an unrelated parent variable is absent.
-2. Register and verify the Sociobot one-time checkout, price, return flow, and new-license unlock.
-3. Implement/document supported platform sandbox boundaries or formally revise the researched contract.
-4. Fix intrinsic mobile grid sizing at 200% text and add an automated resize/reflow test.
-5. Restore real hidden behavior for the license form and assert its initial state.
+- Static deployment is performed by the factory from the pushed `main` commit. After the push, verify the live page bytes, security/cache headers, routes, and browser suite before treating the deployment as accepted.
+- Existing license verification remains optional and only contacts the documented Sociobot verification API after a user submits or has already stored a token. No purchase or checkout link is present.
+- The operator-gated checkout is intentionally not integrated or probed by this repair. Registering a future new-sale flow requires operator action outside this work order; until then the product must remain existing-license-only.
+- macOS and Windows release artifacts remain unsigned, as documented in the existing release workflow and README.

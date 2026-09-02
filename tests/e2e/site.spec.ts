@@ -121,15 +121,35 @@ test("all repeated navigation targets meet the 44 px minimum", async ({ page }) 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
-test("@claim:existing-license-recovery leaves a 404 checkout unavailable and restores existing licenses", async ({ page }) => {
+test("landing reflows at 390px and 200% text, and the license form stays hidden until disclosed", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const form = page.locator("#license-form");
+  await expect(form).toBeHidden();
+  await expect(form).toHaveAttribute("hidden", "");
+  await expect(form).toHaveCSS("display", "none");
+
+  await page.evaluate(() => document.documentElement.style.setProperty("font-size", "32px", "important"));
+  const assertNoOverflow = async () => {
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    for (const selector of [".code-sheet", "#license", ".purchase"]) {
+      const box = await page.locator(selector).boundingBox();
+      expect(box?.x).toBeGreaterThanOrEqual(0);
+      expect((box?.x || 0) + (box?.width || 0)).toBeLessThanOrEqual(390);
+    }
+  };
+  await assertNoOverflow();
+
+  await page.getByRole("button", { name: "Restore an existing license" }).click();
+  await expect(form).toBeVisible();
+  await expect(page.getByLabel("Paste license token")).toBeFocused();
+  await assertNoOverflow();
+});
+
+test("@claim:existing-license-recovery discloses and restores existing licenses without a checkout", async ({ page }) => {
   const token = "existing-license-fixture-2026";
   const verifyUrl = `https://api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=${token}`;
-  const checkoutRequests: string[] = [];
   const verifyRequests: string[] = [];
-  await page.route("https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout", async (route) => {
-    checkoutRequests.push(route.request().url());
-    await route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"enabled factory product","status":404}' });
-  });
   await page.route(verifyUrl, async (route) => {
     verifyRequests.push(route.request().url());
     await route.fulfill({
@@ -139,13 +159,15 @@ test("@claim:existing-license-recovery leaves a 404 checkout unavailable and res
     });
   });
   await page.goto("/");
-  await expect(page.getByText("New license sales are unavailable.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Use an existing license.", { exact: true })).toBeVisible();
+  await expect(page.getByText("This page does not offer a checkout. Restore a valid token from an earlier purchase.")).toBeVisible();
   await expect(page.getByText(/\$29/)).toHaveCount(0);
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: /buy|purchase/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /buy|purchase/i })).toHaveCount(0);
-  expect(checkoutRequests).toEqual([]);
+  await expect(page.locator("#license-form")).toBeHidden();
   await page.getByRole("button", { name: "Restore an existing license" }).click();
+  await expect(page.locator("#license-form")).toBeVisible();
   await page.getByLabel("Paste license token").fill(token);
   await page.getByRole("button", { name: "Verify license" }).click();
   await expect(page.locator("#license-message")).toHaveText("License verified. Open the app and paste the same token in Settings.");
@@ -158,7 +180,7 @@ test("@claim:existing-license-recovery leaves a 404 checkout unavailable and res
   await expect(page.getByRole("button", { name: "License active on this browser" })).toBeDisabled();
   expect(verifyRequests).toEqual([verifyUrl]);
   await page.goto("/terms/");
-  await expect(page.locator("main")).toContainText("New license sales are unavailable.");
+  await expect(page.locator("main")).toContainText("This site does not offer a checkout.");
 });
 
 test("unusable release metadata keeps a calm direct-download recovery path", async ({ page }) => {

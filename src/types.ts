@@ -39,7 +39,8 @@ export interface AppState {
   demoMode: boolean;
 }
 
-export interface PreparedStep { program: string; args: string[]; cwd: string; env: Record<string, string>; display: string; }
+export interface SandboxBoundary { kind: "linuxLandlock" | "unavailable"; abi?: number; description: string; }
+export interface PreparedStep { program: string; args: string[]; cwd: string; env: Record<string, string>; sandbox: SandboxBoundary; display: string; }
 export interface PreparedRun { runbookId: string; name: string; risk: string; rollback: string; steps: PreparedStep[]; }
 export interface RunResult { id: string; runbookId: string; name: string; startedAt: string; durationMs: number; status: "success" | "failed"; exitCode?: number; output: string; rollback: string; }
 export interface DirectoryInspection { path: string; digest: string; files: string[]; runbooks: RunbookSummary[]; warnings: string[]; }

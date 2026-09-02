@@ -13,8 +13,7 @@ The landing page was read in source order, including runtime status and existing
 | Add an owned directory of YAML files. | 7 | Pass |
 | The app records its path and content digest on your device. | 11 | Pass |
 | Enter typed values for choices, integers, paths, booleans, and secrets before preparing the run. | 15 | Pass |
-| Read the program, arguments, environment, working folder, and rollback note. | 11 | Pass |
-| Then type the runbook name to run it. | 8 | Pass |
+| Read the program, arguments, only child environment, working folder, sandbox status, and rollback note. | 13 | Pass |
 | Four real app screens show the bundled sample from first click to redacted result. | 14 | Pass |
 | Start from an empty app without choosing a real folder. | 10 | Pass |
 | Choose an environment and keep the token masked. | 8 | Pass |
@@ -25,13 +24,16 @@ The landing page was read in source order, including runtime status and existing
 | A runbook names the executable. | 5 | Pass |
 | A parameter cannot change which program starts. | 7 | Pass |
 | Editing a reviewed YAML file requires another review before the folder becomes available again. | 14 | Pass |
-| Secret parameters are hidden in the review and redacted before local history is written. | 14 | Pass |
+| The app clears launch variables. | 5 | Pass |
+| The consent screen lists every variable given to the child process. | 11 | Pass |
+| When Linux permits Landlock, file changes stay in the reviewed working folder. | 12 | Pass |
+| The consent screen names other limits. | 7 | Pass |
 | The author’s recovery note appears before a run and beside its saved result. | 13 | Pass |
 | The free app opens 3 runbooks and shows 10 history entries. | 11 | Pass |
 | A valid existing license adds unlimited local runbooks and 100 history entries. | 13 | Pass |
 | No subscription or account is needed for the free tier. | 10 | Pass |
-| New license sales are unavailable. | 5 | Pass |
-| Existing license tokens can still be restored below. | 8 | Pass |
+| This page does not offer a checkout. | 8 | Pass |
+| Restore a valid token from an earlier purchase. | 9 | Pass |
 | Unsigned preview builds are produced in public GitHub Actions. | 9 | Pass |
 | On macOS, right-click the app and choose Open on first launch. | 11 | Pass |
 | Windows may show a SmartScreen notice. | 6 | Pass |
@@ -63,3 +65,5 @@ No sentence exceeds 22 words. No banned marketing word is present. The first scr
 | Returned execution details | result |
 | Recovery instruction | rollback note |
 | Paid credential | license |
+| Process variable map | child environment |
+| Reviewed containment state | sandbox status |

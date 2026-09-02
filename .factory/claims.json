@@ -8,10 +8,17 @@
   },
   {
     "id": "exact-environment-review",
-    "claim": "Review the exact executable, arguments, environment, working folder, and rollback note before consent.",
+    "claim": "Review the exact executable, arguments, only child environment, working folder, sandbox status, and rollback note before consent.",
     "where": "/demo, landing safety copy, desktop review, README",
     "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_exact_environment_review",
-    "sandbox": "temporary native runbook without cwd; prepare its real native plan; assert the canonical YAML folder is in the plan and is the command's current directory"
+    "sandbox": "temporary native runbook without cwd; prepare its real native plan; assert the canonical YAML folder, then set HOTKEY_QA8_INHERITED_MARKER in the parent and prove /usr/bin/printenv receives neither it nor any unreviewed value while a reviewed value is present"
+  },
+  {
+    "id": "platform-sandbox-boundary",
+    "claim": "When Linux permits Landlock, file changes by a runbook are limited to its reviewed working folder; other platforms show that no process sandbox is active.",
+    "where": "landing safety details, desktop consent, README, terms",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_platform_sandbox_boundary",
+    "sandbox": "Linux kernel with Landlock enabled: a fixed direct child command writes once inside and once outside the reviewed folder; assert the inside write succeeds and the outside write is denied. If the platform does not permit Landlock, assert the reviewed status is unavailable."
   },
   {
     "id": "demo-privacy",
@@ -85,9 +92,9 @@
   },
   {
     "id": "existing-license-recovery",
-    "claim": "New license sales are unavailable. Existing license tokens can be restored.",
+    "claim": "Existing license tokens can be restored. This page does not offer a checkout.",
     "where": "landing license section, desktop Settings, README, terms",
     "test": "npm run test:e2e -- --grep @claim:existing-license-recovery",
-    "sandbox": "fresh browser context on the landing page; reproduce a 404 checkout response with a route fixture, assert no checkout request, price, or purchase action is offered, and restore an existing token"
+    "sandbox": "fresh browser context on the landing page; assert no checkout link, price, or purchase action is offered, then disclose the form and restore an existing token"
   }
 ]

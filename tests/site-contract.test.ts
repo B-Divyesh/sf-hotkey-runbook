@@ -43,16 +43,18 @@ describe("static site contract", () => {
     expect(siteCss).toContain(".legal-page a { min-height:44px");
   });
 
-  it("does not promise unavailable license sales while preserving recovery", () => {
+  it("does not offer a checkout while preserving existing-license recovery", () => {
     const publicCopy = ["site/index.html", "site/terms/index.html", "site/privacy/index.html", "README.md"]
       .map((path) => readFileSync(path, "utf8"))
       .join("\n");
     const nativeUi = readFileSync("src/main.ts", "utf8");
-    expect(publicCopy).toContain("New license sales are unavailable.");
-    expect(nativeUi).toContain("New license sales are unavailable.");
-    expect(publicCopy).not.toMatch(/\$29|one-time license|\/checkout/i);
-    expect(nativeUi).not.toMatch(/\$29|one-time license|\/checkout/i);
-    expect(publicCopy).toContain("Existing license tokens can still be restored below.");
-    expect(nativeUi).toContain("Existing licenses can still be restored.");
+    expect(publicCopy).toContain("This page does not offer a checkout.");
+    expect(nativeUi).toContain("This app does not offer checkout.");
+    expect(publicCopy).not.toMatch(/\$29|one-time license/i);
+    expect(nativeUi).not.toMatch(/\$29|one-time license/i);
+    expect(publicCopy).not.toMatch(/href=["'][^"']*\/checkout/i);
+    expect(nativeUi).not.toMatch(/https:\/\/api\.sociobot\.in\/api\/v1\/products\/hotkey-runbook\/checkout/i);
+    expect(publicCopy).toContain("Restore a valid token from an earlier purchase.");
+    expect(nativeUi).toContain("Restore a license you already have.");
   });
 });

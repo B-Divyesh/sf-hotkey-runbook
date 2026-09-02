@@ -178,7 +178,15 @@ struct PreparedStep {
     args: Vec<String>,
     cwd: String,
     env: BTreeMap<String, String>,
+    sandbox: SandboxBoundary,
     display: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+enum SandboxBoundary {
+    LinuxLandlock { abi: i32, description: String },
+    Unavailable { description: String },
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -904,6 +912,7 @@ fn prepare_loaded(
         steps.push(PreparedStep {
             program: step.program.clone(),
             args,
+            sandbox: sandbox_boundary(),
             cwd,
             env,
             display,
@@ -983,14 +992,168 @@ fn mask_plan_secrets(
     }
 }
 
+/// Builds the only process command used for a runbook step. The environment
+/// starts empty: every value made available to the child is in `prepared.env`
+/// and is therefore part of the consent review.
 fn configured_command(prepared: &PreparedStep) -> Command {
     let mut command = Command::new(&prepared.program);
     command.args(&prepared.args);
     command.current_dir(&prepared.cwd);
+    command.env_clear();
     for (key, value) in &prepared.env {
         command.env(key, value);
     }
+    configure_platform_sandbox(&mut command, prepared);
     command
+}
+
+fn sandbox_boundary() -> SandboxBoundary {
+    #[cfg(target_os = "linux")]
+    {
+        match linux_landlock_abi() {
+            Ok(abi) if abi >= 1 => SandboxBoundary::LinuxLandlock {
+                abi,
+                description: format!(
+                    "Linux Landlock ABI {abi}: file changes are limited to this reviewed working folder. Network access and file reads are not isolated."
+                ),
+            },
+            Ok(_) => SandboxBoundary::Unavailable {
+                description: "This Linux kernel does not provide the required Landlock file-write boundary. The process will use your normal operating-system permissions.".into(),
+            },
+            Err(_) => SandboxBoundary::Unavailable {
+                description: "This Linux environment does not permit the Landlock file-write boundary. The process will use your normal operating-system permissions.".into(),
+            },
+        }
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        SandboxBoundary::Unavailable {
+            description: "No process sandbox is available on this platform. The process will use your normal operating-system permissions.".into(),
+        }
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn configure_platform_sandbox(command: &mut Command, prepared: &PreparedStep) {
+    if matches!(&prepared.sandbox, SandboxBoundary::LinuxLandlock { .. }) {
+        use std::{ffi::CString, os::unix::process::CommandExt};
+
+        // A canonical filesystem path cannot contain NUL. Build it before
+        // `pre_exec`, where allocating would be unsafe after fork.
+        let cwd = CString::new(prepared.cwd.clone()).expect("canonical path contains no NUL");
+        unsafe {
+            command.pre_exec(move || apply_linux_landlock_write_boundary(&cwd));
+        }
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn configure_platform_sandbox(_command: &mut Command, _prepared: &PreparedStep) {}
+
+#[cfg(target_os = "linux")]
+const LANDLOCK_CREATE_RULESET_VERSION: libc::c_uint = 1;
+#[cfg(target_os = "linux")]
+const LANDLOCK_RULE_PATH_BENEATH: libc::c_int = 1;
+#[cfg(target_os = "linux")]
+const LANDLOCK_ACCESS_FS_WRITE_BOUNDARY: u64 = (1 << 1)
+    | (1 << 4)
+    | (1 << 5)
+    | (1 << 6)
+    | (1 << 7)
+    | (1 << 8)
+    | (1 << 9)
+    | (1 << 10)
+    | (1 << 11)
+    | (1 << 12)
+    | (1 << 13)
+    | (1 << 14);
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct LandlockRulesetAttr {
+    handled_access_fs: u64,
+}
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct LandlockPathBeneathAttr {
+    allowed_access: u64,
+    parent_fd: libc::c_int,
+}
+
+#[cfg(target_os = "linux")]
+fn linux_landlock_abi() -> std::io::Result<i32> {
+    let abi = unsafe {
+        libc::syscall(
+            libc::SYS_landlock_create_ruleset,
+            std::ptr::null::<libc::c_void>(),
+            0usize,
+            LANDLOCK_CREATE_RULESET_VERSION,
+        )
+    };
+    if abi < 0 {
+        Err(std::io::Error::last_os_error())
+    } else {
+        Ok(abi as i32)
+    }
+}
+
+/// Applies a best-effort Linux-only write boundary in the child after fork and
+/// before exec. The callback uses only direct syscalls and a pre-built C path.
+#[cfg(target_os = "linux")]
+fn apply_linux_landlock_write_boundary(cwd: &std::ffi::CStr) -> std::io::Result<()> {
+    let ruleset = LandlockRulesetAttr {
+        handled_access_fs: LANDLOCK_ACCESS_FS_WRITE_BOUNDARY,
+    };
+    let ruleset_fd = unsafe {
+        libc::syscall(
+            libc::SYS_landlock_create_ruleset,
+            &ruleset as *const LandlockRulesetAttr,
+            std::mem::size_of::<LandlockRulesetAttr>(),
+            0u32,
+        )
+    };
+    if ruleset_fd < 0 {
+        return Err(std::io::Error::last_os_error());
+    }
+    let ruleset_fd = ruleset_fd as libc::c_int;
+    let cwd_fd = unsafe { libc::open(cwd.as_ptr(), libc::O_PATH | libc::O_CLOEXEC) };
+    if cwd_fd < 0 {
+        let error = std::io::Error::last_os_error();
+        unsafe { libc::close(ruleset_fd) };
+        return Err(error);
+    }
+    let rule = LandlockPathBeneathAttr {
+        allowed_access: LANDLOCK_ACCESS_FS_WRITE_BOUNDARY,
+        parent_fd: cwd_fd,
+    };
+    let add_rule = unsafe {
+        libc::syscall(
+            libc::SYS_landlock_add_rule,
+            ruleset_fd,
+            LANDLOCK_RULE_PATH_BENEATH,
+            &rule as *const LandlockPathBeneathAttr,
+            0u32,
+        )
+    };
+    unsafe { libc::close(cwd_fd) };
+    if add_rule < 0 {
+        let error = std::io::Error::last_os_error();
+        unsafe { libc::close(ruleset_fd) };
+        return Err(error);
+    }
+    if unsafe { libc::prctl(libc::PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) } < 0 {
+        let error = std::io::Error::last_os_error();
+        unsafe { libc::close(ruleset_fd) };
+        return Err(error);
+    }
+    let restrict_self =
+        unsafe { libc::syscall(libc::SYS_landlock_restrict_self, ruleset_fd, 0u32) };
+    let close_result = unsafe { libc::close(ruleset_fd) };
+    if restrict_self < 0 || close_result < 0 {
+        return Err(std::io::Error::last_os_error());
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -1454,6 +1617,101 @@ steps:
             command.get_current_dir(),
             Some(Path::new(&plan.steps[0].cwd))
         );
+
+        const MARKER: &str = "HOTKEY_QA8_INHERITED_MARKER";
+        const VALUE: &str = "inherited-but-not-reviewed";
+        let prepared = PreparedStep {
+            program: "/usr/bin/printenv".into(),
+            args: vec![MARKER.into()],
+            cwd: directory.path().display().to_string(),
+            env: BTreeMap::new(),
+            sandbox: sandbox_boundary(),
+            display: format!("/usr/bin/printenv {MARKER}"),
+        };
+
+        // This models a launcher-provided credential or proxy setting. It is
+        // absent from the reviewed runbook environment and must not reach the
+        // process that executes the runbook.
+        unsafe { std::env::set_var(MARKER, VALUE) };
+        let output = configured_command(&prepared).output().unwrap();
+        unsafe { std::env::remove_var(MARKER) };
+
+        assert_eq!(output.status.code(), Some(1));
+        assert!(output.stdout.is_empty());
+        assert!(
+            !String::from_utf8_lossy(&output.stdout).contains(VALUE),
+            "an unreviewed parent environment value reached the child process"
+        );
+
+        let reviewed = PreparedStep {
+            program: "/usr/bin/printenv".into(),
+            args: vec!["HOTKEY_REVIEWED_VALUE".into()],
+            cwd: directory.path().display().to_string(),
+            env: BTreeMap::from([("HOTKEY_REVIEWED_VALUE".into(), "shown-in-consent".into())]),
+            sandbox: sandbox_boundary(),
+            display: "/usr/bin/printenv HOTKEY_REVIEWED_VALUE".into(),
+        };
+        let output = configured_command(&reviewed).output().unwrap();
+        assert_eq!(output.status.code(), Some(0));
+        assert_eq!(
+            String::from_utf8_lossy(&output.stdout),
+            "shown-in-consent\n"
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    // @claim:platform-sandbox-boundary
+    fn claim_platform_sandbox_boundary_limits_writes_when_linux_permits_landlock() {
+        let sandbox = sandbox_boundary();
+        let SandboxBoundary::LinuxLandlock { .. } = sandbox else {
+            assert!(matches!(sandbox, SandboxBoundary::Unavailable { .. }));
+            return;
+        };
+
+        let working = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let allowed = working.path().join("allowed.txt");
+        let denied = outside.path().join("denied.txt");
+        let prepared = PreparedStep {
+            program: "/usr/bin/sh".into(),
+            args: vec![
+                "-c".into(),
+                format!(
+                    "printf allowed > {}; printf denied > {}",
+                    allowed.display(),
+                    denied.display()
+                ),
+            ],
+            cwd: working.path().display().to_string(),
+            env: BTreeMap::new(),
+            sandbox,
+            display: "fixed sandbox regression command".into(),
+        };
+
+        let output = configured_command(&prepared).output().unwrap();
+        assert!(
+            allowed.exists(),
+            "the reviewed working folder remains writable"
+        );
+        assert!(
+            !denied.exists(),
+            "Landlock must block a runbook write outside the reviewed working folder"
+        );
+        assert!(
+            !output.status.success(),
+            "the denied write must fail the run"
+        );
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    #[test]
+    // @claim:platform-sandbox-boundary
+    fn claim_platform_sandbox_boundary_reports_when_no_native_boundary_exists() {
+        assert!(matches!(
+            sandbox_boundary(),
+            SandboxBoundary::Unavailable { .. }
+        ));
     }
 
     #[test]
