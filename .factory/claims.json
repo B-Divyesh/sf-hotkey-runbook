@@ -49,6 +49,13 @@
     "sandbox": "100 deterministic items; assert free runbook and history slices, then assert the licensed view contains all 100"
   },
   {
+    "id": "licensed-runbooks",
+    "claim": "A valid existing license removes the product's three-runbook limit: every locally available runbook is shown.",
+    "where": "landing license section, desktop Settings, README, terms",
+    "test": "npm run test:unit -- --testNamePattern @claim:licensed-runbooks",
+    "sandbox": "101 deterministic reviewed runbooks; assert the free view shows 3 and the licensed view returns every runbook without a product count cap"
+  },
+  {
     "id": "installer-integrity",
     "claim": "Release installers include a SHA-256 checksum file whose names match the downloadable assets.",
     "where": "landing checksum link, release workflow, README",

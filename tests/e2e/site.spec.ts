@@ -122,10 +122,21 @@ test("all repeated navigation targets meet the 44 px minimum", async ({ page }) 
 });
 
 test("@claim:existing-license-recovery leaves a 404 checkout unavailable and restores existing licenses", async ({ page }) => {
+  const token = "existing-license-fixture-2026";
+  const verifyUrl = `https://api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=${token}`;
   const checkoutRequests: string[] = [];
+  const verifyRequests: string[] = [];
   await page.route("https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout", async (route) => {
     checkoutRequests.push(route.request().url());
     await route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"enabled factory product","status":404}' });
+  });
+  await page.route(verifyUrl, async (route) => {
+    verifyRequests.push(route.request().url());
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: '{"valid":true,"reason":"ok","expires_at":null}',
+    });
   });
   await page.goto("/");
   await expect(page.getByText("New license sales are unavailable.", { exact: true })).toBeVisible();
@@ -135,7 +146,17 @@ test("@claim:existing-license-recovery leaves a 404 checkout unavailable and res
   await expect(page.getByRole("button", { name: /buy|purchase/i })).toHaveCount(0);
   expect(checkoutRequests).toEqual([]);
   await page.getByRole("button", { name: "Restore an existing license" }).click();
-  await expect(page.getByLabel("Paste license token")).toBeVisible();
+  await page.getByLabel("Paste license token").fill(token);
+  await page.getByRole("button", { name: "Verify license" }).click();
+  await expect(page.locator("#license-message")).toHaveText("License verified. Open the app and paste the same token in Settings.");
+  expect(verifyRequests).toEqual([verifyUrl]);
+  expect(await page.evaluate(() => ({
+    token: localStorage.getItem("sb_license:hotkey-runbook"),
+    verdict: JSON.parse(localStorage.getItem("sb_license:hotkey-runbook:verdict") || "null"),
+  }))).toMatchObject({ token, verdict: { unlocked: true, token, reason: "ok" } });
+  await page.reload();
+  await expect(page.getByRole("button", { name: "License active on this browser" })).toBeDisabled();
+  expect(verifyRequests).toEqual([verifyUrl]);
   await page.goto("/terms/");
   await expect(page.locator("main")).toContainText("New license sales are unavailable.");
 });

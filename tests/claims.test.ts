@@ -10,6 +10,12 @@ describe("product claims", () => {
     expect(visibleFreeItems(values, FREE_HISTORY_LIMIT, true)).toHaveLength(100);
   });
 
+  it("@claim:licensed-runbooks removes the product runbook cap after a valid license", () => {
+    const reviewedRunbooks = Array.from({ length: 101 }, (_, index) => `runbook-${index + 1}`);
+    expect(visibleFreeItems(reviewedRunbooks, FREE_RUNBOOK_LIMIT, false)).toHaveLength(FREE_RUNBOOK_LIMIT);
+    expect(visibleFreeItems(reviewedRunbooks, FREE_RUNBOOK_LIMIT, true)).toEqual(reviewedRunbooks);
+  });
+
   it("@claim:local-privacy limits runtime network code to release and license services", () => {
     const sources = ["src/main.ts", "src/bridge.ts", "src/license.ts", "site/main.ts", "site/demo/main.ts"]
       .map((path) => readFileSync(path, "utf8"))
