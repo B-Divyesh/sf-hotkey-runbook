@@ -31,4 +31,15 @@ describe("product claims", () => {
     expect(native).toContain('join("demo-trusted-directories.json")');
     expect(native).toContain("verified_runbooks_for_mode");
   });
+
+  it("@claim:no-cloud-sync has no native sync transport or remote-storage command", () => {
+    const cargo = readFileSync("src-tauri/Cargo.toml", "utf8");
+    const bridge = readFileSync("src/bridge.ts", "utf8");
+    const native = readFileSync("src-tauri/src/lib.rs", "utf8");
+    expect(cargo).not.toMatch(/reqwest|hyper|tonic|websocket|tauri-plugin-http|tauri-plugin-store/i);
+    expect(bridge).not.toMatch(/\b(?:sync|upload|download|remote|cloud)\b/i);
+    expect(native).not.toMatch(/TcpStream|UdpSocket|reqwest|hyper::|tonic::/i);
+    expect(native).toContain('join("history.json")');
+    expect(native).toContain('join("trusted-directories.json")');
+  });
 });

@@ -2,7 +2,7 @@
 
 Hotkey Runbook is a keyboard-first desktop utility for operators and developers who repeat local maintenance procedures. It reads reviewed YAML runbooks from folders you choose, validates typed parameters, shows the exact executable, arguments, child environment, working folder, and sandbox status, asks for explicit consent, runs locally, and keeps a redacted local history with the rollback note attached.
 
-It is intentionally not remote orchestration, a secret vault, or a shell-script builder. There is no account, telemetry, or cloud sync.
+It is intentionally not remote orchestration, a secret vault, or a shell-script builder. The desktop app needs no account and includes no telemetry or cloud sync.
 
 Live site: <https://hotkey-runbook.sociobot.in>
 
@@ -76,7 +76,7 @@ The static deployment root is `dist/site`; `index.html` is written directly ther
 
 ## Install and releases
 
-Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS`, `latest.json`, and `installer-metadata.json`. The manifest records the release version, tagged commit, installed-build identity, per-platform URL, and SHA-256. The workflow extracts the packaged Linux app and fails before publishing unless `hotkey-runbook --build-identity` reports that exact source commit. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
+The release workflow builds on native macOS, Windows, and Linux runners. It publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS`, `latest.json`, and `installer-metadata.json`. The manifest records the release version, tagged commit, installed-build identity, per-platform URL, and SHA-256. The workflow extracts the packaged Linux app and fails before publishing unless `hotkey-runbook --build-identity` reports that exact source commit. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
 
 After installing, use this to inspect the exact native build:
 
@@ -98,6 +98,6 @@ Preview packages are unsigned. On macOS, right-click the app and choose **Open**
 
 ## License and privacy
 
-The free field kit supports three runbooks and ten visible history entries. A valid existing license adds unlimited runbooks and the 100-entry logbook. New license sales are unavailable until the operator registers checkout. Existing license verification and recovery continue through the Sociobot billing API. Core safety, accessibility, and data control are not gated.
+The free field kit supports three runbooks and ten visible history entries. A $29 one-time license adds unlimited runbooks and the 100-entry logbook. [Buy through the Sociobot-hosted checkout](https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout) or restore a valid token in Settings. Sociobot and Dodo handle payment and refunds. Core safety, accessibility, and data control are not gated.
 
 See the deployed [privacy policy](https://hotkey-runbook.sociobot.in/privacy/) and [terms](https://hotkey-runbook.sociobot.in/terms/). The source is MIT licensed; see [LICENSE](LICENSE).

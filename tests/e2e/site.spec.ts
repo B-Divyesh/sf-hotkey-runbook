@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { readFileSync } from "node:fs";
 
 test("landing page is keyboard-ready and has no serious accessibility violations", async ({ page }) => {
   const errors: string[] = [];
@@ -140,13 +141,32 @@ test("landing reflows at 390px and 200% text, and the license form stays hidden 
   };
   await assertNoOverflow();
 
-  await page.getByRole("button", { name: "Restore an existing license" }).click();
+  await page.getByRole("button", { name: "Have a license? Paste it" }).click();
   await expect(form).toBeVisible();
-  await expect(page.getByLabel("Paste license token")).toBeFocused();
+  await expect(page.getByLabel("License token")).toBeFocused();
   await assertNoOverflow();
 });
 
-test("@claim:existing-license-recovery discloses and restores existing licenses without a checkout", async ({ page }) => {
+test("@claim:one-time-license-purchase opens the $29 Sociobot checkout", async ({ page }) => {
+  const checkoutUrl = "https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout";
+  await page.route(checkoutUrl, async (route) => route.fulfill({
+    status: 200,
+    contentType: "text/html",
+    body: "<!doctype html><html><head><title>Sociobot checkout</title></head><body><main><h1>Hosted checkout</h1></main></body></html>",
+  }));
+  await page.goto("/");
+  await expect(page.getByText("$29", { exact: true })).toBeVisible();
+  const buy = page.getByRole("link", { name: "Buy the one-time license" });
+  await expect(buy).toHaveAttribute("href", checkoutUrl);
+  await buy.click();
+  await expect(page).toHaveURL(checkoutUrl);
+  await expect(page.getByRole("heading", { name: "Hosted checkout" })).toBeVisible();
+  await page.goto("/terms/");
+  await expect(page.locator("main")).toContainText("Dodo is the merchant of record and handles refunds.");
+  await expect(page.getByRole("link", { name: "Buy the license through the hosted checkout" })).toHaveAttribute("href", checkoutUrl);
+});
+
+test("@claim:existing-license-recovery discloses and restores an existing license", async ({ page }) => {
   const token = "existing-license-fixture-2026";
   const verifyUrl = `https://api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=${token}`;
   const verifyRequests: string[] = [];
@@ -159,16 +179,12 @@ test("@claim:existing-license-recovery discloses and restores existing licenses 
     });
   });
   await page.goto("/");
-  await expect(page.getByText("New license sales are unavailable.", { exact: true })).toBeVisible();
-  await expect(page.getByText("Checkout will be available after the operator registers it. Restore a valid token from an earlier purchase.")).toBeVisible();
-  await expect(page.getByText(/\$29/)).toHaveCount(0);
-  await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /buy|purchase/i })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /buy|purchase/i })).toHaveCount(0);
+  await expect(page.getByText("$29", { exact: true })).toBeVisible();
+  await expect(page.locator('a[href="https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout"]')).toHaveCount(1);
   await expect(page.locator("#license-form")).toBeHidden();
-  await page.getByRole("button", { name: "Restore an existing license" }).click();
+  await page.getByRole("button", { name: "Have a license? Paste it" }).click();
   await expect(page.locator("#license-form")).toBeVisible();
-  await page.getByLabel("Paste license token").fill(token);
+  await page.getByLabel("License token").fill(token);
   await page.getByRole("button", { name: "Verify license" }).click();
   await expect(page.locator("#license-message")).toHaveText("License verified. Open the app and paste the same token in Settings.");
   expect(verifyRequests).toEqual([verifyUrl]);
@@ -180,7 +196,59 @@ test("@claim:existing-license-recovery discloses and restores existing licenses 
   await expect(page.getByRole("button", { name: "License active on this browser" })).toBeDisabled();
   expect(verifyRequests).toEqual([verifyUrl]);
   await page.goto("/terms/");
-  await expect(page.locator("main")).toContainText("New license sales are unavailable until checkout is registered.");
+  await expect(page.locator("main")).toContainText("Dodo is the merchant of record and handles refunds.");
+});
+
+test("@claim:no-account completes the free sample without an account", async ({ page }) => {
+  const packageManifest = readFileSync("package.json", "utf8");
+  const nativeUi = readFileSync("src/main.ts", "utf8");
+  expect(packageManifest).not.toMatch(/auth0|firebase|oauth|openid|clerk/i);
+  expect(nativeUi).not.toMatch(/sign in|log in|create account/i);
+  await page.goto("/demo/");
+  await expect(page.getByRole("link", { name: /sign in|log in|create account/i })).toHaveCount(0);
+  await page.getByRole("button", { name: "Review exact process" }).click();
+  await page.locator("#demo-confirm").fill("Inspect sample deployment");
+  await page.getByRole("button", { name: "Run sample check" }).click();
+  await expect(page.getByText("Completed sample check")).toBeVisible();
+});
+
+test("@claim:no-telemetry sends no analytics during the free browser flow", async ({ page }) => {
+  const runtimeSources = ["src/main.ts", "src/bridge.ts", "src/license.ts", "src-tauri/src/lib.rs", "site/main.ts", "site/demo/main.ts"]
+    .map((path) => readFileSync(path, "utf8"))
+    .join("\n");
+  expect(runtimeSources).not.toMatch(/segment\.com|googletagmanager|google-analytics|mixpanel|posthog|sentry|applicationinsights/i);
+  const requests: string[] = [];
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-hotkey-runbook/releases/latest", async (route) => route.fulfill({ json: { tag_name: "v0.1.14", assets: [] } }));
+  page.on("request", (request) => requests.push(request.url()));
+  await page.goto("/");
+  await page.getByRole("link", { name: /Try it with sample data/ }).click();
+  await page.getByRole("button", { name: "Review exact process" }).click();
+  await page.locator("#demo-confirm").fill("Inspect sample deployment");
+  await page.getByRole("button", { name: "Run sample check" }).click();
+  const siteOrigin = new URL(page.url()).origin;
+  expect(requests.every((url) => {
+    const parsed = new URL(url);
+    return parsed.origin === siteOrigin || parsed.href === "https://api.github.com/repos/B-Divyesh/sf-hotkey-runbook/releases/latest";
+  })).toBe(true);
+});
+
+test("license returns replace an older cached verdict and remove the token from the URL", async ({ page }) => {
+  const token = "new-checkout-license-2026";
+  const verifyUrl = `https://api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=${token}`;
+  await page.route(verifyUrl, async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: '{"valid":true,"reason":"ok","expires_at":null}',
+  }));
+  await page.goto("/");
+  await page.evaluate(() => {
+    localStorage.setItem("sb_license:hotkey-runbook", "old-token");
+    localStorage.setItem("sb_license:hotkey-runbook:verdict", JSON.stringify({ unlocked: false, token: "old-token", reason: "invalid", checkedAt: Date.now() }));
+  });
+  await page.goto(`/?license=${token}`);
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("button", { name: "License active on this browser" })).toBeDisabled();
+  expect(await page.evaluate(() => localStorage.getItem("sb_license:hotkey-runbook"))).toBe(token);
 });
 
 test("unusable release metadata keeps a calm direct-download recovery path", async ({ page }) => {

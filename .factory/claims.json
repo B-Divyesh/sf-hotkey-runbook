@@ -49,6 +49,27 @@
     "sandbox": "inspect every runtime source for network origins and assert demo and real history use separate local files"
   },
   {
+    "id": "no-account",
+    "claim": "The free sample and free desktop tier need no account.",
+    "where": "landing license section, desktop Settings, README",
+    "test": "npm run test:e2e -- --grep @claim:no-account",
+    "sandbox": "fresh browser context; complete the free sample without a sign-in, login, or account-creation step"
+  },
+  {
+    "id": "no-telemetry",
+    "claim": "Hotkey Runbook includes no telemetry or analytics.",
+    "where": "desktop Settings, privacy page, README",
+    "test": "npm run test:e2e -- --grep @claim:no-telemetry",
+    "sandbox": "fresh browser context; record the landing and complete demo request flow; allow only same-origin assets and the documented GitHub release-metadata request"
+  },
+  {
+    "id": "no-cloud-sync",
+    "claim": "The desktop app does not include cloud sync.",
+    "where": "desktop Settings, README",
+    "test": "npm run test:unit -- --testNamePattern @claim:no-cloud-sync",
+    "sandbox": "inspect native dependencies and bridge commands; assert there is no HTTP client, sync command, remote-storage plugin, or remote orchestration command"
+  },
+  {
     "id": "free-tier-limits",
     "claim": "The free app shows 3 runbooks and 10 history entries; a valid license shows up to the 100-entry local history limit.",
     "where": "landing license section, desktop settings, README, terms",
@@ -92,9 +113,16 @@
   },
   {
     "id": "existing-license-recovery",
-    "claim": "Existing license tokens can be restored. New license sales are unavailable until checkout is registered.",
+    "claim": "An existing license token can be restored on another device.",
     "where": "landing license section, desktop Settings, README, terms",
     "test": "npm run test:e2e -- --grep @claim:existing-license-recovery",
-    "sandbox": "fresh browser context on the landing page; assert no checkout link, price, or purchase action is offered, then disclose the form and restore an existing token"
+    "sandbox": "fresh browser context; intercept the documented verification endpoint with a valid fixture; restore a token, assert namespaced local storage, reload, and assert the daily verdict cache avoids a second request"
+  },
+  {
+    "id": "one-time-license-purchase",
+    "claim": "A $29 one-time license is purchased through the Sociobot-hosted checkout.",
+    "where": "landing license section, desktop Settings, README, terms",
+    "test": "npm run test:e2e -- --grep @claim:one-time-license-purchase",
+    "sandbox": "fresh browser context; intercept only the documented scoped checkout endpoint, click the $29 purchase link, and assert navigation reaches the hosted checkout fixture"
   }
 ]

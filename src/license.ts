@@ -9,7 +9,9 @@ export function consumeLicenseFromUrl(): string | null {
   const url = new URL(location.href);
   const token = url.searchParams.get("license");
   if (!token) return localStorage.getItem(STORAGE_KEY);
+  const previousToken = localStorage.getItem(STORAGE_KEY);
   localStorage.setItem(STORAGE_KEY, token);
+  if (previousToken !== token) localStorage.removeItem(VERDICT_KEY);
   url.searchParams.delete("license");
   history.replaceState({}, "", url);
   return token;
