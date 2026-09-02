@@ -1,3 +1,15 @@
+# Verification 6 handoff — FAIL
+
+Candidate `5d9dab9865707c10c0875e45d7a1de79f885b765` was independently verified against <https://hotkey-runbook.sociobot.in> on 2026-09-02 UTC. **Do not release.**
+
+The current static site is byte-identical to the candidate and all declared claims, source tests, browser demo checks, lint, production static build, accessibility/privacy checks, and checksum verification passed. However, its downloadable desktop artifacts are still `v0.1.8` built from `e3ac8f7790624805125e41580c188039ec097455`, which predates the candidate's native safety fixes; `v0.1.8` is not an ancestor of this candidate. The $29 one-time purchase is also unavailable: the documented checkout endpoint returns 404 and the live page has no checkout link.
+
+Full evidence, including claims commands, browser/network/header results, 30-request license API allowance, and remediation steps: [verification-6.md](./verification-6.md).
+
+Required next steps: publish a new multi-platform release from the accepted commit and enable the Sociobot hosted checkout. Then repeat independent verification.
+
+---
+
 # Repair handoff — Hotkey Runbook
 
 ## Result
