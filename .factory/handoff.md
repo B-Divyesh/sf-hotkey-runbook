@@ -1,81 +1,135 @@
-# Handoff — release repair 9
+# Handoff — repair 10
 
-## Result: released and deployed
+## Status
 
-Desktop release [`v0.1.12`](https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.12) is an immutable build of source commit `7cf42e58b59f4305cc222c9ff9051a11bb68bea6`. The tag points at that exact source revision, and the GitHub Actions release run `33592747930` completed successfully for macOS arm64/x86_64, Windows x86_64, and Linux x86_64.
+The stale-desktop-artifact repair is released and deployed. Desktop release
+[`v0.1.13`](https://github.com/B-Divyesh/sf-hotkey-runbook/releases/tag/v0.1.13)
+is an immutable build of source commit
+`57258e3f605881ef6cd2f677685bf2f695706d87` (tag `v0.1.13` resolves to that
+commit). GitHub Actions run
+[`33596086623`](https://github.com/B-Divyesh/sf-hotkey-runbook/actions/runs/33596086623)
+passed its clean test job and all macOS arm64/x86_64, Windows x86_64, and Linux
+x86_64 builds before publishing.
 
-The static site is deployed at <https://hotkey-runbook.sociobot.in>. Its live `latest.json` identifies the same v0.1.12 commit and includes per-platform download URLs and SHA-256 values.
+The production static site is deployed at <https://hotkey-runbook.sociobot.in>.
+Its live `/latest.json` identifies the same v0.1.13 source commit and immutable
+download URLs. The owned Azure Static Web App deployed successfully to
+`https://proud-dune-0462c4310.7.azurestaticapps.net`.
+
+Full acceptance still has one external blocker: new one-time sales cannot be
+enabled until the Sociobot billing product is registered. See **Known gap**.
 
 ## Repairs
 
-1. Replaced the stale v0.1.9 download metadata with v0.1.12 release metadata. The release includes `latest.json`, `SHA256SUMS`, and `installer-metadata.json`; the Homebrew cask, Scoop manifest, and Winget manifest use the corresponding immutable installer hashes.
-2. Added a native installed-build identity contract. `hotkey-runbook --build-identity` emits JSON with the package version and full source commit. Settings shows the same installed-build identity. Cargo now watches the active Git ref, so incremental builds cannot retain a previous commit identity.
-3. Made the release workflow inject the resolved source commit into every platform build, prove the Linux AppImage's installed identity before publication, and reject mismatched tag/version/source/checksum metadata.
-4. Added regressions for the original stale-artifact failure (`@regression:release-source-identity`) and for installed build identity (`@regression:installed-build-identity`).
-5. Kept existing-token recovery, but removed any implication that a new purchase works. New license sales are plainly unavailable until the operator registers checkout. No billing or shared resource was changed.
+1. Preserved the release-identity work from the prior repair and published a
+   fresh desktop release from the reviewed source. The release workflow verifies
+   the tag/version, embeds the source revision, extracts the Linux AppImage, and
+   rejects a mismatched installed-build identity before publication.
+2. Added `npm run clean:build-caches`, invoked before every Rust test. It removes
+   only disposable repository outputs (`src-tauri/target`, Vite cache, Playwright
+   report/results) and the npm package cache, then refuses to start Cargo with
+   less than 5 GiB free.
+3. Added `@regression:disk-exhaustion` coverage. It deterministically models the
+   reported low-space condition one byte below the preflight minimum, verifies
+   the useful error, runs cleanup in an isolated fixture, and proves source files
+   survive while only cache paths are removed. The first clean native test used
+   3.5 GiB; native tests plus strict Clippy peaked at 4.2 GiB, validating the
+   5 GiB headroom.
+4. Synchronized `latest.json`, Homebrew, Scoop, and Winget with the v0.1.13
+   immutable checksums before rebuilding and deploying the site.
+
+The worker did not deliberately fill the shared filesystem. A constrained mount
+is not permitted in this container and `/dev/shm` is `noexec`; the regression
+therefore reproduces the capacity boundary deterministically without risking
+other work. The real clean build then completed with the cache preflight.
 
 ## Immutable-release evidence
 
-The released artifacts were downloaded from the v0.1.12 GitHub Release and checked locally:
+The downloaded public Linux artifact was verified after publication:
 
 ```sh
 sha256sum -c SHA256SUMS --ignore-missing
-# Hotkey-Runbook_0.1.12_linux-x86_64.AppImage: OK
+# Hotkey-Runbook_0.1.13_linux-x86_64.AppImage: OK
 
 ./squashfs-root/AppRun --build-identity
-# {"version":"0.1.12","commit":"7cf42e58b59f4305cc222c9ff9051a11bb68bea6"}
+# {"version":"0.1.13","commit":"57258e3f605881ef6cd2f677685bf2f695706d87"}
 
 node scripts/verify-release-identity.mjs RELEASE_DIR \
-  7cf42e58b59f4305cc222c9ff9051a11bb68bea6 \
-  '{"version":"0.1.12","commit":"7cf42e58b59f4305cc222c9ff9051a11bb68bea6"}'
-# Release identity verified for v0.1.12
+  57258e3f605881ef6cd2f677685bf2f695706d87 \
+  '{"version":"0.1.13","commit":"57258e3f605881ef6cd2f677685bf2f695706d87"}'
+# Release v0.1.13 identifies 57258e3f605881ef6cd2f677685bf2f695706d87.
 ```
-
-Published SHA-256 values:
 
 | Artifact | SHA-256 |
 | --- | --- |
-| macOS arm64 DMG | `93efb6c74962a6af9d7ccb34a46564aaac9c8961d89f602db0d79d89b1fb44e1` |
-| macOS x86_64 DMG | `8335d47fce06a02fe4bc4b320a1df68e475ac0bfbe4fb326120ca7383cef66e8` |
-| Windows x86_64 MSI | `fad4245e0a52aa704f5bd5050dba4add4913baf51fe338bc9fc11561dfb14229` |
-| Windows x86_64 EXE | `f9a5edb0b27fc8fff3264572ceb279b2e1b53b44089adc4fd2f5f1c43d2c7c8f` |
-| Linux x86_64 AppImage | `0914ee0b3c9711ef62078c07b38c3b0bce88b03e07cbfd75b83818467ef31d28` |
-| Linux x86_64 DEB | `23174901a771a1cc9dc20f9fc98326e95cd39b5b0e9a3f06b06f79467b3c7e71` |
+| macOS arm64 DMG | `298eda635fbedf45583c6f1f77bd61a16304d13e8ab65cd68d7eed015bb40837` |
+| macOS x86_64 DMG | `8a21fe81cbae5b7e1ebaae35e51d97a3ab467a4880fe5d708f67499bdc5f5c7f` |
+| Windows x86_64 MSI | `95fba1d542ffa7e09511cc8cc3992269868c4fec801b9bc7e408f81ba5aa501e` |
+| Linux x86_64 AppImage | `2bfa7201801763c12532193993cb4f7e75806233582f9a88a746020c5004a020` |
+| Linux x86_64 DEB | `05fd3ebe7fd0a04a380507622aaed36e0c83158f5ba3ee549ffc77c79bb46d27` |
+| Windows x86_64 EXE | `c0a87eefdcec0f73d2f765b9732c1d43d2eda991d73dd2fc6ef60cf731e4b30a` |
 
 ## Verification
 
-From a clean install, all of the following passed after the final metadata sync:
+From a clean local install (after installing the documented GTK/WebKit host
+packages), the following passed:
 
 ```sh
 npm ci
-npm test
-npm run lint
-npm run build
+npm run check
+npm run test:e2e
 ```
 
-All commands referenced by `.factory/claims.json` passed, including the release-source and installed-build regressions, native environment isolation, Landlock boundary where supported, installer checksum guards, demo isolation, privacy request recording, and existing-license recovery.
+`npm run check` passed 24 Vitest tests, 12 Rust tests, strict TypeScript,
+rustfmt, strict Clippy, and both production web builds. The new regression is
+covered by `npm run test:unit -- --testNamePattern @regression:disk-exhaustion`.
+The release workflow independently reran clean install, tests, lint, browser
+tests, and build before packaging.
 
-Live checks against <https://hotkey-runbook.sociobot.in> passed:
+Browser verification passed locally and against production:
 
 ```sh
-/opt/fleet/lib/verify-url.sh https://hotkey-runbook.sociobot.in .factory/repair-9-live
 PLAYWRIGHT_BASE_URL=https://hotkey-runbook.sociobot.in npm run test:e2e
+# 22 passed: desktop and 390 px mobile, keyboard, focus management,
+# reduced motion, privacy request recording, responsive text, and Axe checks.
+
+/opt/fleet/lib/verify-url.sh https://hotkey-runbook.sociobot.in .factory/repair-10-live
+# title/lang/one h1/main/alt/button labels, 0 console errors
 ```
 
-The live Playwright suite passed 22 tests at desktop and 390 px mobile, including keyboard, reduced-motion, headers, request privacy, and Playwright axe checks. `@axe-core/cli` was also attempted, but its Selenium-launched Chromium exited in this container; the repository's Playwright axe integration is the supported alternate accessibility check and passed. Live Lighthouse (mobile defaults) scored Performance 100, Accessibility 100, Best Practices 100, and SEO 100 (FCP 0.9 s, LCP 1.2 s, CLS 0.005). Evidence is in `.factory/repair-9-live/`.
+The live mobile Lighthouse report at `.factory/repair-10-live/lighthouse.json`
+scored Performance 100, Accessibility 100, Best Practices 100, and SEO 100;
+LCP was 1.21 s and CLS was 0.0047. Live headers include CSP with header-only
+`frame-ancestors 'none'`, HSTS, `nosniff`, strict-origin referrer policy, frame
+denial, and restrictive permissions policy.
 
 ## How to run
 
 ```sh
 npm ci
+npm run clean:build-caches
+npm run check
 npm run dev
 # desktop development: npm run tauri dev
-npm test && npm run lint && npm run build
 ```
 
-The browser demo is at `/demo/`; installed builds offer **Load sample project**. See `.factory/demo.md` for isolation details.
+The browser demo is `/demo/`; installed builds offer **Load sample project**.
+See `.factory/demo.md` for its separate storage namespaces.
 
-## Known gaps and operator action
+## Known gap and required operator action
 
-- New license sales remain unavailable by design until an operator registers the checkout product. Existing license token recovery remains available. Do not add a checkout link until that registration exists.
-- Release installers are unsigned. To ship signed installers, the operator must provide the documented Apple certificate/notarization and Windows Authenticode secrets to the GitHub Actions environment. The current installers clearly state their unsigned status.
+The independent verifier's checkout blocker cannot be repaired from this worker:
+
+```text
+GET https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout
+HTTP 404
+{"error":"enabled factory product","status":404}
+```
+
+The documented factory registrar (`fleet/new-paid-product.sh`) and a scoped
+billing-registration credential are absent from this worker. Do not add a fake
+checkout link. An authorized operator must register `hotkey-runbook` as the
+approved $29 one-time product through the Sociobot billing engine, then update
+the existing-license recovery copy and its claim test to the live checkout flow.
+Installers remain unsigned pending the owner-provided Apple notarization and
+Windows Authenticode secrets.
