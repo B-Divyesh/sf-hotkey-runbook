@@ -1,5 +1,5 @@
 PackageIdentifier: Sociobot.HotkeyRunbook
-PackageVersion: 0.1.8
+PackageVersion: 0.1.9
 PackageLocale: en-US
 Publisher: Sociobot
 PackageName: Hotkey Runbook
@@ -9,7 +9,7 @@ PackageUrl: https://hotkey-runbook.sociobot.in
 InstallerType: wix
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.8/Hotkey-Runbook_0.1.8_windows-x86_64.msi
-    InstallerSha256: A7320125FA09DB6C26DF1FBBD72D88C290DF115ADF27E5B20A588DE45D918C3F
+    InstallerUrl: https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v0.1.9/Hotkey-Runbook_0.1.9_windows-x86_64.msi
+    InstallerSha256: 0F7E277A396017A168489CCE06A161F19422848E618DF7B2302F046964B73F31
 ManifestType: singleton
 ManifestVersion: 1.6.0

@@ -10,6 +10,8 @@ afterEach(() => temporary.splice(0).forEach((path) => rmSync(path, { recursive: 
 describe("release manifest", () => {
   it("keeps package manifests pinned to the published site manifest", () => {
     const latest = JSON.parse(readFileSync("public/latest.json", "utf8"));
+    const packageManifest = JSON.parse(readFileSync("package.json", "utf8"));
+    const tauriManifest = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8"));
     const version = latest.version.replace(/^v/, "");
     const macArm = latest.platforms["macos-arm64"];
     const macIntel = latest.platforms["macos-x86_64"];
@@ -18,6 +20,9 @@ describe("release manifest", () => {
     const scoop = JSON.parse(readFileSync("scoop-bucket/hotkey-runbook.json", "utf8"));
     const winget = readFileSync("winget/manifests/h/HotkeyRunbook/HotkeyRunbook.yaml", "utf8");
 
+    expect(latest.commit).toMatch(/^[a-f0-9]{40}$/);
+    expect(packageManifest.version).toBe(version);
+    expect(tauriManifest.version).toBe(version);
     expect(cask).toContain(`version "${version}"`);
     expect(cask).toContain(macArm.sha256);
     expect(cask).toContain(macIntel.sha256);

@@ -75,7 +75,7 @@ The static deployment root is `dist/site`; `index.html` is written directly ther
 
 ## Install and releases
 
-Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS` and `latest.json`. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
+Tagged releases are built only by GitHub Actions on native macOS, Windows, and Linux runners. The release workflow publishes unsigned `.dmg`, `.msi`/`.exe`, `.AppImage`, and `.deb` artifacts, plus `SHA256SUMS` and `latest.json`. The manifest records the release version, tagged commit, per-platform URL, and SHA-256. The landing page reads GitHub’s release API, caches the result locally for one hour, and resolves the matching download without a cross-origin redirect fetch.
 
 One-line installers verify SHA-256 before installing:
 
