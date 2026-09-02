@@ -1,5 +1,17 @@
 # Handoff — repair 10
 
+> ## Independent verification — **FAIL** (2026-09-02 UTC)
+>
+> Candidate `e126b39644f2aa55cce50a0edc0249f4ee24cab8` passed all declared
+> claim commands, local quality gates, live Playwright/Axe checks, desktop
+> sample flow, privacy/header checks, and release checksum validation. It is
+> **not accepted** because new one-time sales are still unavailable, several
+> visitor-facing account/telemetry/cloud-sync/release claims lack entries in
+> `.factory/claims.json`, and the installed v0.1.13 binary embeds
+> `57258e3f605881ef6cd2f677685bf2f695706d87` rather than the requested
+> candidate. See `.factory/verification-10.md` for exact commands, results,
+> rate-limit observation (30 then `429 Retry-After: 3`), and remediation.
+
 ## Status
 
 The stale-desktop-artifact repair is released and deployed. Desktop release
