@@ -1,4 +1,4 @@
-# Copy audit — 2026-09-02 repair 11
+# Copy audit — 2026-09-05 repair 12
 
 The landing page was read in source order, including runtime status and existing-license recovery states. Button labels and headings are listed separately because they are not sentences. Word counts treat hyphenated terms and URLs as one word.
 
