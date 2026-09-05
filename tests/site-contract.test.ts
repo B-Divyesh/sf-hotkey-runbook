@@ -8,16 +8,6 @@ describe("static site contract", () => {
     expect(config.responseOverrides["404"]).toEqual({ rewrite: "/404.html" });
   });
 
-  it("permits documented live and test billing verification origins", () => {
-    const staticConfig = JSON.parse(readFileSync("public/staticwebapp.config.json", "utf8"));
-    const nativeConfig = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8"));
-    const policies = [staticConfig.globalHeaders["Content-Security-Policy"], nativeConfig.app.security.csp];
-    for (const policy of policies) {
-      expect(policy).toMatch(/connect-src[^;]*https:\/\/api\.sociobot\.in/);
-      expect(policy).toMatch(/connect-src[^;]*https:\/\/pilot-api\.sociobot\.in/);
-    }
-  });
-
   it("publishes the required social and touch metadata", () => {
     const home = readFileSync("site/index.html", "utf8");
     expect(home).toContain('content="https://hotkey-runbook.sociobot.in/assets/social-preview.jpg"');

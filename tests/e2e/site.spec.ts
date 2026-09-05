@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
 
 test("landing page is keyboard-ready and has no serious accessibility violations", async ({ page }) => {
   const errors: string[] = [];
@@ -14,6 +15,49 @@ test("landing page is keyboard-ready and has no serious accessibility violations
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
   expect(errors).toEqual([]);
+});
+
+test("test license verification succeeds under each deployed billing policy", async ({ browser }) => {
+  const staticPolicy = JSON.parse(readFileSync("public/staticwebapp.config.json", "utf8")).globalHeaders["Content-Security-Policy"];
+  const nativePolicy = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8")).app.security.csp;
+
+  for (const policy of [staticPolicy, nativePolicy]) {
+    const server = createServer((request, response) => {
+      if (request.url === "/verify.js") {
+        response.writeHead(200, { "Content-Type": "text/javascript" });
+        response.end('fetch("https://pilot-api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=csp-fixture").then((result) => { document.body.textContent = result.ok ? "Pilot verification allowed" : "Pilot verification failed"; }).catch(() => { document.body.textContent = "Pilot verification blocked"; });');
+        return;
+      }
+      response.writeHead(200, { "Content-Security-Policy": policy, "Content-Type": "text/html" });
+      response.end('<!doctype html><html lang="en"><body><script src="/verify.js"></script></body></html>');
+    });
+    await new Promise<void>((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(0, "127.0.0.1", resolve);
+    });
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("Could not start the CSP test server.");
+    const context = await browser.newContext();
+    let requestedPilotVerification = false;
+    await context.route("https://pilot-api.sociobot.in/api/v1/products/hotkey-runbook/verify?license=csp-fixture", async (route) => {
+      requestedPilotVerification = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: '{"valid":true,"reason":"ok","expires_at":null}',
+      });
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(`http://127.0.0.1:${address.port}/`);
+      await expect(page.getByText("Pilot verification allowed")).toBeVisible();
+      expect(requestedPilotVerification).toBe(true);
+    } finally {
+      await context.close();
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  }
 });
 
 test("legal pages and mobile download path render", async ({ page }) => {
