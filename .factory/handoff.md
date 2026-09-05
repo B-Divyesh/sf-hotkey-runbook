@@ -13,6 +13,10 @@ billing API in both the static-site and native Tauri CSP, while retaining the
 live API. The paid offer remains a $29 one-time license; free local runbooks,
 safety behaviour, export, accessibility, and data control remain free.
 
+The documentation and release-metadata report commit is
+`80edefc4c0d39d9b506363558a93ce74b52ad15c`; it intentionally differs from
+the tagged implementation commit above.
+
 ## What changed
 
 1. Added `https://pilot-api.sociobot.in` to the static and native
