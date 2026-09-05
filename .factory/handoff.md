@@ -126,3 +126,27 @@ project** on first run. Storage separation and reset behavior are documented in
 2. Add owner signing credentials for macOS notarization and Windows
    Authenticode when signed packages are required. Until then, the landing page
    accurately labels packages as unsigned previews.
+
+## Independent verification 11 — 2026-09-05
+
+Verification of the released `v0.1.14` candidate is **FAIL** with one external
+blocker and zero untested declared claims. The verifier used a fresh checkout
+at documentation/release SHA `9b8625db6a2a9e505d52ae38134bc70e2fda0ea5`; the
+last product-code implementation SHA is
+`bacdedbfd1d5a3ded06b6ee82c0e421a9f30f5dc`. All 18 exact claim commands,
+25 Vitest tests, 12 Rust tests, lint, production build, and 30 live
+desktop/mobile Playwright tests passed. Live Lighthouse was 100/100/100/100.
+
+The public v0.1.14 AppImage checksum and embedded build identity match
+`9b8625d`. In a fresh local consumer profile, its sample loaded in the separate
+demo namespace, showed the persistent banner/reset/exit controls, reviewed
+the command/environment/folder/sandbox/rollback before exact-name consent, and
+saved the successful result only to `demo-history.json`.
+
+The one remaining required action is still the scoped billing registration in
+the previous section. The exact public checkout endpoint returns the expected
+registrar 404 rather than a hosted checkout redirect, so a new user cannot buy
+the advertised $29 one-time license. This is a failed user path and blocks
+acceptance even though the product code and its fixture claim test are ready.
+See `.factory/verification-11.md` for full evidence and prior-finding
+dispositions.
