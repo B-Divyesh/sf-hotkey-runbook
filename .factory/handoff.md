@@ -1,50 +1,53 @@
-# Handoff — repair 11
+# Handoff — repair 12
 
 ## Status
 
-The verifier findings for candidate `e126b39644f2aa55cce50a0edc0249f4ee24cab8`
-were reproduced from `.factory/verification-10.md`. Version 0.1.14 contains the
-product-side repairs and exact regressions. The desktop and static artifacts are
-buildable and the final `v0.1.14` tag is intended to identify this handoff
-commit exactly.
+The $29 checkout blocker recorded in verification 11 is resolved. The scoped
+live checkout now returns a `303` to `checkout.dodopayments.com`; the Test
+checkout returns a `303` to `test.checkout.dodopayments.com`. A fresh browser
+loaded the live hosted offer and found **Hotkey Runbook License** at **$29**.
 
-One external release blocker remains: the scoped Sociobot billing product is
-not registered. The public checkout still returns HTTP 404 with
-`{"error":"enabled factory product","status":404}`. This worker has no
-`fleet/new-paid-product.sh` and no scoped billing-registration credential. It
-did not inspect or change a shared service, database, key vault, staging slot,
-or another product. See **Needs operator action**.
+The released implementation is `v0.1.15`, commit
+`3b59853dfa78a195143f236e5bc0f4ad86dc36f8`. It permits the documented Test
+billing API in both the static-site and native Tauri CSP, while retaining the
+live API. The paid offer remains a $29 one-time license; free local runbooks,
+safety behaviour, export, accessibility, and data control remain free.
 
-## Repairs
+## What changed
 
-1. Added the required $29 one-time purchase UI on the landing page and desktop
-   Settings. Both use only the documented scoped checkout URL:
-   `https://api.sociobot.in/api/v1/products/hotkey-runbook/checkout`.
-2. Preserved existing-token recovery and daily verdict caching. A newly
-   returned checkout token now clears any verdict for an older token before it
-   is verified, and the token is removed from the address bar.
-3. Updated Privacy and Terms with the exact price, one-time terms, local token
-   storage, merchant-of-record wording, refund/revocation behavior, and the
-   existing recovery path. Core safety, accessibility, and data control remain
-   free.
-4. Added one-to-one claims and regressions for account-free use, no telemetry,
-   no cloud sync, the hosted checkout path, and existing-license recovery.
-   `.factory/claims.json` now contains 18 unique claims.
-5. Removed the unlisted “public GitHub Actions” sentence. Release provenance
-   remains enforced by the workflow and installed `--build-identity` check.
-6. Bumped every app/package surface and the release workflow default to
-   v0.1.14. The release workflow still builds macOS arm64/x86_64, Windows
-   x86_64, and Linux x86_64 after the complete test job.
-7. Updated `.factory/copy-audit.md`; every landing sentence remains at or below
-   22 words and no banned marketing word is present.
+1. Added `https://pilot-api.sociobot.in` to the static and native
+   `connect-src` policies, plus the static checkout form policy. This lets a
+   staging/Test build validate a returned Test license rather than having its
+   own CSP block the request.
+2. Strengthened the $29 purchase claim: its hosted-checkout fixture now
+   returns a token to the product, which must be stored, verified, removed
+   from the address bar, and visibly activate the license.
+3. Added an outcome test that serves each deployed CSP policy to a browser and
+   requires a Test license verification request to succeed. It does not merely
+   inspect a policy string.
+4. Released v0.1.15 for macOS arm64/x86_64, Windows x86_64, and Linux x86_64.
+   `public/latest.json`, Homebrew, Scoop, and winget now use the published
+   v0.1.15 checksums.
+5. Added the required catalog description and copied it to
+   `/work/.evidence/catalog-description.txt`. Billing-offer evidence is at
+   `/work/.evidence/billing-offer.json`.
 
-## Exact verification evidence
+## Billing verification
 
-The normal Tauri Linux prerequisites were installed in the disposable worker.
-Then these clean gates passed:
+- Live and Test invalid tokens return HTTP 200 with `valid: false` and
+  `reason: "invalid"`.
+- The Test hosted checkout was completed with the documented Test-card flow.
+  It returned to the product, stored the token, and the Test verifier returned
+  `valid: true`, `reason: "ok"`.
+- No live customer payment was attempted. The live public checkout and exact
+  $29 offer are reachable; the Test environment proves the issued-license
+  return and validation path end to end.
+
+## Verification
+
+From a clean `npm ci` after the documented Tauri system prerequisites:
 
 ```sh
-npm ci
 npm test
 npm run lint
 npm run build
@@ -52,51 +55,28 @@ npm run test:e2e
 npm audit --audit-level=high
 ```
 
-- `npm ci`: 65 packages installed, 0 vulnerabilities.
-- Vitest: 25/25 passed.
-- Rust: 12/12 passed after a clean native build.
-- Strict TypeScript, rustfmt, and Clippy with `-D warnings`: passed.
-- Playwright: 30/30 passed across desktop Chrome and a 390 × 844 mobile
-  project. Coverage includes keyboard use, dialog focus, reduced motion, 200%
-  text, touch targets, request privacy, returned licenses, and Axe scans.
-- All 18 commands in `.factory/claims.json` were also executed individually
-  and passed.
-- Dependency audit: 0 high-severity findings and 0 total vulnerabilities.
-- Production outputs: `dist/app` and `dist/site`.
-- Landing bundle: 3.60 KB JavaScript (1.69 KB gzip) and 13.77 KB CSS
-  (3.73 KB gzip).
+All passed. Results: 25/25 Vitest, 12/12 Rust, strict TypeScript, rustfmt,
+Clippy with `-D warnings`, 32/32 Playwright checks, and no audit findings.
+All 18 exact commands declared in `.factory/claims.json` were also run
+individually. Browser checks include Playwright Axe scans with no serious or
+critical violations.
 
-Local browser verification:
+`/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173
+.factory/verification-12-local` passed with a title, `lang=en`, one `<h1>`,
+`<main>`, no missing alt text or unlabelled buttons, and no console errors.
+The static landing output is 3.60 KB JavaScript (1.69 KB gzip) and 13.77 KB
+CSS (3.73 KB gzip).
 
-```sh
-/opt/fleet/lib/verify-url.sh http://127.0.0.1:5173 .factory/repair-11-local
-```
+Fresh live desktop and 390×844 phone sessions identified the job, audience,
+and **Try it with sample data** action before scrolling. The sample completed,
+kept its persistent demo label, and reset without reading or writing real
+browser data.
 
-It reported title, `lang=en`, one `<h1>`, `<main>`, no missing alt text, no
-unlabelled buttons, and zero console errors. Desktop and mobile captures plus
-`verify.json` are in `.factory/repair-11-local/`.
-
-Lighthouse mobile evidence is
-`.factory/repair-11-lighthouse-local.json`: Performance 98, Accessibility 100,
-Best Practices 100, SEO 100, LCP 1.90 s, CLS 0.0047, TBT 0 ms.
-
-The committed source repair packaged locally with:
-
-```sh
-CI=false HOTKEY_BUILD_COMMIT=$(git rev-parse HEAD) \
-  npm run tauri -- build --bundles appimage,deb
-```
-
-Both the release binary and extracted AppImage reported version 0.1.14 and
-source `bacdedbfd1d5a3ded06b6ee82c0e421a9f30f5dc`. Local package checksums:
-
-- AppImage: `aa17fc0af0ca8c5bac697ae3fa7e60a8a110102d3edec4655b927cabbe433c1e`
-- DEB: `18aaede94fd467866edc95ebaaad1be82abc4c5954f5caabb484b90f5348ecc5`
-
-The release binary was launched under Xvfb with a fresh `XDG_DATA_HOME`.
-`.factory/repair-11-native-initial.png` shows the first-run sample action;
-`.factory/repair-11-native-sample.png` shows the isolated demo banner, reset
-action, start-for-real action, typed parameters, and bundled sample.
+The released Linux AppImage checksum matches the v0.1.15 manifest. In a fresh
+consumer data directory its extracted `AppRun --build-identity` returned
+version 0.1.15 and implementation commit `3b59853dfa78a195143f236e5bc0f4ad86dc36f8`.
+It then remained running under Xvfb until the test timeout, with a new local
+profile. Container-only graphics/session-bus warnings did not terminate it.
 
 ## Run and verify
 
@@ -106,47 +86,22 @@ npm test
 npm run lint
 npm run build
 npm run test:e2e
-npm run dev
-# desktop development
 npm run tauri dev
 ```
 
-The browser sandbox is `/demo/`. The installed app offers **Load sample
-project** on first run. Storage separation and reset behavior are documented in
-`.factory/demo.md`.
+Use `/demo/` for the isolated browser sample. The installed app starts with
+**Load sample project**. See `.factory/demo.md` for storage namespaces and
+reset behaviour.
 
-## Needs operator action
+## Known gaps and operator action
 
-1. Register `hotkey-runbook` as the approved $29 one-time product through the
-   Sociobot billing registrar, with return URL
-   `https://hotkey-runbook.sociobot.in/?license={license}`. Then confirm the
-   scoped checkout returns the hosted redirect instead of 404. The product
-   code, copy, restore path, terms, privacy disclosure, and regression fixture
-   are ready for that registration.
-2. Add owner signing credentials for macOS notarization and Windows
-   Authenticode when signed packages are required. Until then, the landing page
-   accurately labels packages as unsigned previews.
-
-## Independent verification 11 — 2026-09-05
-
-Verification of the released `v0.1.14` candidate is **FAIL** with one external
-blocker and zero untested declared claims. The verifier used a fresh checkout
-at documentation/release SHA `9b8625db6a2a9e505d52ae38134bc70e2fda0ea5`; the
-last product-code implementation SHA is
-`bacdedbfd1d5a3ded06b6ee82c0e421a9f30f5dc`. All 18 exact claim commands,
-25 Vitest tests, 12 Rust tests, lint, production build, and 30 live
-desktop/mobile Playwright tests passed. Live Lighthouse was 100/100/100/100.
-
-The public v0.1.14 AppImage checksum and embedded build identity match
-`9b8625d`. In a fresh local consumer profile, its sample loaded in the separate
-demo namespace, showed the persistent banner/reset/exit controls, reviewed
-the command/environment/folder/sandbox/rollback before exact-name consent, and
-saved the successful result only to `demo-history.json`.
-
-The one remaining required action is still the scoped billing registration in
-the previous section. The exact public checkout endpoint returns the expected
-registrar 404 rather than a hosted checkout redirect, so a new user cannot buy
-the advertised $29 one-time license. This is a failed user path and blocks
-acceptance even though the product code and its fixture claim test are ready.
-See `.factory/verification-11.md` for full evidence and prior-finding
-dispositions.
+1. The managed product edge was still serving v0.1.14 at the final cold HTTPS
+   check, including its pre-v0.1.15 CSP, even though the product's Static site
+   GitHub workflow passed for the pushed source. Per the product runbook, this
+   worker did not touch deployment infrastructure. Promote the successful
+   static artifact to `https://hotkey-runbook.sociobot.in`, then recheck that
+   the footer says `Build 0.1.15` and the CSP lists `pilot-api.sociobot.in`.
+   The checkout blocker itself is already resolved on the currently live
+   v0.1.14 site by the completed billing registration.
+2. macOS and Windows packages remain unsigned previews. Owner signing and
+   notarization credentials are needed only if signed distribution is required.

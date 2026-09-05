@@ -1,9 +1,9 @@
 cask "hotkey-runbook" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "0.1.13"
-  sha256 arm:   "298eda635fbedf45583c6f1f77bd61a16304d13e8ab65cd68d7eed015bb40837",
-         intel: "8a21fe81cbae5b7e1ebaae35e51d97a3ab467a4880fe5d708f67499bdc5f5c7f"
+  version "0.1.15"
+  sha256 arm:   "2ad189d192e6f961a40790428e836e972c00064a22b0f4cf3d925ccda224e1c4",
+         intel: "3fd156d76291a0ed43ea21d6fdcb41347fdac391894b45501cec081f445bc0c2"
 
   url "https://github.com/B-Divyesh/sf-hotkey-runbook/releases/download/v#{version}/Hotkey-Runbook_#{version}_macos-#{arch}.dmg"
   name "Hotkey Runbook"
